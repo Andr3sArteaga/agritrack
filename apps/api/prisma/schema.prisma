@@ -4,11 +4,176 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// =========================================
+// Enums
+// =========================================
+
+enum Rol {
+  JEFE
+  CONTABILIDAD
+  OPERATIVO
+}
+
+enum EstadoCampana {
+  PLANIFICADA
+  EN_CURSO
+  COSECHADA
+}
+
+enum TipoActividad {
+  SIEMBRA
+  FUMIGACION
+  FERTILIZACION
+  MEDICION_HUMEDAD_SUELO
+  MEDICION_HUMEDAD_GRANO
+  COSECHA
+}
+
+enum TipoContacto {
+  COMPRADOR
+  TRANSPORTISTA
+  MAQUINARIA
+  INSUMOS
+  SERVICIOS
+  OTRO
+}
+
+// =========================================
+// Modelos
+// =========================================
+
+model Usuario {
+  id           String   @id @default(cuid())
+  nombre       String
+  email        String   @unique
+  passwordHash String
+  rol          Rol
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  actividadesRegistradas Actividad[] @relation("ResponsableActividad")
+
+  @@map("usuarios")
+}
+
+model Parcela {
+  id                     String   @id @default(cuid())
+  nombre                 String
+  hectareas              Float
+  ubicacionTexto         String
+  lat                    Float?
+  lng                    Float?
+  disponibleParaPreventa Boolean  @default(false)
+  activa                 Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  campanas Campana[]
+
+  @@index([disponibleParaPreventa])
+  @@index([activa])
+  @@map("parcelas")
+}
+
+model Cultivo {
+  id        String   @id @default(cuid())
+  nombre    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campanas Campana[]
+
+  @@map("cultivos")
+}
+
+model Campana {
+  id          String        @id @default(cuid())
+  parcelaId   String
+  parcela     Parcela       @relation(fields: [parcelaId], references: [id], onDelete: Restrict)
+  cultivoId   String
+  cultivo     Cultivo       @relation(fields: [cultivoId], references: [id])
+  temporada   String
+  fechaInicio DateTime
+  fechaFin    DateTime?
+  estado      EstadoCampana @default(PLANIFICADA)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  actividades Actividad[]
+
+  // Regla de negocio "solo una EN_CURSO por parcela" se valida en el
+  // service (CampanasService) antes de crear/actualizar el estado.
+  @@index([parcelaId])
+  @@index([cultivoId])
+  @@index([estado])
+  @@map("campanas")
+}
+
+model Actividad {
+  id                  String        @id @default(cuid())
+  secuencia           Int           @unique @default(autoincrement())
+  campanaId           String
+  campana             Campana       @relation(fields: [campanaId], references: [id], onDelete: Restrict)
+  tipo                TipoActividad
+  fecha               DateTime
+  descripcion         String
+  insumo              String?
+  cantidad            Float?
+  unidad              String?
+  responsableId       String
+  responsable         Usuario       @relation("ResponsableActividad", fields: [responsableId], references: [id])
+  tercerizado         Boolean       @default(false)
+  maquinariaUtilizada String?
+  rendimientoTnHa     Float?
+
+  // Correcciones: una actividad no se edita ni borra; una correccion es un
+  // nuevo registro que referencia a la actividad original. Una actividad
+  // con al menos una correccion apuntandole deja de ser "vigente".
+  correccionDeId   String?
+  correccionDe     Actividad?  @relation("CorreccionDeActividad", fields: [correccionDeId], references: [id])
+  correcciones     Actividad[] @relation("CorreccionDeActividad")
+  motivoCorreccion String?
+
+  // Cadena de integridad: hash = SHA-256(contenido canonico + hashAnterior),
+  // canonicalizado en orden fijo (secuencia, campanaId, tipo, fecha,
+  // descripcion, insumo, cantidad, unidad, responsableId, tercerizado,
+  // maquinariaUtilizada, rendimientoTnHa, correccionDeId, motivoCorreccion,
+  // hashAnterior). hashAnterior apunta al hash del registro con secuencia
+  // inmediatamente anterior (cadena global); null solo en secuencia = 1.
+  // La insercion corre dentro de una transaccion con
+  // pg_advisory_xact_lock para evitar que dos inserciones concurrentes
+  // tomen el mismo hashAnterior.
+  hash         String
+  hashAnterior String?
+
+  createdAt DateTime @default(now())
+
+  @@index([campanaId])
+  @@index([responsableId])
+  @@index([tipo])
+  @@map("actividades")
+}
+
+model Contacto {
+  id        String       @id @default(cuid())
+  tipo      TipoContacto
+  nombre    String
+  empresa   String?
+  telefono  String?
+  email     String?
+  notas     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([tipo])
+  @@map("contactos")
 }
