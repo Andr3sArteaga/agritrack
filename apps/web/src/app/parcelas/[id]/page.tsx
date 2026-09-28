@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { DetalleParcelaPublico } from "@/lib/types";
 import { TIPO_ACTIVIDAD_LABEL } from "@/lib/types";
 import { formatearFecha } from "@/lib/format";
+import { MiniMapaCliente } from "./mini-mapa-cliente";
 import { RendimientoChart } from "./rendimiento-chart";
 
 async function obtenerDetalle(
@@ -87,6 +88,17 @@ export default async function ParcelaDetallePage(
             </p>
           </div>
         </div>
+
+        {parcela.poligono && (
+          <section className="mt-10">
+            <h2 className="text-lg font-semibold text-stone-900">
+              Ubicación de la parcela
+            </h2>
+            <div className="mt-4 overflow-hidden rounded-lg border border-stone-200">
+              <MiniMapaCliente poligono={parcela.poligono} />
+            </div>
+          </section>
+        )}
 
         <section className="mt-10">
           <h2 className="text-lg font-semibold text-stone-900">

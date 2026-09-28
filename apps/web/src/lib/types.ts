@@ -31,6 +31,11 @@ export interface LoginResponse {
   usuario: Usuario;
 }
 
+export interface PoligonoGeoJson {
+  type: "Polygon";
+  coordinates: number[][][];
+}
+
 export interface Parcela {
   id: string;
   nombre: string;
@@ -40,8 +45,10 @@ export interface Parcela {
   lng: number | null;
   disponibleParaPreventa: boolean;
   activa: boolean;
+  poligono: PoligonoGeoJson | null;
   createdAt: string;
   updatedAt: string;
+  advertencia?: string;
 }
 
 export interface Cultivo {
@@ -164,6 +171,7 @@ export interface DetalleParcelaPublico {
   nombre: string;
   hectareas: number;
   ubicacionTexto: string;
+  poligono: PoligonoGeoJson | null;
   cultivoActual: string | null;
   temporadaActual: string | null;
   rendimientoEstimadoTnHa: number | null;

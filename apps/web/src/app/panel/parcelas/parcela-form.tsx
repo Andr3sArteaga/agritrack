@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
 import { Modal } from "@/components/modal";
-import type { Parcela } from "@/lib/types";
+import type { Parcela, PoligonoGeoJson } from "@/lib/types";
+
+const PoligonoEditor = dynamic(
+  () => import("@/components/map/poligono-editor").then((m) => m.PoligonoEditor),
+  { ssr: false, loading: () => <p className="text-sm text-stone-500">Cargando mapa...</p> },
+);
 
 export function ParcelaForm({
   parcela,
@@ -20,8 +26,30 @@ export function ParcelaForm({
   const [disponibleParaPreventa, setDisponibleParaPreventa] = useState(
     parcela?.disponibleParaPreventa ?? false,
   );
+  const [poligono, setPoligono] = useState<PoligonoGeoJson | null>(
+    parcela?.poligono ?? null,
+  );
+  const [poligonoTocado, setPoligonoTocado] = useState(false);
+  const [otrasParcelas, setOtrasParcelas] = useState<Parcela[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  useEffect(() => {
+    api
+      .get<Parcela[]>("/parcelas")
+      .then((res) =>
+        setOtrasParcelas(res.data.filter((p) => p.id !== parcela?.id)),
+      )
+      .catch(() => setOtrasParcelas([]));
+  }, [parcela?.id]);
+
+  function onPoligonoChange(nuevo: PoligonoGeoJson | null, areaHa: number | null) {
+    setPoligonoTocado(true);
+    setPoligono(nuevo);
+    if (areaHa !== null) {
+      setHectareas(areaHa.toString());
+    }
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -32,12 +60,14 @@ export function ParcelaForm({
       hectareas: Number(hectareas),
       ubicacionTexto,
       disponibleParaPreventa,
+      ...(poligonoTocado ? { poligono } : {}),
     };
     try {
-      if (parcela) {
-        await api.patch(`/parcelas/${parcela.id}`, payload);
-      } else {
-        await api.post("/parcelas", payload);
+      const respuesta = parcela
+        ? await api.patch<Parcela>(`/parcelas/${parcela.id}`, payload)
+        : await api.post<Parcela>("/parcelas", payload);
+      if (respuesta.data.advertencia) {
+        alert(respuesta.data.advertencia);
       }
       onSaved();
     } catch (err) {
@@ -59,18 +89,47 @@ export function ParcelaForm({
             className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-stone-700">Hectáreas</label>
+          <label className="block text-sm font-medium text-stone-700">
+            Contorno de la parcela
+          </label>
+          <p className="mt-1 text-xs text-stone-500">
+            Dibuja el polígono haciendo clic en cada vértice. Puedes editar los
+            vértices arrastrándolos o borrarlo y volver a dibujar.
+          </p>
+          <div className="mt-2">
+            <PoligonoEditor
+              valorInicial={poligono}
+              otrasParcelas={otrasParcelas}
+              onChange={onPoligonoChange}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-stone-700">
+            Hectáreas {poligono && "(calculadas del polígono)"}
+          </label>
           <input
             required
             type="number"
             step="0.01"
             min="0.01"
+            readOnly={!!poligono}
             value={hectareas}
             onChange={(e) => setHectareas(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+            className={`mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${
+              poligono ? "bg-stone-100 text-stone-600" : ""
+            }`}
           />
+          {poligono && (
+            <p className="mt-1 text-xs font-medium text-emerald-700">
+              Área calculada: {hectareas} ha
+            </p>
+          )}
         </div>
+
         <div>
           <label className="block text-sm font-medium text-stone-700">Ubicación</label>
           <input

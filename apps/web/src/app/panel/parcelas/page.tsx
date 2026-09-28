@@ -1,17 +1,53 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import type { Parcela } from "@/lib/types";
+import type { Campana, Cultivo, Parcela } from "@/lib/types";
 import { ParcelaForm } from "./parcela-form";
+
+const ParcelasMapa = dynamic(
+  () => import("@/components/map/parcelas-mapa").then((m) => m.ParcelasMapa),
+  { ssr: false, loading: () => <p className="text-sm text-stone-500">Cargando mapa...</p> },
+);
+
+function calcularCultivoActualPorParcela(
+  campanas: Campana[],
+  cultivos: Cultivo[],
+): Record<string, string | null> {
+  const nombreCultivo = new Map(cultivos.map((c) => [c.id, c.nombre]));
+  const resultado: Record<string, string | null> = {};
+
+  const porParcela = new Map<string, Campana[]>();
+  for (const campana of campanas) {
+    const lista = porParcela.get(campana.parcelaId) ?? [];
+    lista.push(campana);
+    porParcela.set(campana.parcelaId, lista);
+  }
+
+  for (const [parcelaId, lista] of porParcela) {
+    const enCurso = lista.find((c) => c.estado === "EN_CURSO");
+    const actual =
+      enCurso ??
+      lista
+        .filter((c) => c.estado === "PLANIFICADA")
+        .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio))[0];
+    resultado[parcelaId] = actual ? nombreCultivo.get(actual.cultivoId) ?? null : null;
+  }
+
+  return resultado;
+}
 
 export default function ParcelasPage() {
   const { usuario } = useAuth();
   const puedeEditar = usuario?.rol === "JEFE";
 
   const [parcelas, setParcelas] = useState<Parcela[]>([]);
+  const [cultivoActualPorParcela, setCultivoActualPorParcela] = useState<
+    Record<string, string | null>
+  >({});
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editando, setEditando] = useState<Parcela | null>(null);
@@ -19,9 +55,17 @@ export default function ParcelasPage() {
 
   const cargar = useCallback(() => {
     setCargando(true);
-    api
-      .get<Parcela[]>("/parcelas")
-      .then((res) => setParcelas(res.data))
+    Promise.all([
+      api.get<Parcela[]>("/parcelas"),
+      api.get<Campana[]>("/campanas"),
+      api.get<Cultivo[]>("/cultivos"),
+    ])
+      .then(([parcelasRes, campanasRes, cultivosRes]) => {
+        setParcelas(parcelasRes.data);
+        setCultivoActualPorParcela(
+          calcularCultivoActualPorParcela(campanasRes.data, cultivosRes.data),
+        );
+      })
       .catch((err) => setError(apiErrorMessage(err, "No se pudieron cargar las parcelas")))
       .finally(() => setCargando(false));
   }, []);
@@ -79,6 +123,14 @@ export default function ParcelasPage() {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+      {!cargando && parcelas.some((p) => p.poligono) && (
+        <div className="overflow-hidden rounded-lg border border-stone-200">
+          <ParcelasMapa
+            parcelas={parcelas}
+            cultivoActualPorParcela={cultivoActualPorParcela}
+          />
+        </div>
+      )}
       {cargando ? (
         <p className="text-stone-500">Cargando...</p>
       ) : (
