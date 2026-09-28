@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsLatitude,
@@ -7,7 +8,9 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  ValidateNested,
 } from 'class-validator';
+import { PoligonoDto } from './poligono.dto';
 
 export class CreateParcelaDto {
   @ApiProperty({ example: 'Parcela El Ceibo' })
@@ -37,4 +40,14 @@ export class CreateParcelaDto {
   @IsOptional()
   @IsBoolean()
   disponibleParaPreventa?: boolean;
+
+  @ApiPropertyOptional({
+    type: PoligonoDto,
+    description:
+      'GeoJSON Polygon del contorno de la parcela. Si se envia, las hectareas se recalculan en el backend y se ignora el valor de "hectareas" enviado.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PoligonoDto)
+  poligono?: PoligonoDto;
 }

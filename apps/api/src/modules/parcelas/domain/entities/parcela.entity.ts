@@ -1,3 +1,8 @@
+export interface PoligonoGeoJson {
+  type: 'Polygon';
+  coordinates: number[][][];
+}
+
 export class ParcelaEntity {
   constructor(
     public readonly id: string,
@@ -8,6 +13,7 @@ export class ParcelaEntity {
     public readonly lng: number | null,
     public readonly disponibleParaPreventa: boolean,
     public readonly activa: boolean,
+    public readonly poligono: PoligonoGeoJson | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}

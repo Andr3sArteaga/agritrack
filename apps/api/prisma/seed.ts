@@ -19,9 +19,33 @@ import { ActividadPrismaRepository } from '../src/modules/actividades/infrastruc
 import { ActividadesService } from '../src/modules/actividades/application/actividades.service';
 import { ContactoPrismaRepository } from '../src/modules/contactos/infrastructure/contacto.prisma.repository';
 import { ContactosService } from '../src/modules/contactos/application/contactos.service';
+import type { PoligonoGeoJson } from '../src/modules/parcelas/domain/entities/parcela.entity';
 
 const PASSWORD_DEMO = 'Agroan2025!';
 const SALT_ROUNDS = 10;
+
+/** Rectangulo GeoJSON (anillo cerrado, [lng, lat]) desde su esquina inferior izquierda. */
+function rectanguloGeoJson(
+  minLng: number,
+  minLat: number,
+  dLng: number,
+  dLat: number,
+): PoligonoGeoJson {
+  const maxLng = minLng + dLng;
+  const maxLat = minLat + dLat;
+  return {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [minLng, minLat],
+        [maxLng, minLat],
+        [maxLng, maxLat],
+        [minLng, maxLat],
+        [minLng, minLat],
+      ],
+    ],
+  };
+}
 
 interface CampanaPasadaConfig {
   temporada: string;
@@ -99,23 +123,29 @@ async function main(): Promise<void> {
   await cultivosService.create({ nombre: 'Sésamo' });
 
   console.log('Creando parcelas...');
+  // Rectangulos cercanos a la finca (-17.73902, -62.57987), sin superponerse.
+  // Las hectareas reales se recalculan en ParcelasService a partir del
+  // poligono (turf.area); los valores de aqui son solo una referencia.
   const elCeibo = await parcelasService.create({
     nombre: 'Parcela El Ceibo',
     hectareas: 25.5,
     ubicacionTexto: 'Km 12 carretera a Montero, Santa Cruz',
     disponibleParaPreventa: true,
+    poligono: rectanguloGeoJson(-62.592, -17.734, 0.00401, 0.00539),
   });
   const santaRosa = await parcelasService.create({
     nombre: 'Parcela Santa Rosa',
     hectareas: 40,
     ubicacionTexto: 'Km 30 carretera a Warnes, Santa Cruz',
     disponibleParaPreventa: true,
+    poligono: rectanguloGeoJson(-62.576, -17.734, 0.004718, 0.007186),
   });
   const losAlmendros = await parcelasService.create({
     nombre: 'Parcela Los Almendros',
     hectareas: 18,
     ubicacionTexto: 'Zona San Pedro, Santa Cruz',
     disponibleParaPreventa: false,
+    poligono: rectanguloGeoJson(-62.592, -17.746, 0.003775, 0.004042),
   });
 
   async function crearHistorialParcela(

@@ -74,6 +74,9 @@ model Parcela {
   lng                    Float?
   disponibleParaPreventa Boolean  @default(false)
   activa                 Boolean  @default(true)
+  // GeoJSON Polygon ([lng, lat]). Las hectareas se derivan de este poligono
+  // en el service (turf.area), nunca del valor enviado por el cliente.
+  poligono               Json?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 

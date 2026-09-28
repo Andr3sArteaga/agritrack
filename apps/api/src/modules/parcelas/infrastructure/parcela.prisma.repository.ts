@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../../generated/prisma/client';
 import type { Parcela as ParcelaModel } from '../../../generated/prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
-import { ParcelaEntity } from '../domain/entities/parcela.entity';
+import { ParcelaEntity, PoligonoGeoJson } from '../domain/entities/parcela.entity';
 import {
   ActualizarParcelaData,
   CrearParcelaData,
@@ -25,7 +26,9 @@ export class ParcelaPrismaRepository implements ParcelaRepository {
   }
 
   async create(data: CrearParcelaData): Promise<ParcelaEntity> {
-    const parcela = await this.prisma.parcela.create({ data });
+    const parcela = await this.prisma.parcela.create({
+      data: { ...data, poligono: this.aJsonInput(data.poligono) },
+    });
     return this.toEntity(parcela);
   }
 
@@ -36,12 +39,22 @@ export class ParcelaPrismaRepository implements ParcelaRepository {
     try {
       const parcela = await this.prisma.parcela.update({
         where: { id },
-        data,
+        data: { ...data, poligono: this.aJsonInput(data.poligono) },
       });
       return this.toEntity(parcela);
     } catch {
       throw new NotFoundException('Parcela no encontrada');
     }
+  }
+
+  // undefined = no tocar el campo; null = borrar el poligono (SQL NULL);
+  // objeto = guardar el GeoJSON.
+  private aJsonInput(
+    poligono: PoligonoGeoJson | null | undefined,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull | undefined {
+    if (poligono === undefined) return undefined;
+    if (poligono === null) return Prisma.DbNull;
+    return poligono as unknown as Prisma.InputJsonValue;
   }
 
   private toEntity(parcela: ParcelaModel): ParcelaEntity {
@@ -54,6 +67,7 @@ export class ParcelaPrismaRepository implements ParcelaRepository {
       parcela.lng,
       parcela.disponibleParaPreventa,
       parcela.activa,
+      parcela.poligono as PoligonoGeoJson | null,
       parcela.createdAt,
       parcela.updatedAt,
     );

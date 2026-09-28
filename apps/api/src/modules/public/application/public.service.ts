@@ -113,6 +113,7 @@ export class PublicService {
       nombre: parcela.nombre,
       hectareas: parcela.hectareas,
       ubicacionTexto: parcela.ubicacionTexto,
+      poligono: parcela.poligono,
       cultivoActual,
       temporadaActual,
       rendimientoEstimadoTnHa,

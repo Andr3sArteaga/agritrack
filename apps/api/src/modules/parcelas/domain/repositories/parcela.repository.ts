@@ -1,4 +1,4 @@
-import { ParcelaEntity } from '../entities/parcela.entity';
+import { ParcelaEntity, PoligonoGeoJson } from '../entities/parcela.entity';
 
 export const PARCELA_REPOSITORY = Symbol('PARCELA_REPOSITORY');
 
@@ -9,6 +9,7 @@ export interface CrearParcelaData {
   lat?: number | null;
   lng?: number | null;
   disponibleParaPreventa?: boolean;
+  poligono?: PoligonoGeoJson | null;
 }
 
 export interface ActualizarParcelaData {
@@ -19,6 +20,7 @@ export interface ActualizarParcelaData {
   lng?: number | null;
   disponibleParaPreventa?: boolean;
   activa?: boolean;
+  poligono?: PoligonoGeoJson | null;
 }
 
 export interface ParcelaRepository {

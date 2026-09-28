@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TipoActividad } from '../../../../generated/prisma/enums';
+import { PoligonoGeoJson } from '../../../parcelas/domain/entities/parcela.entity';
+import { PoligonoDto } from '../../../parcelas/application/dto/poligono.dto';
 
 export class TimelineItemDto {
   @ApiProperty({ enum: TipoActividad })
@@ -46,6 +48,9 @@ export class DetalleParcelaPublicoDto {
 
   @ApiProperty()
   ubicacionTexto: string;
+
+  @ApiPropertyOptional({ type: PoligonoDto, nullable: true })
+  poligono: PoligonoGeoJson | null;
 
   @ApiPropertyOptional()
   cultivoActual: string | null;
