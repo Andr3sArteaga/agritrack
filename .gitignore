@@ -7,3 +7,6 @@ dist/
 **/src/generated/
 coverage/
 .DS_Store
+
+# TypeScript
+*.tsbuildinfo
