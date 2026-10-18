@@ -1,0 +1,11 @@
+Comando: cd apps/api && npm run build
+Fecha: 2026-10-17 23:36:03
+Node: v22.18.0
+Rama: test/jest-integridad | Commit base: e1c8e1e (con cambios sin commitear del fix)
+------------------------------------------------------------
+
+
+> api@0.0.1 build
+> nest build
+
+Codigo de salida: 0

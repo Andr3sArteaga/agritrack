@@ -62,15 +62,14 @@ export class ActividadPrismaRepository implements ActividadRepository {
       // nunca calculen el hash a partir del mismo hashAnterior.
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(${LOCK_KEY_CADENA_ACTIVIDADES})`;
 
-      const secuenciaRows = await tx.$queryRaw<{ secuencia: number }[]>`
-        SELECT nextval(pg_get_serial_sequence('actividades', 'secuencia'))::int AS secuencia
-      `;
-      const secuencia = secuenciaRows[0].secuencia;
-
+      // La secuencia se calcula como MAX(secuencia)+1 bajo el lock (no con
+      // nextval): una secuencia de Postgres no se revierte con el rollback y
+      // una transaccion fallida dejaria un hueco falso en la cadena.
       const ultima = await tx.actividad.findFirst({
         orderBy: { secuencia: 'desc' },
-        select: { hash: true },
+        select: { hash: true, secuencia: true },
       });
+      const secuencia = (ultima?.secuencia ?? 0) + 1;
       const hashAnterior = ultima?.hash ?? null;
 
       const contenidoCanonico = canonicalizarActividad({
