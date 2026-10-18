@@ -135,6 +135,53 @@ describe('Cadena de integridad con PostgreSQL real', () => {
     });
   });
 
+  it('un insert fallido (rollback) no deja hueco en la secuencia', async () => {
+    const primera = await repositorio.crearConIntegridad(datosActividad('A'));
+
+    await expect(
+      repositorio.crearConIntegridad(
+        datosActividad('FALLA', { campanaId: 'campana_inexistente' }),
+      ),
+    ).rejects.toBeDefined();
+
+    const segunda = await repositorio.crearConIntegridad(datosActividad('B'));
+
+    expect([primera.secuencia, segunda.secuencia]).toEqual([1, 2]);
+    expect(segunda.hashAnterior).toBe(primera.hash);
+    const enBd = await repositorio.findTodasOrdenadas();
+    expect(enBd.map((a) => a.secuencia)).toEqual([1, 2]);
+    await expect(integridad.verificarGlobal()).resolves.toEqual({
+      valido: true,
+      totalVerificadas: 2,
+      actividadAlteradaId: null,
+      motivo: null,
+    });
+  });
+
+  it('inserciones simultaneas con fallos intercalados siguen sin dejar huecos', async () => {
+    const resultados = await Promise.allSettled(
+      Array.from({ length: 20 }, (_, i) =>
+        repositorio.crearConIntegridad(
+          datosActividad(
+            `Mixta ${i}`,
+            i % 4 === 0 ? { campanaId: 'campana_inexistente' } : {},
+          ),
+        ),
+      ),
+    );
+
+    const exitosas = resultados.filter((r) => r.status === 'fulfilled').length;
+    expect(exitosas).toBe(15);
+    const enBd = await repositorio.findTodasOrdenadas();
+    expect(enBd.map((a) => a.secuencia)).toEqual(
+      Array.from({ length: 15 }, (_, i) => i + 1),
+    );
+    await expect(integridad.verificarGlobal()).resolves.toMatchObject({
+      valido: true,
+      totalVerificadas: 15,
+    });
+  });
+
   it('una correccion crea un registro nuevo y deja el original intacto', async () => {
     const original = await repositorio.crearConIntegridad(
       datosActividad('Cosecha', { tipo: 'COSECHA', rendimientoTnHa: 3.1 }),

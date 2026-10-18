@@ -1,25 +1,27 @@
 Comando: cd apps/api && npm run test:integration -- --verbose --reporters=default (PostgreSQL real, base agritrack_test)
-Fecha: 2026-10-17 23:27:00
+Fecha: 2026-10-17 23:35:54
 Node: v22.18.0
-Rama: test/jest-integridad | Commit: 49e83d1
+Rama: test/jest-integridad | Commit base: e1c8e1e (con cambios sin commitear del fix)
 ------------------------------------------------------------
 
 
 > api@0.0.1 test:integration
 > node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-integration.json --runInBand --verbose --reporters=default
 
-(node:5072) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(node:14932) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
 PASS test/integracion/cadena-integridad.integration-spec.ts
   Cadena de integridad con PostgreSQL real
-    √ inserciones simultaneas mantienen la cadena consistente (1080 ms)
-    √ una correccion crea un registro nuevo y deja el original intacto (199 ms)
-    √ detecta un UPDATE directo en la base y senala el registro alterado (204 ms)
-    √ detecta un DELETE directo en la base (hueco en la secuencia) (194 ms)
+    √ inserciones simultaneas mantienen la cadena consistente (634 ms)
+    √ un insert fallido (rollback) no deja hueco en la secuencia (209 ms)
+    √ inserciones simultaneas con fallos intercalados siguen sin dejar huecos (310 ms)
+    √ una correccion crea un registro nuevo y deja el original intacto (176 ms)
+    √ detecta un UPDATE directo en la base y senala el registro alterado (183 ms)
+    √ detecta un DELETE directo en la base (hueco en la secuencia) (188 ms)
 
 Test Suites: 1 passed, 1 total
-Tests:       4 passed, 4 total
+Tests:       6 passed, 6 total
 Snapshots:   0 total
-Time:        2.271 s
+Time:        2.174 s, estimated 3 s
 Ran all test suites.
 Codigo de salida: 0

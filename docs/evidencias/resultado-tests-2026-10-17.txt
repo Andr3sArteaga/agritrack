@@ -1,7 +1,7 @@
 Comando: cd apps/api && npm run test -- --verbose --reporters=default
-Fecha: 2026-10-17 23:26:58
+Fecha: 2026-10-17 23:35:53
 Node: v22.18.0
-Rama: test/jest-integridad | Commit: 49e83d1
+Rama: test/jest-integridad | Commit base: e1c8e1e (con cambios sin commitear del fix)
 ------------------------------------------------------------
 
 
@@ -11,63 +11,63 @@ Rama: test/jest-integridad | Commit: 49e83d1
 PASS src/shared/integridad/canonicalizar-actividad.spec.ts
   canonicalizarActividad
     √ produce exactamente el formato canonico esperado (orden fijo de campos) (3 ms)
-    √ el mismo registro produce la misma cadena, aunque sean objetos distintos (1 ms)
-    √ no depende del orden de las propiedades del objeto de entrada (2 ms)
+    √ el mismo registro produce la misma cadena, aunque sean objetos distintos
+    √ no depende del orden de las propiedades del objeto de entrada (1 ms)
     √ serializa la fecha como ISO UTC (mismo instante = misma cadena)
     √ cambiar el campo secuencia cambia la cadena canonica (1 ms)
     √ cambiar el campo campanaId cambia la cadena canonica
-    √ cambiar el campo tipo cambia la cadena canonica (1 ms)
+    √ cambiar el campo tipo cambia la cadena canonica
     √ cambiar el campo fecha cambia la cadena canonica
     √ cambiar el campo descripcion cambia la cadena canonica (1 ms)
     √ cambiar el campo insumo cambia la cadena canonica
-    √ cambiar el campo cantidad cambia la cadena canonica
+    √ cambiar el campo cantidad cambia la cadena canonica (1 ms)
     √ cambiar el campo unidad cambia la cadena canonica
     √ cambiar el campo responsableId cambia la cadena canonica
-    √ cambiar el campo tercerizado cambia la cadena canonica
+    √ cambiar el campo tercerizado cambia la cadena canonica (1 ms)
     √ cambiar el campo maquinariaUtilizada cambia la cadena canonica
-    √ cambiar el campo rendimientoTnHa cambia la cadena canonica
+    √ cambiar el campo rendimientoTnHa cambia la cadena canonica (1 ms)
     √ cambiar el campo correccionDeId cambia la cadena canonica
-    √ cambiar el campo motivoCorreccion cambia la cadena canonica (1 ms)
-    √ cambiar el campo hashAnterior cambia la cadena canonica (4 ms)
-    √ distingue null de cadena vacia y de cero (2 ms)
+    √ cambiar el campo motivoCorreccion cambia la cadena canonica
+    √ cambiar el campo hashAnterior cambia la cadena canonica
+    √ distingue null de cadena vacia y de cero
   calcularHashSha256
     √ coincide con el vector de prueba SHA-256 conocido ("abc")
-    √ el hash del registro canonico coincide con el valor calculado de forma independiente (1 ms)
-    √ devuelve 64 caracteres hexadecimales y es determinista (1 ms)
-    √ un cambio minimo en la entrada cambia por completo el hash (2 ms)
+    √ el hash del registro canonico coincide con el valor calculado de forma independiente (3 ms)
+    √ devuelve 64 caracteres hexadecimales y es determinista
+    √ un cambio minimo en la entrada cambia por completo el hash
   encadenamiento con hashAnterior
     √ la primera actividad no tiene hashAnterior y las siguientes apuntan al hash previo (1 ms)
     √ cada hash se recalcula igual a partir del contenido guardado
     √ dos registros con contenido identico pero distinta posicion en la cadena tienen hashes distintos (1 ms)
     √ el hashAnterior forma parte del hash: alterarlo invalida el hash propio
 
+PASS src/modules/actividades/application/actividades.service.spec.ts
+  ActividadesService.crear — correcciones
+    √ una correccion llama a crearConIntegridad con correccionDeId y motivo (2 ms)
+    √ crea un registro nuevo y no modifica el original (1 ms)
+    √ el repositorio de actividades no expone ninguna operacion de update/delete
+    √ rechaza corregir una actividad inexistente sin crear nada (9 ms)
+    √ corregir una COSECHA no cambia el estado de la campana; una cosecha nueva si (1 ms)
+
 PASS src/modules/integridad/application/integridad.service.spec.ts
   IntegridadService.verificarGlobal
-    √ valida una cadena intacta (2 ms)
+    √ valida una cadena intacta (1 ms)
     √ considera valida una cadena vacia (1 ms)
     √ detecta una descripcion modificada y senala el registro alterado
     √ detecta un rendimiento de cosecha modificado (1 ms)
-    √ detecta la modificacion del campo fecha (1 ms)
-    √ detecta la modificacion del campo cantidad (2 ms)
-    √ detecta la modificacion del campo campanaId (1 ms)
-    √ detecta la modificacion del campo hashAnterior (1 ms)
-    √ informa la primera actividad alterada cuando hay varias
+    √ detecta la modificacion del campo fecha (4 ms)
+    √ detecta la modificacion del campo cantidad (1 ms)
+    √ detecta la modificacion del campo campanaId
+    √ detecta la modificacion del campo hashAnterior
+    √ informa la primera actividad alterada cuando hay varias (1 ms)
     √ detecta un registro alterado aunque el atacante recalcule el hash propio (rompe la cadena en el siguiente)
     √ detecta un registro eliminado del medio (hueco en la secuencia) (1 ms)
     √ detecta que se elimino el primer registro de la cadena
     √ detecta registros reordenados (1 ms)
   IntegridadService.verificarPorParcela
     √ valida las actividades intactas de una parcela
-    √ detecta un registro de la parcela cuyo contenido fue modificado
-    √ solo valida cada registro contra su propio hashAnterior guardado (no la continuidad global) (1 ms)
-
-PASS src/modules/actividades/application/actividades.service.spec.ts
-  ActividadesService.crear — correcciones
-    √ una correccion llama a crearConIntegridad con correccionDeId y motivo (1 ms)
-    √ crea un registro nuevo y no modifica el original (1 ms)
-    √ el repositorio de actividades no expone ninguna operacion de update/delete (1 ms)
-    √ rechaza corregir una actividad inexistente sin crear nada (10 ms)
-    √ corregir una COSECHA no cambia el estado de la campana; una cosecha nueva si (1 ms)
+    √ detecta un registro de la parcela cuyo contenido fue modificado (1 ms)
+    √ solo valida cada registro contra su propio hashAnterior guardado (no la continuidad global)
 
 PASS src/app.controller.spec.ts
   AppController
@@ -77,6 +77,6 @@ PASS src/app.controller.spec.ts
 Test Suites: 4 passed, 4 total
 Tests:       50 passed, 50 total
 Snapshots:   0 total
-Time:        0.387 s, estimated 1 s
+Time:        0.321 s, estimated 1 s
 Ran all test suites.
 Codigo de salida: 0
