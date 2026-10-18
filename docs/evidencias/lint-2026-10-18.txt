@@ -1,0 +1,18 @@
+Comando: npm run lint (apps/api: oxlint) y npm run lint (apps/web: eslint)
+Fecha: 2026-10-18 11:30:37
+Node: v22.18.0
+Rama: feat/costos | Commit base: 6d54ae6 (con cambios sin commitear: pruebas de costos)
+------------------------------------------------------------
+### apps/api
+
+> api@0.0.1 lint
+> oxlint src/ test/
+
+exit: 0
+
+### apps/web
+
+> web@0.1.0 lint
+> eslint
+
+exit: 0
