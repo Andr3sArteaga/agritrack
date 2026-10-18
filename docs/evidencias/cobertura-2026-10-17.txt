@@ -1,0 +1,182 @@
+Comando: cd apps/api && npm run test:cov
+Fecha: 2026-10-17 23:27:10
+Node: v22.18.0
+Rama: test/jest-integridad | Commit: 49e83d1
+------------------------------------------------------------
+
+
+> api@0.0.1 test:cov
+> jest --coverage
+
+---------------------------------------------|---------|----------|---------|---------|-------------------
+File                                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------------------------------------|---------|----------|---------|---------|-------------------
+All files                                    |   10.32 |     7.74 |     7.1 |    10.6 |                   
+ src                                         |   29.54 |       50 |      75 |   23.68 |                   
+  app.controller.ts                          |     100 |       75 |     100 |     100 | 6                 
+  app.module.ts                              |       0 |      100 |     100 |       0 | 1-35              
+  app.service.ts                             |     100 |      100 |     100 |     100 |                   
+  main.ts                                    |       0 |        0 |       0 |       0 | 1-31              
+ src/generated/prisma                        |   28.57 |      100 |     100 |   28.57 |                   
+  browser.ts                                 |       0 |      100 |     100 |       0 | 16-19             
+  client.ts                                  |       0 |      100 |     100 |       0 | 18-40             
+  enums.ts                                   |     100 |      100 |     100 |     100 |                   
+ src/generated/prisma/internal               |       0 |      100 |       0 |       0 |                   
+  class.ts                                   |       0 |      100 |       0 |       0 | 14-253            
+  prismaNamespace.ts                         |       0 |      100 |     100 |       0 | 18-1188           
+  prismaNamespaceBrowser.ts                  |       0 |      100 |     100 |       0 | 18-205            
+ src/modules/actividades                     |       0 |      100 |     100 |       0 |                   
+  actividades.module.ts                      |       0 |      100 |     100 |       0 | 1-17              
+ src/modules/actividades/application         |   64.51 |       80 |      40 |   62.06 |                   
+  actividades.service.ts                     |   64.51 |       80 |      40 |   62.06 | 27-42,51          
+ src/modules/actividades/application/dto     |   70.49 |    56.25 |   33.33 |   70.49 |                   
+  actividad-response.dto.ts                  |     100 |       75 |     100 |     100 | 16-58             
+  create-actividad.dto.ts                    |       0 |        0 |       0 |       0 | 1-78              
+ src/modules/actividades/domain/entities     |     100 |      100 |     100 |     100 |                   
+  actividad.entity.ts                        |     100 |      100 |     100 |     100 |                   
+ src/modules/actividades/domain/repositories |     100 |      100 |     100 |     100 |                   
+  actividad.repository.ts                    |     100 |      100 |     100 |     100 |                   
+ src/modules/actividades/infrastructure      |       0 |        0 |       0 |       0 |                   
+  actividad.prisma.repository.ts             |       0 |        0 |       0 |       0 | 1-105             
+ src/modules/actividades/presentation        |       0 |        0 |       0 |       0 |                   
+  actividades.controller.ts                  |       0 |        0 |       0 |       0 | 1-46              
+ src/modules/auth                            |       0 |      100 |       0 |       0 |                   
+  auth.module.ts                             |       0 |      100 |       0 |       0 | 1-39              
+ src/modules/auth/application                |       0 |        0 |       0 |       0 |                   
+  auth.service.ts                            |       0 |        0 |       0 |       0 | 1-73              
+ src/modules/auth/application/dto            |       0 |        0 |       0 |       0 |                   
+  login-response.dto.ts                      |       0 |        0 |     100 |       0 | 1-9               
+  login.dto.ts                               |       0 |      100 |     100 |       0 | 1-11              
+  register.dto.ts                            |       0 |        0 |     100 |       0 | 1-21              
+  usuario-response.dto.ts                    |       0 |        0 |       0 |       0 | 1-28              
+ src/modules/auth/domain/entities            |       0 |      100 |       0 |       0 |                   
+  usuario.entity.ts                          |       0 |      100 |       0 |       0 | 3-11              
+ src/modules/auth/domain/repositories        |       0 |      100 |     100 |       0 |                   
+  usuario.repository.ts                      |       0 |      100 |     100 |       0 | 4                 
+ src/modules/auth/infrastructure             |       0 |        0 |       0 |       0 |                   
+  usuario.prisma.repository.ts               |       0 |        0 |       0 |       0 | 1-30              
+ src/modules/auth/infrastructure/strategies  |       0 |        0 |       0 |       0 |                   
+  jwt.strategy.ts                            |       0 |        0 |       0 |       0 | 1-40              
+ src/modules/auth/presentation               |       0 |        0 |       0 |       0 |                   
+  auth.controller.ts                         |       0 |        0 |       0 |       0 | 1-46              
+ src/modules/auth/presentation/decorators    |       0 |      100 |       0 |       0 |                   
+  current-usuario.decorator.ts               |       0 |      100 |       0 |       0 | 1-7               
+  roles.decorator.ts                         |       0 |      100 |       0 |       0 | 1-5               
+ src/modules/auth/presentation/guards        |       0 |        0 |       0 |       0 |                   
+  jwt-auth.guard.ts                          |       0 |      100 |     100 |       0 | 1-5               
+  roles.guard.ts                             |       0 |        0 |       0 |       0 | 1-23              
+ src/modules/campanas                        |       0 |      100 |     100 |       0 |                   
+  campanas.module.ts                         |       0 |      100 |     100 |       0 | 1-18              
+ src/modules/campanas/application            |       0 |        0 |       0 |       0 |                   
+  campanas.service.ts                        |       0 |        0 |       0 |       0 | 1-122             
+ src/modules/campanas/application/dto        |       0 |        0 |       0 |       0 |                   
+  campana-response.dto.ts                    |       0 |        0 |       0 |       0 | 1-44              
+  create-campana.dto.ts                      |       0 |        0 |     100 |       0 | 1-35              
+  update-campana.dto.ts                      |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/campanas/domain/entities        |       0 |      100 |       0 |       0 |                   
+  campana.entity.ts                          |       0 |      100 |       0 |       0 | 3-13              
+ src/modules/campanas/domain/repositories    |     100 |      100 |     100 |     100 |                   
+  campana.repository.ts                      |     100 |      100 |     100 |     100 |                   
+ src/modules/campanas/infrastructure         |       0 |        0 |       0 |       0 |                   
+  campana.prisma.repository.ts               |       0 |        0 |       0 |       0 | 1-75              
+ src/modules/campanas/presentation           |       0 |        0 |       0 |       0 |                   
+  campanas.controller.ts                     |       0 |        0 |       0 |       0 | 1-59              
+ src/modules/contactos                       |       0 |      100 |     100 |       0 |                   
+  contactos.module.ts                        |       0 |      100 |     100 |       0 | 1-15              
+ src/modules/contactos/application           |       0 |        0 |       0 |       0 |                   
+  contactos.service.ts                       |       0 |        0 |       0 |       0 | 1-47              
+ src/modules/contactos/application/dto       |       0 |        0 |       0 |       0 |                   
+  contacto-response.dto.ts                   |       0 |        0 |       0 |       0 | 1-44              
+  create-contacto.dto.ts                     |       0 |        0 |     100 |       0 | 1-32              
+  update-contacto.dto.ts                     |       0 |      100 |     100 |       0 | 1-4               
+ src/modules/contactos/domain/entities       |       0 |      100 |       0 |       0 |                   
+  contacto.entity.ts                         |       0 |      100 |       0 |       0 | 3-13              
+ src/modules/contactos/domain/repositories   |       0 |      100 |     100 |       0 |                   
+  contacto.repository.ts                     |       0 |      100 |     100 |       0 | 4                 
+ src/modules/contactos/infrastructure        |       0 |        0 |       0 |       0 |                   
+  contacto.prisma.repository.ts              |       0 |        0 |       0 |       0 | 1-66              
+ src/modules/contactos/presentation          |       0 |        0 |       0 |       0 |                   
+  contactos.controller.ts                    |       0 |        0 |       0 |       0 | 1-53              
+ src/modules/cultivos                        |       0 |      100 |     100 |       0 |                   
+  cultivos.module.ts                         |       0 |      100 |     100 |       0 | 1-15              
+ src/modules/cultivos/application            |       0 |        0 |       0 |       0 |                   
+  cultivos.service.ts                        |       0 |        0 |       0 |       0 | 1-27              
+ src/modules/cultivos/application/dto        |       0 |        0 |       0 |       0 |                   
+  create-cultivo.dto.ts                      |       0 |      100 |     100 |       0 | 1-7               
+  cultivo-response.dto.ts                    |       0 |        0 |       0 |       0 | 1-19              
+ src/modules/cultivos/domain/entities        |       0 |      100 |       0 |       0 |                   
+  cultivo.entity.ts                          |       0 |      100 |       0 |       0 | 1-6               
+ src/modules/cultivos/domain/repositories    |       0 |      100 |     100 |       0 |                   
+  cultivo.repository.ts                      |       0 |      100 |     100 |       0 | 3                 
+ src/modules/cultivos/infrastructure         |       0 |        0 |       0 |       0 |                   
+  cultivo.prisma.repository.ts               |       0 |        0 |       0 |       0 | 1-39              
+ src/modules/cultivos/presentation           |       0 |        0 |       0 |       0 |                   
+  cultivos.controller.ts                     |       0 |        0 |       0 |       0 | 1-26              
+ src/modules/integridad                      |       0 |      100 |     100 |       0 |                   
+  integridad.module.ts                       |       0 |      100 |     100 |       0 | 1-12              
+ src/modules/integridad/application          |     100 |      100 |     100 |     100 |                   
+  integridad.service.ts                      |     100 |      100 |     100 |     100 |                   
+ src/modules/integridad/presentation         |       0 |        0 |       0 |       0 |                   
+  integridad.controller.ts                   |       0 |        0 |       0 |       0 | 1-27              
+ src/modules/parcelas                        |       0 |      100 |     100 |       0 |                   
+  parcelas.module.ts                         |       0 |      100 |     100 |       0 | 1-15              
+ src/modules/parcelas/application            |       0 |        0 |       0 |       0 |                   
+  parcelas.service.ts                        |       0 |        0 |       0 |       0 | 1-160             
+ src/modules/parcelas/application/dto        |       0 |        0 |       0 |       0 |                   
+  create-parcela.dto.ts                      |       0 |        0 |       0 |       0 | 1-52              
+  parcela-response.dto.ts                    |       0 |        0 |       0 |       0 | 1-60              
+  poligono.dto.ts                            |       0 |      100 |     100 |       0 | 1-27              
+  update-parcela.dto.ts                      |       0 |      100 |       0 |       0 | 1-23              
+ src/modules/parcelas/domain/entities        |       0 |      100 |       0 |       0 |                   
+  parcela.entity.ts                          |       0 |      100 |       0 |       0 | 6-18              
+ src/modules/parcelas/domain/repositories    |       0 |      100 |     100 |       0 |                   
+  parcela.repository.ts                      |       0 |      100 |     100 |       0 | 3                 
+ src/modules/parcelas/infrastructure         |       0 |        0 |       0 |       0 |                   
+  parcela.prisma.repository.ts               |       0 |        0 |       0 |       0 | 1-61              
+ src/modules/parcelas/presentation           |       0 |        0 |       0 |       0 |                   
+  parcelas.controller.ts                     |       0 |        0 |       0 |       0 | 1-56              
+ src/modules/prediccion                      |       0 |      100 |     100 |       0 |                   
+  prediccion.module.ts                       |       0 |      100 |     100 |       0 | 1-15              
+ src/modules/prediccion/application          |       0 |      100 |       0 |       0 |                   
+  prediccion.service.ts                      |       0 |      100 |       0 |       0 | 1-15              
+ src/modules/prediccion/domain/ports         |       0 |      100 |     100 |       0 |                   
+  predictor.port.ts                          |       0 |      100 |     100 |       0 | 1                 
+ src/modules/prediccion/infrastructure       |       0 |        0 |       0 |       0 |                   
+  promedio-historico.predictor.ts            |       0 |        0 |       0 |       0 | 1-60              
+ src/modules/prediccion/presentation         |       0 |        0 |       0 |       0 |                   
+  prediccion.controller.ts                   |       0 |        0 |       0 |       0 | 1-19              
+ src/modules/public                          |       0 |      100 |     100 |       0 |                   
+  public.module.ts                           |       0 |      100 |     100 |       0 | 1-25              
+ src/modules/public/application              |       0 |        0 |       0 |       0 |                   
+  public.service.ts                          |       0 |        0 |       0 |       0 | 1-180             
+ src/modules/public/application/dto          |       0 |        0 |     100 |       0 |                   
+  catalogo-parcela.dto.ts                    |       0 |      100 |     100 |       0 | 1-19              
+  detalle-parcela-publico.dto.ts             |       0 |        0 |     100 |       0 | 1-77              
+ src/modules/public/presentation             |       0 |        0 |       0 |       0 |                   
+  public.controller.ts                       |       0 |        0 |       0 |       0 | 1-19              
+ src/modules/reportes                        |       0 |      100 |     100 |       0 |                   
+  reportes.module.ts                         |       0 |      100 |     100 |       0 | 1-17              
+ src/modules/reportes/application            |       0 |        0 |       0 |       0 |                   
+  reportes.service.ts                        |       0 |        0 |       0 |       0 | 1-61              
+ src/modules/reportes/application/dto        |       0 |        0 |     100 |       0 |                   
+  historico-item.dto.ts                      |       0 |        0 |     100 |       0 | 1-26              
+  resumen-dashboard.dto.ts                   |       0 |      100 |     100 |       0 | 1-55              
+ src/modules/reportes/domain/ports           |       0 |      100 |     100 |       0 |                   
+  reportes-query.port.ts                     |       0 |      100 |     100 |       0 | 1                 
+ src/modules/reportes/infrastructure         |       0 |        0 |       0 |       0 |                   
+  reportes-prisma.query.ts                   |       0 |        0 |       0 |       0 | 1-108             
+ src/modules/reportes/presentation           |       0 |        0 |       0 |       0 |                   
+  reportes.controller.ts                     |       0 |        0 |       0 |       0 | 1-29              
+ src/shared/integridad                       |     100 |      100 |     100 |     100 |                   
+  canonicalizar-actividad.ts                 |     100 |      100 |     100 |     100 |                   
+ src/shared/prisma                           |       0 |        0 |       0 |       0 |                   
+  prisma.module.ts                           |       0 |      100 |     100 |       0 | 1-9               
+  prisma.service.ts                          |       0 |        0 |       0 |       0 | 1-24              
+---------------------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 4 passed, 4 total
+Tests:       50 passed, 50 total
+Snapshots:   0 total
+Time:        4.088 s
+Ran all test suites.
+Codigo de salida: 0
