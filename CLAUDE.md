@@ -57,6 +57,7 @@ npx prisma migrate deploy --config prisma7.config.ts
 npx prisma generate --config prisma7.config.ts   # el cliente va a src/generated (gitignored): hay que generarlo tras clonar
 npx prisma db seed --config prisma7.config.ts
 npm run start:dev                          # http://localhost:3001  | Swagger: /docs
+npm run test                               # Jest (pruebas de integridad, etc.)
 npm run build
 
 # Web  (cd apps/web)
@@ -122,14 +123,14 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 - Alertas RF-45; reporte por campaña RF-42/43; exportar PDF/Excel RF-44.
 - Gestión completa de usuarios RF-03/RF-05; cierre de sesión por inactividad RF-02; filtros RF-08/RF-54/RF-48.
 - **Pantalla web para registrar actividades** (hoy solo vía API/Swagger).
-- Tests: `npx jest` en `apps/api` **no corre** (error TS5011 de `rootDir`, heredado del scaffold). Arreglarlo es prioridad.
+- Tests: Jest **ya corre** en `apps/api` (`npm run test`, 45 pruebas). Cubre canonicalización, hash SHA-256, encadenamiento con `hashAnterior` y detección de alteraciones (`IntegridadService`). **Falta**: prueba de concurrencia de la cadena (necesita Postgres real), pruebas de los demás módulos y tests en `apps/web`.
 - CI (GitHub Actions) y despliegue: no existen.
 
 ---
 
 ## 7. Roadmap priorizado (sigue este orden salvo que Andrés diga otro)
 
-1. **Arreglar Jest** + pruebas de canonicalización, hash y concurrencia de la cadena.
+1. ~~Arreglar Jest + pruebas de canonicalización, hash y encadenamiento~~ (hecho). **Pendiente de este ítem:** prueba de concurrencia de la cadena contra Postgres real (`crearConIntegridad` + `pg_advisory_xact_lock`).
 2. **Costos** (RF-26–30): modelos `Insumo`, `Gasto`, `Presupuesto`; endpoints para JEFE/CONTABILIDAD; vista en panel.
 3. **Cosecha y rendimiento real** (RF-22–24) + cierre de campaña con huella (RF-14, RF-57, RF-58).
 4. **Pantalla web de registro de actividades** (rol OPERATIVO).
@@ -147,7 +148,7 @@ Antes de empezar cualquier ítem: confirma el RF exacto en el documento de la te
 1. **No releas todo el repo.** Usa este archivo + el módulo que vas a tocar + `schema.prisma`.
 2. Resume en 3 líneas qué vas a hacer y qué RF cubre; luego hazlo. Sin planes largos.
 3. Cambios **pequeños y completos**: backend + frontend + (si aplica) seed + prueba del mismo RF. No dejes medias implementaciones.
-4. Antes de dar algo por terminado: `npm run build` en api y web, linters sin errores nuevos, y probar el flujo real (login → acción → resultado). Si no pudiste probarlo, dilo.
+4. Antes de dar algo por terminado: `npm run test` y `npm run build` en api, `npm run build` en web, linters sin errores nuevos, y probar el flujo real (login → acción → resultado). Si no pudiste probarlo, dilo.
 5. Si necesitas cambiar `schema.prisma`: nueva migración (`prisma migrate dev --name <que_hace>`), actualizar seed y `.dbml` si cambia el diseño. Nunca editar migraciones ya aplicadas.
 6. Si algo no está claro o choca con la tesis: **pregunta una vez, corta y concreta**.
 7. No agregues dependencias nuevas sin decir por qué.
@@ -169,6 +170,10 @@ Antes de empezar cualquier ítem: confirma el RF exacto en el documento de la te
 
 ## 10. Trampas conocidas
 
+- **Jest + Nest 12:** los paquetes `@nestjs/*` son ESM-only (usan `import.meta`) y Jest corre en CJS; con Node < 24.9 no pueden cargarse (`Must use import to load ES Module`). No sirve `transformIgnorePatterns` ni `--experimental-vm-modules`. En los specs **no uses `@nestjs/testing`**: mockea los decoradores con `jest.mock('@nestjs/common', () => ({ Injectable: () => () => undefined, Inject: () => () => undefined, ... }))` (agrega los que use la clase) e instancia con `new`. Ver `integridad.service.spec.ts`. Si se sube a Node ≥ 24.9, esto se puede simplificar.
+- Jest necesita el cliente Prisma generado (`src/generated`) porque ts-jest verifica tipos: corre `prisma generate` tras clonar. El `rootDir: "."` de `tsconfig.json` es obligatorio con TypeScript 6 (sin él, TS5011); `tsconfig.build.json` lo sobrescribe con `./src`.
+- Los specs de integridad usan `test/helpers/cadena-integridad.ts` (replica `crearConIntegridad` sin BD con las funciones reales). Los valores *golden* de `canonicalizar-actividad.spec.ts` fijan el formato: si fallan, cambió la canonicalización y los hashes guardados dejan de verificar (ver §5); no "arreglar" el test sin migración consciente.
+- `verificarPorParcela` solo valida cada registro contra su propio `hashAnterior` (no la continuidad global): un re-hash del propio registro solo lo detecta `verificarGlobal`. Es por diseño; tenerlo presente al hablarlo en la tesis.
 - Prisma 7 CLI: usa siempre `--config prisma7.config.ts`; exporta `DATABASE_URL` si el seed dice "DatabaseNotReachable".
 - Si `prisma generate` no puede bajar engines (red restringida), la API no compila: avisar, no parchear el código.
 - Las teselas del mapa necesitan internet; sin conexión se ve el polígono sobre gris (normal).
