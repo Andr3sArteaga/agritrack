@@ -1,0 +1,43 @@
+Comando: cd apps/web && npm run build
+Fecha: 2026-10-17 23:36:18
+Node: v22.18.0
+Rama: test/jest-integridad | Commit base: e1c8e1e (con cambios sin commitear del fix)
+------------------------------------------------------------
+
+
+> web@0.1.0 build
+> next build
+
+▲ Next.js 16.3.6 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 37ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 974ms
+  Running TypeScript ...
+  Finished TypeScript in 2.6s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/10) ...
+  Generating static pages using 11 workers (2/10) 
+  Generating static pages using 11 workers (4/10) 
+  Generating static pages using 11 workers (7/10) 
+✓ Generating static pages using 11 workers (10/10) in 451ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /login
+├ ○ /panel/contactos
+├ ○ /panel/dashboard
+├ ○ /panel/parcelas
+├ ƒ /panel/parcelas/[id]
+├ ○ /panel/reportes
+├ ƒ /parcelas
+└ ƒ /parcelas/[id]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Codigo de salida: 0

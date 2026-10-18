@@ -1,0 +1,19 @@
+Comando: npm run lint (apps/api: oxlint) y npm run lint (apps/web: eslint)
+Fecha: 2026-10-17 23:36:27
+Node: v22.18.0
+Rama: test/jest-integridad | Commit base: e1c8e1e (con cambios sin commitear del fix)
+------------------------------------------------------------
+
+===== apps/api: npm run lint =====
+
+> api@0.0.1 lint
+> oxlint src/ test/
+
+Codigo de salida: 0
+
+===== apps/web: npm run lint =====
+
+> web@0.1.0 lint
+> eslint
+
+Codigo de salida: 0
