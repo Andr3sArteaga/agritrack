@@ -1,0 +1,10 @@
+Comando: cd apps/api && npm run build
+Fecha: 2026-10-18 11:29:39
+Node: v22.18.0
+Rama: feat/costos | Commit base: 6d54ae6 (con cambios sin commitear: pruebas de costos)
+------------------------------------------------------------
+
+> api@0.0.1 build
+> nest build
+
+exit: 0

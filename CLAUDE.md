@@ -82,7 +82,7 @@ infrastructure/  implementaciones (repositorio Prisma, etc.)
 presentation/    controller (HTTP, guards, Swagger)
 ```
 
-Módulos existentes: `auth, parcelas, cultivos, campanas, actividades, integridad, reportes, prediccion, contactos, public`. Compartido en `src/shared` (`prisma/`, `integridad/canonicalizar-actividad.ts`).
+Módulos existentes: `auth, parcelas, cultivos, campanas, actividades, integridad, reportes, prediccion, contactos, costos, public`. Compartido en `src/shared` (`prisma/`, `integridad/canonicalizar-actividad.ts`).
 
 **Reglas (obligatorias):**
 1. **Mira un módulo existente (ej. `parcelas`) y copia su estructura** antes de crear uno nuevo. No inventes otro estilo.
@@ -111,12 +111,14 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 
 ## 6. Estado actual (qué existe de verdad)
 
-**Hecho (API + web):** auth + roles; parcelas (con polígono GeoJSON, área por Turf, aviso de superposición, habilitar preventa); cultivos; campañas; actividades con cadena de integridad; verificación de integridad (global y por parcela); reportes (histórico y dashboard); predicción **línea base** (promedio histórico detrás de `PredictorPort`); contactos; parte pública (landing, catálogo, detalle); panel privado (dashboard, parcelas con editor de mapa, reportes, contactos); seed con datos de demo.
+**Hecho (API + web):** auth + roles; parcelas (con polígono GeoJSON, área por Turf, aviso de superposición, habilitar preventa); cultivos; campañas; actividades con cadena de integridad; verificación de integridad (global y por parcela); reportes (histórico y dashboard); predicción **línea base** (promedio histórico detrás de `PredictorPort`); contactos; parte pública (landing, catálogo, detalle); panel privado (dashboard, parcelas con editor de mapa, reportes, contactos, costos); seed con datos de demo.
 
-**Modelo Prisma actual: solo 6 modelos** (`Usuario, Parcela, Cultivo, Campana, Actividad, Contacto`). El diseño completo de la tesis tiene 28 tablas (DBML en `agritrack_v5_28tablas.dbml`): **el schema real es un subconjunto**. No migres a las 28 de golpe: se agregan tablas solo cuando un RF las necesita.
+**Costos (rama `feat/costos`):** RF-26 (catálogo de insumos con historial de precios, solo API), RF-27 (gastos por campaña: pagado/comprometido, edición y anulación con motivo, sin DELETE), RF-29 (presupuesto único por campaña) y RF-30 (gastado = solo PAGADO, comprometido aparte, ahorro, costo/ha, costo/ton = null sin producción real) están **hechos** con pantalla en el panel (`/panel/costos`, JEFE/CONTABILIDAD). La regla de cálculo está en `costos/domain/rules/calcular-resumen-costos.ts`; el endpoint `GET /costos/campanas/:id/resumen` (parte D) aún no existe y la pantalla usa temporalmente `apps/web/src/lib/costos.ts`. La regla RF-57 está preparada en `campanaPermiteGastos` (hoy permite siempre; falta el estado CERRADA de RF-14).
+
+**Modelo Prisma actual: 10 modelos** (`Usuario, Parcela, Cultivo, Campana, Actividad, Contacto` + costos: `Insumo, PrecioInsumo, Gasto, Presupuesto`). El diseño completo de la tesis tiene 28 tablas (DBML en `agritrack_v5_28tablas.dbml`): **el schema real es un subconjunto**. No migres a las 28 de golpe: se agregan tablas solo cuando un RF las necesita.
 
 **Pendiente (por RF de la tesis; verificar contra el código antes de afirmar):**
-- Costos RF-26 a RF-30 (insumos con precio, gastos, presupuesto, ahorro, costo/ha) — **no existe**.
+- Costos: **RF-28 pendiente** (costo automático de insumos aplicados en labores = cantidad × precio vigente). `Actividad.insumo` es texto libre, sin FK ni precio; resolverlo exige decidir si se toca `Actividad`/canonicalización (zona sensible, §5) o se usa otra vía. También faltan: endpoint de resumen (parte D) y pantalla del catálogo de insumos/historial de precios.
 - Cosecha y rendimiento real RF-22 a RF-24 (hoy el rendimiento viene del seed/campañas).
 - Random Forest + importación histórica CSV/Excel RF-31 a RF-35 — **no existe** (solo línea base).
 - Clima RF-36; recomendaciones de riego/abono RF-37 a RF-40; planificación de labores RF-21.
@@ -124,7 +126,7 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 - Alertas RF-45; reporte por campaña RF-42/43; exportar PDF/Excel RF-44.
 - Gestión completa de usuarios RF-03/RF-05; cierre de sesión por inactividad RF-02; filtros RF-08/RF-54/RF-48.
 - **Pantalla web para registrar actividades** (hoy solo vía API/Swagger).
-- Tests: Jest **ya corre** en `apps/api`: 50 pruebas unitarias (`npm run test`) + 6 de integración con Postgres real (`npm run test:integration`). Cubren canonicalización, hash SHA-256, encadenamiento, detección de alteraciones, correcciones y concurrencia de la cadena. **Falta**: pruebas de los demás módulos y tests en `apps/web`. Evidencias para la tesis en `docs/evidencias/`.
+- Tests: Jest **ya corre** en `apps/api`: 106 pruebas unitarias (`npm run test`) + 11 de integración con Postgres real (`npm run test:integration`). Cubren canonicalización, hash SHA-256, encadenamiento, detección de alteraciones, correcciones y concurrencia de la cadena, y el módulo de costos (totales, ahorro, costo/ha, costo/ton, anulación con motivo, bloqueo RF-57, precio vigente según fecha). **Falta**: pruebas de los demás módulos y tests en `apps/web`. Evidencias para la tesis en `docs/evidencias/`.
 - CI (GitHub Actions) y despliegue: no existen.
 
 ---
@@ -132,7 +134,7 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 ## 7. Roadmap priorizado (sigue este orden salvo que Andrés diga otro)
 
 1. ~~Arreglar Jest + pruebas de canonicalización, hash y encadenamiento~~ (hecho). La concurrencia ya se prueba contra Postgres real.
-2. **Costos** (RF-26–30): modelos `Insumo`, `Gasto`, `Presupuesto`; endpoints para JEFE/CONTABILIDAD; vista en panel.
+2. **Costos** (RF-26–30): RF-26, 27, 29 y 30 hechos (ver §6); **RF-28 pendiente**; falta endpoint de resumen (parte D) y UI del catálogo de insumos.
 3. **Cosecha y rendimiento real** (RF-22–24) + cierre de campaña con huella (RF-14, RF-57, RF-58).
 4. **Pantalla web de registro de actividades** (rol OPERATIVO).
 5. **Random Forest** detrás de `PredictorPort` + importación de datos históricos (RF-31–35). Mantener el contrato del puerto; no tocar controllers/frontend. Advertir si hay < 3 campañas.
