@@ -1,7 +1,7 @@
 Comando: cd apps/api && npm run test:cov
-Fecha: 2026-10-17 23:27:10
+Fecha: 2026-10-17 23:35:58
 Node: v22.18.0
-Rama: test/jest-integridad | Commit: 49e83d1
+Rama: test/jest-integridad | Commit base: e1c8e1e (con cambios sin commitear del fix)
 ------------------------------------------------------------
 
 
@@ -11,7 +11,7 @@ Rama: test/jest-integridad | Commit: 49e83d1
 ---------------------------------------------|---------|----------|---------|---------|-------------------
 File                                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
 ---------------------------------------------|---------|----------|---------|---------|-------------------
-All files                                    |   10.32 |     7.74 |     7.1 |    10.6 |                   
+All files                                    |   10.33 |     7.71 |     7.1 |   10.61 |                   
  src                                         |   29.54 |       50 |      75 |   23.68 |                   
   app.controller.ts                          |     100 |       75 |     100 |     100 | 6                 
   app.module.ts                              |       0 |      100 |     100 |       0 | 1-35              
@@ -37,7 +37,7 @@ All files                                    |   10.32 |     7.74 |     7.1 |   
  src/modules/actividades/domain/repositories |     100 |      100 |     100 |     100 |                   
   actividad.repository.ts                    |     100 |      100 |     100 |     100 |                   
  src/modules/actividades/infrastructure      |       0 |        0 |       0 |       0 |                   
-  actividad.prisma.repository.ts             |       0 |        0 |       0 |       0 | 1-105             
+  actividad.prisma.repository.ts             |       0 |        0 |       0 |       0 | 1-104             
  src/modules/actividades/presentation        |       0 |        0 |       0 |       0 |                   
   actividades.controller.ts                  |       0 |        0 |       0 |       0 | 1-46              
  src/modules/auth                            |       0 |      100 |       0 |       0 |                   
@@ -177,6 +177,6 @@ All files                                    |   10.32 |     7.74 |     7.1 |   
 Test Suites: 4 passed, 4 total
 Tests:       50 passed, 50 total
 Snapshots:   0 total
-Time:        4.088 s
+Time:        3.767 s
 Ran all test suites.
 Codigo de salida: 0

@@ -103,7 +103,7 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 
 - `Actividad` es **inmutable**: nunca `UPDATE`/`DELETE`. Un error se corrige con un **nuevo registro** que apunta al original en `correccionDeId`.
 - Hash = SHA-256 sobre el JSON **canónico** (campos en orden fijo, ver `shared/integridad/canonicalizar-actividad.ts`) + `hashAnterior` (cadena).
-- La inserción corre en transacción con `pg_advisory_xact_lock(851204)` para serializar la cadena (`actividad.prisma.repository.ts → crearConIntegridad`).
+- La inserción corre en transacción con `pg_advisory_xact_lock(851204)` para serializar la cadena (`actividad.prisma.repository.ts → crearConIntegridad`). La `secuencia` se calcula como `MAX(secuencia)+1` bajo ese lock, **no** con `nextval()` (una secuencia de Postgres no se revierte con el rollback y dejaría huecos falsos tras una transacción fallida).
 - Si agregas un campo a `Actividad`, decide si entra en la canonicalización; **cambiarla invalida los hashes ya guardados** → requiere migración/re-seed consciente.
 - Todo cambio aquí necesita una prueba (ver §8).
 
@@ -124,7 +124,7 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 - Alertas RF-45; reporte por campaña RF-42/43; exportar PDF/Excel RF-44.
 - Gestión completa de usuarios RF-03/RF-05; cierre de sesión por inactividad RF-02; filtros RF-08/RF-54/RF-48.
 - **Pantalla web para registrar actividades** (hoy solo vía API/Swagger).
-- Tests: Jest **ya corre** en `apps/api`: 50 pruebas unitarias (`npm run test`) + 4 de integración con Postgres real (`npm run test:integration`). Cubren canonicalización, hash SHA-256, encadenamiento, detección de alteraciones, correcciones y concurrencia de la cadena. **Falta**: pruebas de los demás módulos y tests en `apps/web`. Evidencias para la tesis en `docs/evidencias/`.
+- Tests: Jest **ya corre** en `apps/api`: 50 pruebas unitarias (`npm run test`) + 6 de integración con Postgres real (`npm run test:integration`). Cubren canonicalización, hash SHA-256, encadenamiento, detección de alteraciones, correcciones y concurrencia de la cadena. **Falta**: pruebas de los demás módulos y tests en `apps/web`. Evidencias para la tesis en `docs/evidencias/`.
 - CI (GitHub Actions) y despliegue: no existen.
 
 ---
@@ -176,7 +176,6 @@ Antes de empezar cualquier ítem: confirma el RF exacto en el documento de la te
 - Los specs de integridad usan `test/helpers/cadena-integridad.ts` (replica `crearConIntegridad` sin BD con las funciones reales). Los valores *golden* de `canonicalizar-actividad.spec.ts` fijan el formato: si fallan, cambió la canonicalización y los hashes guardados dejan de verificar (ver §5); no "arreglar" el test sin migración consciente.
 - `verificarPorParcela` solo valida cada registro contra su propio `hashAnterior` (no la continuidad global): un re-hash del propio registro solo lo detecta `verificarGlobal`. Es por diseño; tenerlo presente al hablarlo en la tesis.
 - **Pruebas de integración:** usan la base `agritrack_test` (nunca la de desarrollo: la cadena es global y borrar filas deja huecos). Crearla una vez: `docker exec agritrack-db psql -U agritrack -d postgres -c "CREATE DATABASE agritrack_test"` y `DATABASE_URL=postgresql://agritrack:agritrack@localhost:5433/agritrack_test?schema=public npx prisma migrate deploy --config prisma7.config.ts`. El script usa `--experimental-vm-modules` porque Prisma 7 carga su motor con `import()` dinámico. Con `--verbose` agrega `--reporters=default` o Jest no imprime los nombres de las pruebas.
-- **BUG CONOCIDO (pendiente de decidir):** en `crearConIntegridad` el `nextval()` de `secuencia` se consume antes del INSERT; si la transacción falla después (FK, error de conexión), hace rollback pero la secuencia no vuelve atrás y `verificarGlobal` reporta "hueco en la secuencia" aunque nadie manipuló nada. No tocar la lógica sin que Andrés lo decida.
 - Prisma 7 CLI: usa siempre `--config prisma7.config.ts`; exporta `DATABASE_URL` si el seed dice "DatabaseNotReachable".
 - Si `prisma generate` no puede bajar engines (red restringida), la API no compila: avisar, no parchear el código.
 - Las teselas del mapa necesitan internet; sin conexión se ve el polígono sobre gris (normal).
