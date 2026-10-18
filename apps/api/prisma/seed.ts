@@ -19,6 +19,7 @@ import { ActividadPrismaRepository } from '../src/modules/actividades/infrastruc
 import { ActividadesService } from '../src/modules/actividades/application/actividades.service';
 import { ContactoPrismaRepository } from '../src/modules/contactos/infrastructure/contacto.prisma.repository';
 import { ContactosService } from '../src/modules/contactos/application/contactos.service';
+import { sembrarCostos } from './seed-costos';
 import type { PoligonoGeoJson } from '../src/modules/parcelas/domain/entities/parcela.entity';
 
 const PASSWORD_DEMO = 'Agroan2025!';
@@ -316,6 +317,23 @@ async function main(): Promise<void> {
     temporada: 'Verano 2026',
     fechaInicio: '2026-11-01',
     fechaFin: '2027-03-15',
+  });
+
+  console.log('Creando insumos, gastos y presupuestos...');
+  await sembrarCostos(prisma, {
+    campanas: await campanasService.findAll(),
+    hectareasPorParcela: {
+      [elCeibo.id]: elCeibo.hectareas,
+      [santaRosa.id]: santaRosa.hectareas,
+      [losAlmendros.id]: losAlmendros.hectareas,
+    },
+    nombreCultivoPorId: {
+      [soya.id]: soya.nombre,
+      [sorgo.id]: sorgo.nombre,
+      [trigo.id]: trigo.nombre,
+    },
+    registradoPorId: contabilidad.id,
+    parcelaConGastoAnuladoId: elCeibo.id,
   });
 
   console.log('Creando contactos...');
