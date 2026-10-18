@@ -57,7 +57,8 @@ npx prisma migrate deploy --config prisma7.config.ts
 npx prisma generate --config prisma7.config.ts   # el cliente va a src/generated (gitignored): hay que generarlo tras clonar
 npx prisma db seed --config prisma7.config.ts
 npm run start:dev                          # http://localhost:3001  | Swagger: /docs
-npm run test                               # Jest (pruebas de integridad, etc.)
+npm run test                               # Jest unitarias
+npm run test:integration                   # integracion con Postgres real (base agritrack_test, ver §10)
 npm run build
 
 # Web  (cd apps/web)
@@ -123,14 +124,14 @@ Mecanismo central de la tesis. **No lo modifiques sin que Andrés lo pida explí
 - Alertas RF-45; reporte por campaña RF-42/43; exportar PDF/Excel RF-44.
 - Gestión completa de usuarios RF-03/RF-05; cierre de sesión por inactividad RF-02; filtros RF-08/RF-54/RF-48.
 - **Pantalla web para registrar actividades** (hoy solo vía API/Swagger).
-- Tests: Jest **ya corre** en `apps/api` (`npm run test`, 45 pruebas). Cubre canonicalización, hash SHA-256, encadenamiento con `hashAnterior` y detección de alteraciones (`IntegridadService`). **Falta**: prueba de concurrencia de la cadena (necesita Postgres real), pruebas de los demás módulos y tests en `apps/web`.
+- Tests: Jest **ya corre** en `apps/api`: 50 pruebas unitarias (`npm run test`) + 4 de integración con Postgres real (`npm run test:integration`). Cubren canonicalización, hash SHA-256, encadenamiento, detección de alteraciones, correcciones y concurrencia de la cadena. **Falta**: pruebas de los demás módulos y tests en `apps/web`. Evidencias para la tesis en `docs/evidencias/`.
 - CI (GitHub Actions) y despliegue: no existen.
 
 ---
 
 ## 7. Roadmap priorizado (sigue este orden salvo que Andrés diga otro)
 
-1. ~~Arreglar Jest + pruebas de canonicalización, hash y encadenamiento~~ (hecho). **Pendiente de este ítem:** prueba de concurrencia de la cadena contra Postgres real (`crearConIntegridad` + `pg_advisory_xact_lock`).
+1. ~~Arreglar Jest + pruebas de canonicalización, hash y encadenamiento~~ (hecho). La concurrencia ya se prueba contra Postgres real.
 2. **Costos** (RF-26–30): modelos `Insumo`, `Gasto`, `Presupuesto`; endpoints para JEFE/CONTABILIDAD; vista en panel.
 3. **Cosecha y rendimiento real** (RF-22–24) + cierre de campaña con huella (RF-14, RF-57, RF-58).
 4. **Pantalla web de registro de actividades** (rol OPERATIVO).
@@ -174,6 +175,8 @@ Antes de empezar cualquier ítem: confirma el RF exacto en el documento de la te
 - Jest necesita el cliente Prisma generado (`src/generated`) porque ts-jest verifica tipos: corre `prisma generate` tras clonar. El `rootDir: "."` de `tsconfig.json` es obligatorio con TypeScript 6 (sin él, TS5011); `tsconfig.build.json` lo sobrescribe con `./src`.
 - Los specs de integridad usan `test/helpers/cadena-integridad.ts` (replica `crearConIntegridad` sin BD con las funciones reales). Los valores *golden* de `canonicalizar-actividad.spec.ts` fijan el formato: si fallan, cambió la canonicalización y los hashes guardados dejan de verificar (ver §5); no "arreglar" el test sin migración consciente.
 - `verificarPorParcela` solo valida cada registro contra su propio `hashAnterior` (no la continuidad global): un re-hash del propio registro solo lo detecta `verificarGlobal`. Es por diseño; tenerlo presente al hablarlo en la tesis.
+- **Pruebas de integración:** usan la base `agritrack_test` (nunca la de desarrollo: la cadena es global y borrar filas deja huecos). Crearla una vez: `docker exec agritrack-db psql -U agritrack -d postgres -c "CREATE DATABASE agritrack_test"` y `DATABASE_URL=postgresql://agritrack:agritrack@localhost:5433/agritrack_test?schema=public npx prisma migrate deploy --config prisma7.config.ts`. El script usa `--experimental-vm-modules` porque Prisma 7 carga su motor con `import()` dinámico. Con `--verbose` agrega `--reporters=default` o Jest no imprime los nombres de las pruebas.
+- **BUG CONOCIDO (pendiente de decidir):** en `crearConIntegridad` el `nextval()` de `secuencia` se consume antes del INSERT; si la transacción falla después (FK, error de conexión), hace rollback pero la secuencia no vuelve atrás y `verificarGlobal` reporta "hueco en la secuencia" aunque nadie manipuló nada. No tocar la lógica sin que Andrés lo decida.
 - Prisma 7 CLI: usa siempre `--config prisma7.config.ts`; exporta `DATABASE_URL` si el seed dice "DatabaseNotReachable".
 - Si `prisma generate` no puede bajar engines (red restringida), la API no compila: avisar, no parchear el código.
 - Las teselas del mapa necesitan internet; sin conexión se ve el polígono sobre gris (normal).
