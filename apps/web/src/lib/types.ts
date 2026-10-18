@@ -215,3 +215,53 @@ export const ROL_LABEL: Record<Rol, string> = {
   CONTABILIDAD: "Contabilidad",
   OPERATIVO: "Operativo",
 };
+
+export type CategoriaGasto =
+  | "INSUMOS"
+  | "SERVICIO_TERCERIZADO"
+  | "MAQUINARIA"
+  | "MANO_DE_OBRA"
+  | "OTROS";
+
+export type EstadoGasto = "PAGADO" | "COMPROMETIDO";
+
+export interface Gasto {
+  id: string;
+  campanaId: string;
+  categoria: CategoriaGasto;
+  descripcion: string;
+  monto: number;
+  fecha: string;
+  estado: EstadoGasto;
+  insumoId: string | null;
+  cantidad: number | null;
+  precioUnitario: number | null;
+  registradoPorId: string;
+  anulado: boolean;
+  motivoAnulacion: string | null;
+  anuladoEn: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Presupuesto {
+  id: string;
+  campanaId: string;
+  montoTotal: number;
+  notas: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const CATEGORIA_GASTO_LABEL: Record<CategoriaGasto, string> = {
+  INSUMOS: "Insumos",
+  SERVICIO_TERCERIZADO: "Servicio tercerizado",
+  MAQUINARIA: "Maquinaria",
+  MANO_DE_OBRA: "Mano de obra",
+  OTROS: "Otros",
+};
+
+export const ESTADO_GASTO_LABEL: Record<EstadoGasto, string> = {
+  PAGADO: "Pagado",
+  COMPROMETIDO: "Comprometido",
+};
