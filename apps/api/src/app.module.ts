@@ -13,6 +13,7 @@ import { PrediccionModule } from './modules/prediccion/prediccion.module';
 import { IntegridadModule } from './modules/integridad/integridad.module';
 import { ReportesModule } from './modules/reportes/reportes.module';
 import { PublicModule } from './modules/public/public.module';
+import { CostosModule } from './modules/costos/costos.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PublicModule } from './modules/public/public.module';
     IntegridadModule,
     ReportesModule,
     PublicModule,
+    CostosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
