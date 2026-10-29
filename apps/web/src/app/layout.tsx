@@ -24,7 +24,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">
+      {/* Extensiones del navegador (ej. ColorZilla) agregan atributos al body antes de hidratar. */}
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-stone-50 text-stone-900"
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
