@@ -1,0 +1,35 @@
+Comando: cd apps/api && node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-integration.json --runInBand test/integracion/prueba-extension.integration-spec.ts --verbose --reporters=default
+Fecha: 2026-11-02 02:51:26
+Node: v22.18.0
+Rama: prueba/deps-reportes | Commit base: 2626faa (dependencias pdfmake y write-excel-file instaladas, sin commitear)
+------------------------------------------------------------
+Spec temporal contra agritrack_test (copia en pruebas-temporales/). Crea y elimina su propio trigger/tabla de prueba.
+
+(node:2552) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.log
+    A) tras rollback externo => cultivos: [ { nombre: 'Debe revertirse' } ] eventos: [ { tabla: 'cultivos', usuario: 'usuario_A' } ]
+
+      at Object.<anonymous> (test/integracion/prueba-extension.integration-spec.ts:193:15)
+
+PASS test/integracion/prueba-extension.integration-spec.ts
+  Paso 0: extension $extends + set_config + trigger (Prisma 7)
+    mecanismo base
+      √ el cliente extendido sigue siendo asignable a PrismaClient (tipos) (266 ms)
+      √ el trigger ve el usuario fijado con set_config (misma transaccion) (318 ms)
+      √ TRAMPA: si el await queda fuera del contexto, la bitacora registra null (304 ms)
+      √ el usuario no se filtra a otra escritura sin contexto (set_config es local) (306 ms)
+      √ escrituras concurrentes de usuarios distintos no se mezclan (599 ms)
+      √ si la escritura falla, no queda evento (rollback conjunto) (527 ms)
+    atomicidad dentro de una transaccion interactiva externa
+      √ A) HALLAZGO: escritura interceptada dentro de la transaccion externa NO es atomica (402 ms)
+      √ B) modelo excluido (caso Actividad) + error en la transaccion externa (340 ms)
+      √ B2) modelo excluido + commit: queda en la misma transaccion que el resto (285 ms)
+      √ C) transaccion abierta desde el cliente BASE con set_config al inicio (327 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        5.064 s
+Ran all test suites matching test/integracion/prueba-extension.integration-spec.ts.
+exit: 0
