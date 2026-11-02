@@ -1,7 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { FileBarChart, ShieldAlert, ShieldCheck, TrendingUp } from "lucide-react";
+import {
+  ArrowRight,
+  FileBarChart,
+  ShieldAlert,
+  ShieldCheck,
+  TrendingUp,
+} from "lucide-react";
 import { Ayuda } from "@/components/ayuda";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { api, apiErrorMessage } from "@/lib/api";
@@ -132,6 +139,9 @@ function TabHistorico() {
                 <th className="px-4 py-3 font-medium">Temporada</th>
                 <th className="px-4 py-3 font-medium">Fecha cosecha</th>
                 <th className="px-4 py-3 font-medium">Rendimiento</th>
+                <th className="px-4 py-3">
+                  <span className="sr-only">Reporte</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
@@ -143,6 +153,16 @@ function TabHistorico() {
                   <td className="px-4 py-3">{formatearFecha(item.fecha)}</td>
                   <td className="px-4 py-3 font-medium text-emerald-700">
                     {item.rendimientoTnHa} t/ha
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <Link
+                      href={`/panel/reportes/campanas/${item.campanaId}`}
+                      title="Ver el reporte completo de esta campaña"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                    >
+                      Ver reporte
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </Link>
                   </td>
                 </tr>
               ))}
