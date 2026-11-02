@@ -3,6 +3,22 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Ban,
+  CircleCheck,
+  Clock,
+  Pencil,
+  PiggyBank,
+  Plus,
+  Receipt,
+  Ruler,
+  Scale,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+import { Ayuda } from "@/components/ayuda";
+import { BadgeEstadoGasto } from "@/components/badge";
+import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { calcularResumenCostos } from "@/lib/costos";
@@ -10,7 +26,6 @@ import { formatearBs, formatearFecha } from "@/lib/format";
 import {
   CATEGORIA_GASTO_LABEL,
   ESTADO_CAMPANA_LABEL,
-  ESTADO_GASTO_LABEL,
   type Campana,
   type Cultivo,
   type Gasto,
@@ -158,12 +173,11 @@ export default function CostosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-stone-900">Costos</h1>
-        <p className="mt-1 text-stone-600">
-          Gastos y presupuesto por campaña. Montos en bolivianos (Bs).
-        </p>
-      </div>
+      <EncabezadoPagina
+        icono={Wallet}
+        titulo="Costos"
+        descripcion="Gastos y presupuesto por campaña. Montos en bolivianos (Bs)."
+      />
 
       <div>
         <label className="block text-sm font-medium text-stone-700">Campaña</label>
@@ -190,26 +204,43 @@ export default function CostosPage() {
       {!cargando && detalle && resumen && campanaActual && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Tarjeta etiqueta="Total gastado (pagado)" valor={formatearBs(resumen.gastado)} />
             <Tarjeta
+              icono={CircleCheck}
+              etiqueta="Total gastado (pagado)"
+              valor={formatearBs(resumen.gastado)}
+              ayuda="Suma de los gastos ya pagados, sin contar los anulados. Es el gasto real de la campaña."
+            />
+            <Tarjeta
+              icono={Clock}
               etiqueta="Total comprometido"
               valor={formatearBs(resumen.comprometido)}
               nota="Aparte; no entra en el gasto real"
+              ayuda="Gastos acordados que todavía no se pagaron. No se restan del presupuesto hasta que se paguen."
             />
             <Tarjeta
+              icono={Wallet}
               etiqueta="Presupuesto"
               valor={formatearBs(resumen.presupuesto)}
               nota={resumen.presupuesto === null ? "Sin presupuesto definido" : undefined}
+              ayuda="Monto total que se planificó gastar en esta campaña."
               accion={
                 <button
                   onClick={() => setFormPresupuesto(true)}
-                  className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                  title={
+                    detalle.presupuesto
+                      ? "Cambiar el presupuesto de la campaña"
+                      : "Definir el presupuesto de la campaña"
+                  }
+                  className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
                 >
+                  <Pencil className="h-3.5 w-3.5" aria-hidden />
                   {detalle.presupuesto ? "Cambiar" : "Definir"}
                 </button>
               }
             />
             <Tarjeta
+              icono={PiggyBank}
+              ayuda="Lo que sobró del presupuesto: presupuesto menos lo ya pagado. Si es negativo, se gastó más de lo planificado."
               etiqueta="Ahorro (presupuesto − gastado)"
               valor={formatearBs(resumen.ahorro)}
               tono={
@@ -226,11 +257,15 @@ export default function CostosPage() {
               }
             />
             <Tarjeta
+              icono={Ruler}
               etiqueta="Costo por hectárea"
               valor={formatearBs(resumen.costoPorHa)}
               nota={`${detalle.hectareas} ha`}
+              ayuda="Gasto real dividido entre las hectáreas de la parcela."
             />
             <Tarjeta
+              icono={Scale}
+              ayuda="Gasto real dividido entre las toneladas cosechadas. Solo se calcula cuando ya hay producción registrada."
               etiqueta="Costo por tonelada"
               valor={formatearBs(resumen.costoPorTonelada)}
               nota={
@@ -242,11 +277,16 @@ export default function CostosPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-stone-900">Gastos</h2>
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+              <Receipt className="h-5 w-5 text-emerald-700" aria-hidden />
+              Gastos
+            </h2>
             <button
               onClick={() => setFormGasto({ gasto: null })}
-              className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+              title="Registrar un gasto nuevo en esta campaña"
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
             >
+              <Plus className="h-4 w-4" aria-hidden />
               Registrar gasto
             </button>
           </div>
@@ -282,21 +322,7 @@ export default function CostosPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        {gasto.anulado ? (
-                          <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
-                            Anulado
-                          </span>
-                        ) : (
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                              gasto.estado === "PAGADO"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-amber-100 text-amber-800"
-                            }`}
-                          >
-                            {ESTADO_GASTO_LABEL[gasto.estado]}
-                          </span>
-                        )}
+                        <BadgeEstadoGasto estado={gasto.estado} anulado={gasto.anulado} />
                       </td>
                       <td
                         className={`whitespace-nowrap px-4 py-3 text-right font-medium ${
@@ -310,14 +336,18 @@ export default function CostosPage() {
                           <div className="flex justify-end gap-3">
                             <button
                               onClick={() => setFormGasto({ gasto })}
-                              className="text-sm text-stone-600 hover:text-stone-900"
+                              title="Editar descripción, fecha, estado o monto del gasto"
+                              className="inline-flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
                             >
+                              <Pencil className="h-4 w-4" aria-hidden />
                               Editar
                             </button>
                             <button
                               onClick={() => setGastoAAnular(gasto)}
-                              className="text-sm text-red-600 hover:text-red-800"
+                              title="Anular el gasto (no se borra: queda con su motivo)"
+                              className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800"
                             >
+                              <Ban className="h-4 w-4" aria-hidden />
                               Anular
                             </button>
                           </div>
@@ -369,17 +399,21 @@ export default function CostosPage() {
 }
 
 function Tarjeta({
+  icono: Icono,
   etiqueta,
   valor,
   nota,
   tono,
   accion,
+  ayuda,
 }: {
+  icono: LucideIcon;
   etiqueta: string;
   valor: string;
   nota?: string;
   tono?: "positivo" | "negativo";
   accion?: React.ReactNode;
+  ayuda: string;
 }) {
   const colorValor =
     tono === "positivo"
@@ -389,8 +423,12 @@ function Tarjeta({
         : "text-stone-900";
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-5">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm text-stone-500">{etiqueta}</p>
+      <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
+        <p className="flex items-center gap-1.5 text-sm text-stone-500">
+          <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
+          {etiqueta}
+          <Ayuda texto={ayuda} />
+        </p>
         {accion}
       </div>
       <p className={`mt-1 text-2xl font-semibold ${colorValor}`}>{valor}</p>

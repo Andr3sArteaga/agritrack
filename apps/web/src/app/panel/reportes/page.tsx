@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { FileBarChart, ShieldAlert, ShieldCheck, TrendingUp } from "lucide-react";
+import { Ayuda } from "@/components/ayuda";
+import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { api, apiErrorMessage } from "@/lib/api";
 import { formatearFecha } from "@/lib/format";
 import type {
@@ -15,24 +18,34 @@ export default function ReportesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-stone-900">Reportes</h1>
-        <p className="mt-1 text-stone-600">
-          Histórico de rendimiento e integridad de los registros
-        </p>
-      </div>
+      <EncabezadoPagina
+        icono={FileBarChart}
+        titulo="Reportes"
+        descripcion="Histórico de rendimiento e integridad de los registros"
+      />
 
       <div className="flex gap-1 border-b border-stone-200">
         {(["historico", "integridad"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium ${
+            aria-pressed={tab === t}
+            title={
+              t === "historico"
+                ? "Rendimiento (toneladas por hectárea) de las campañas ya cosechadas"
+                : "Comprobar que los registros de labores no fueron alterados"
+            }
+            className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium ${
               tab === t
                 ? "border-b-2 border-emerald-700 text-emerald-800"
                 : "text-stone-500 hover:text-stone-800"
             }`}
           >
+            {t === "historico" ? (
+              <TrendingUp className="h-4 w-4" aria-hidden />
+            ) : (
+              <ShieldCheck className="h-4 w-4" aria-hidden />
+            )}
             {t === "historico" ? "Histórico de rendimiento" : "Integridad"}
           </button>
         ))}
@@ -110,7 +123,7 @@ function TabHistorico() {
       ) : items.length === 0 ? (
         <p className="text-sm text-stone-500">No hay cosechas registradas con estos filtros.</p>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-stone-50 text-left text-stone-500">
               <tr>
@@ -161,15 +174,19 @@ function TabIntegridad() {
 
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-6">
-      <p className="text-stone-600">
-        Recalcula el hash de cada actividad registrada en el sistema y valida
-        que la cadena global no haya sido alterada.
+      <p className="flex items-start gap-2 text-stone-600">
+        <span>
+          Recalcula el hash de cada actividad registrada en el sistema y valida
+          que la cadena global no haya sido alterada.
+        </span>
+        <Ayuda texto="El hash es una huella digital de cada registro: si alguien cambia un dato guardado, la huella ya no coincide y se detecta." />
       </p>
       <button
         onClick={verificar}
         disabled={verificando}
-        className="mt-4 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
       >
+        <ShieldCheck className="h-4 w-4" aria-hidden />
         {verificando ? "Verificando..." : "Ejecutar verificación global"}
       </button>
 
@@ -181,10 +198,15 @@ function TabIntegridad() {
             resultado.valido ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"
           }`}
         >
-          <p className="font-semibold">
+          <p className="flex items-center gap-2 font-semibold">
+            {resultado.valido ? (
+              <ShieldCheck className="h-5 w-5" aria-hidden />
+            ) : (
+              <ShieldAlert className="h-5 w-5" aria-hidden />
+            )}
             {resultado.valido
-              ? "✓ La cadena de integridad es válida"
-              : "✗ Se detectó una alteración en la cadena"}
+              ? "La cadena de integridad es válida"
+              : "Se detectó una alteración en la cadena"}
           </p>
           <p className="mt-1">
             Actividades verificadas: {resultado.totalVerificadas}

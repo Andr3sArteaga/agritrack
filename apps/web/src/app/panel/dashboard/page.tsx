@@ -2,6 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  CalendarClock,
+  LayoutDashboard,
+  LineChart,
+  Ruler,
+  Sprout,
+  Tractor,
+  Wheat,
+  type LucideIcon,
+} from "lucide-react";
+import { Ayuda } from "@/components/ayuda";
+import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatearFecha } from "@/lib/format";
@@ -32,15 +44,28 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-stone-900">Dashboard</h1>
-        <p className="mt-1 text-stone-600">Resumen general de la operación</p>
-      </div>
+      <EncabezadoPagina
+        icono={LayoutDashboard}
+        titulo="Dashboard"
+        descripcion="Resumen general de la operación"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metrica etiqueta="Hectáreas totales" valor={`${resumen.hectareasTotales} ha`} />
-        <Metrica etiqueta="Campañas en curso" valor={resumen.campanasEnCurso} />
         <Metrica
+          icono={Ruler}
+          etiqueta="Hectáreas totales"
+          valor={`${resumen.hectareasTotales} ha`}
+          ayuda="Suma de la superficie de las parcelas activas."
+        />
+        <Metrica
+          icono={Tractor}
+          etiqueta="Campañas en curso"
+          valor={resumen.campanasEnCurso}
+          ayuda="Campañas que se están ejecutando ahora (sembradas y sin cosechar)."
+        />
+        <Metrica
+          icono={Wheat}
+          ayuda="Rendimiento de la cosecha más reciente, en toneladas por hectárea (t/ha)."
           etiqueta="Última cosecha"
           valor={
             resumen.ultimaCosecha
@@ -54,6 +79,8 @@ export default function DashboardPage() {
           }
         />
         <Metrica
+          icono={Sprout}
+          ayuda="Estimación del rendimiento (t/ha) a partir del promedio de campañas anteriores. Es orientativa: mejora a medida que hay más historial."
           etiqueta="Predicción próxima campaña"
           valor={
             resumen.prediccionProximaCampana?.rendimientoEstimadoTnHa !== null &&
@@ -70,7 +97,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="rounded-lg border border-stone-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-stone-900">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+          <LineChart className="h-5 w-5 text-emerald-700" aria-hidden />
           Histórico de rendimiento
         </h2>
         <div className="mt-4">
@@ -79,7 +107,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="rounded-lg border border-stone-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-stone-900">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+          <CalendarClock className="h-5 w-5 text-emerald-700" aria-hidden />
           Próximas cosechas
         </h2>
         {resumen.proximasCosechas.length === 0 ? (
@@ -104,17 +133,25 @@ export default function DashboardPage() {
 }
 
 function Metrica({
+  icono: Icono,
   etiqueta,
   valor,
   subtexto,
+  ayuda,
 }: {
+  icono: LucideIcon;
   etiqueta: string;
   valor: string | number;
   subtexto?: string;
+  ayuda: string;
 }) {
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-5">
-      <p className="text-sm text-stone-500">{etiqueta}</p>
+      <p className="flex items-center gap-1.5 text-sm text-stone-500">
+        <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
+        {etiqueta}
+        <Ayuda texto={ayuda} />
+      </p>
       <p className="mt-1 text-2xl font-semibold text-stone-900">{valor}</p>
       {subtexto && <p className="mt-1 text-xs text-stone-500">{subtexto}</p>}
     </div>

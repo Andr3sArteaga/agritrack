@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
-import { Modal } from "@/components/modal";
+import { AccionesModal, Modal } from "@/components/modal";
 import { formatearBs } from "@/lib/format";
 import type { Gasto } from "@/lib/types";
 
@@ -57,22 +57,7 @@ export function AnularGastoModal({
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="flex justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-100"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={guardando || motivo.trim().length < 5}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
-          >
-            {guardando ? "Anulando..." : "Anular gasto"}
-          </button>
-        </div>
+        <AccionesModal onCancelar={onClose} etiqueta="Anular gasto" etiquetaGuardando="Anulando..." guardando={guardando} deshabilitado={motivo.trim().length < 5} peligro />
       </form>
     </Modal>
   );
