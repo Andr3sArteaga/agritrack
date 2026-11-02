@@ -10,3 +10,9 @@ export const TILE_ATTRIBUTION_SATELITAL =
 export const TILE_URL_ETIQUETAS =
   "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}";
 export const TILE_ATTRIBUTION_ETIQUETAS = "Esri, Garmin, HERE, USGS";
+
+export const TILE_URL_CALLES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+export const TILE_ATTRIBUTION_CALLES =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+export type TipoMapa = "satelite" | "calles";

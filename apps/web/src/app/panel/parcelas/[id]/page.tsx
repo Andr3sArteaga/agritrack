@@ -3,6 +3,22 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  Beaker,
+  CalendarRange,
+  Droplets,
+  FlaskConical,
+  Pencil,
+  Plus,
+  Sprout,
+  SprayCan,
+  Trash2,
+  Wheat,
+  type LucideIcon,
+} from "lucide-react";
+import { Ayuda } from "@/components/ayuda";
+import { BadgeEstadoCampana } from "@/components/badge";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatearFecha } from "@/lib/format";
@@ -14,11 +30,26 @@ import {
   type Cultivo,
   type EstadoCampana,
   type Parcela,
+  type TipoActividad,
 } from "@/lib/types";
 import { CampanaForm } from "./campana-form";
 import { ActividadForm } from "./actividad-form";
 
 const ESTADOS: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"];
+
+const ICONO_ACTIVIDAD: Record<TipoActividad, LucideIcon> = {
+  SIEMBRA: Sprout,
+  FUMIGACION: SprayCan,
+  FERTILIZACION: FlaskConical,
+  MEDICION_HUMEDAD_SUELO: Droplets,
+  MEDICION_HUMEDAD_GRANO: Beaker,
+  COSECHA: Wheat,
+};
+
+function IconoActividad({ tipo }: { tipo: TipoActividad }) {
+  const Icono = ICONO_ACTIVIDAD[tipo];
+  return <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />;
+}
 
 export default function ParcelaPrivadaDetallePage() {
   const params = useParams<{ id: string }>();
@@ -104,8 +135,12 @@ export default function ParcelaPrivadaDetallePage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/panel/parcelas" className="text-sm text-stone-500 hover:text-stone-700">
-          ← Volver a parcelas
+        <Link
+          href="/panel/parcelas"
+          className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Volver a parcelas
         </Link>
         <h1 className="mt-2 text-2xl font-bold text-stone-900">{parcela.nombre}</h1>
         <p className="mt-1 text-stone-600">
@@ -114,12 +149,18 @@ export default function ParcelaPrivadaDetallePage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-stone-900">Campañas</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+          <CalendarRange className="h-5 w-5 text-emerald-700" aria-hidden />
+          Campañas
+          <Ayuda texto="Una campaña es un ciclo de cultivo en esta parcela: desde la siembra hasta la cosecha." />
+        </h2>
         {esJefe && (
           <button
             onClick={() => setMostrarFormCampana(true)}
-            className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+            title="Crear una campaña nueva en esta parcela"
+            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
           >
+            <Plus className="h-4 w-4" aria-hidden />
             Nueva campaña
           </button>
         )}
@@ -143,24 +184,17 @@ export default function ParcelaPrivadaDetallePage() {
                   {formatearFecha(campana.fechaInicio)} – {formatearFecha(campana.fechaFin)}
                 </p>
               </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  campana.estado === "EN_CURSO"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : campana.estado === "COSECHADA"
-                      ? "bg-stone-200 text-stone-700"
-                      : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {ESTADO_CAMPANA_LABEL[campana.estado]}
-              </span>
+              <BadgeEstadoCampana estado={campana.estado} />
             </button>
 
             {campanaAbierta === campana.id && (
               <div className="border-t border-stone-100 px-5 py-4">
                 {esJefe && (
                   <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-                    <span className="text-stone-500">Cambiar estado:</span>
+                    <span className="inline-flex items-center gap-1 text-stone-500">
+                      Cambiar estado:
+                      <Ayuda texto="Pasa la campaña a otra etapa: planificada, en curso o cosechada." />
+                    </span>
                     {ESTADOS.map((estado) => (
                       <button
                         key={estado}
@@ -173,24 +207,31 @@ export default function ParcelaPrivadaDetallePage() {
                     ))}
                     <button
                       onClick={() => eliminarCampana(campana)}
-                      className="ml-auto text-xs text-red-600 hover:text-red-800"
+                      title="Eliminar la campaña (pide confirmación)"
+                      className="ml-auto inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-800"
                     >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden />
                       Eliminar campaña
                     </button>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-stone-900">Actividades</h3>
+                  <h3 className="flex items-center gap-1.5 text-sm font-semibold text-stone-900">
+                    Actividades
+                    <Ayuda texto="Labores de campo de esta campaña. Los registros no se editan: si hubo un error, se corrige con un registro nuevo." />
+                  </h3>
                   {puedeRegistrarActividad && (
                     <button
                       onClick={() => {
                         setCorrigiendo(null);
                         setMostrarFormActividad(true);
                       }}
-                      className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                      title="Registrar una labor de campo en esta campaña"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
                     >
-                      + Registrar actividad
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Registrar actividad
                     </button>
                   )}
                 </div>
@@ -208,8 +249,9 @@ export default function ParcelaPrivadaDetallePage() {
                           : "border-stone-100 bg-stone-50 text-stone-400 line-through"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex flex-wrap items-center gap-1.5 font-medium">
+                          <IconoActividad tipo={actividad.tipo} />
                           #{actividad.secuencia} {TIPO_ACTIVIDAD_LABEL[actividad.tipo]} ·{" "}
                           {formatearFecha(actividad.fecha)}
                           {actividad.tipo === "COSECHA" && actividad.rendimientoTnHa !== null && (
@@ -222,8 +264,10 @@ export default function ParcelaPrivadaDetallePage() {
                               setCorrigiendo(actividad);
                               setMostrarFormActividad(true);
                             }}
-                            className="text-xs font-medium text-amber-700 hover:text-amber-900 no-underline"
+                            title="Registrar una corrección: el registro original se conserva"
+                            className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900 no-underline"
                           >
+                            <Pencil className="h-3.5 w-3.5" aria-hidden />
                             Corregir
                           </button>
                         )}

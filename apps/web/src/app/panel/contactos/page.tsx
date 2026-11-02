@@ -1,6 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  Contact,
+  Ellipsis,
+  Handshake,
+  Package,
+  Pencil,
+  Plus,
+  Search,
+  Tractor,
+  Truck,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
+import { Badge } from "@/components/badge";
+import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { TIPO_CONTACTO_LABEL, type Contacto, type TipoContacto } from "@/lib/types";
@@ -14,6 +29,15 @@ const TIPOS: TipoContacto[] = [
   "SERVICIOS",
   "OTRO",
 ];
+
+const ICONO_TIPO: Record<TipoContacto, LucideIcon> = {
+  COMPRADOR: Handshake,
+  TRANSPORTISTA: Truck,
+  MAQUINARIA: Tractor,
+  INSUMOS: Package,
+  SERVICIOS: Wrench,
+  OTRO: Ellipsis,
+};
 
 export default function ContactosPage() {
   const { usuario } = useAuth();
@@ -45,28 +69,38 @@ export default function ContactosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-stone-900">Contactos</h1>
-          <p className="mt-1 text-stone-600">Compradores, transportistas y proveedores</p>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <EncabezadoPagina
+          icono={Contact}
+          titulo="Contactos"
+          descripcion="Compradores, transportistas y proveedores"
+        />
         {puedeEditar && (
           <button
             onClick={() => setMostrarForm(true)}
-            className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+            title="Agregar un contacto nuevo a la agenda"
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
           >
+            <Plus className="h-4 w-4" aria-hidden />
             Nuevo contacto
           </button>
         )}
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre, empresa, teléfono o email..."
-          className="flex-1 min-w-[240px] rounded-md border border-stone-300 px-3 py-2 text-sm"
-        />
+        <div className="relative min-w-[240px] flex-1">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+            aria-hidden
+          />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nombre, empresa, teléfono o email..."
+            aria-label="Buscar contactos"
+            className="w-full rounded-md border border-stone-300 py-2 pl-9 pr-3 text-sm"
+          />
+        </div>
         <select
           value={tipo}
           onChange={(e) => setTipo(e.target.value as TipoContacto | "")}
@@ -87,7 +121,7 @@ export default function ContactosPage() {
       ) : contactos.length === 0 ? (
         <p className="text-sm text-stone-500">No se encontraron contactos.</p>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-stone-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-stone-50 text-left text-stone-500">
               <tr>
@@ -103,9 +137,9 @@ export default function ContactosPage() {
                 <tr key={contacto.id}>
                   <td className="px-4 py-3 font-medium text-stone-900">{contacto.nombre}</td>
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-700">
+                    <Badge tono="gris" icono={ICONO_TIPO[contacto.tipo]}>
                       {TIPO_CONTACTO_LABEL[contacto.tipo]}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-stone-600">{contacto.empresa ?? "—"}</td>
                   <td className="px-4 py-3 text-stone-600">
@@ -115,8 +149,10 @@ export default function ContactosPage() {
                     {puedeEditar && (
                       <button
                         onClick={() => setEditando(contacto)}
-                        className="text-sm text-stone-600 hover:text-stone-900"
+                        title="Editar los datos del contacto"
+                        className="inline-flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
                       >
+                        <Pencil className="h-4 w-4" aria-hidden />
                         Editar
                       </button>
                     )}
