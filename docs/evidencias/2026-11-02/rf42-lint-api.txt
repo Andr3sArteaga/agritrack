@@ -1,0 +1,11 @@
+Comando: cd apps/api && npm run lint
+Fecha: 2026-11-02 16:58:13
+Node: v22.18.0
+Rama: feat/reportes | Commit: 40e9bd5
+Contexto: reporte por campana (RF-42), vista de detalle; rama con cherry-pick de 265fb38
+------------------------------------------------------------
+
+> api@0.0.1 lint
+> oxlint src/ test/
+
+exit: 0
