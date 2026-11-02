@@ -1,0 +1,21 @@
+Comando: cd apps/api && npx jest src/prueba-pdfmake.spec.ts src/prueba-write-excel-file.spec.ts --verbose --reporters=default
+Fecha: 2026-11-02 02:51:20
+Node: v22.18.0
+Rama: prueba/deps-reportes | Commit base: 2626faa (dependencias pdfmake y write-excel-file instaladas, sin commitear)
+------------------------------------------------------------
+Specs temporales (copia en pruebas-temporales/). Se eliminaron del codigo despues de esta corrida.
+
+PASS src/prueba-write-excel-file.spec.ts
+  write-excel-file en el servidor (Jest CJS)
+    √ genera un .xlsx de dos hojas con tildes, numeros y fechas (47 ms)
+
+PASS src/prueba-pdfmake.spec.ts
+  pdfmake 0.3 en el servidor (Jest CJS)
+    √ genera un PDF con tabla, tildes y ñ (111 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        2.418 s, estimated 3 s
+Ran all test suites matching src/prueba-pdfmake.spec.ts|src/prueba-write-excel-file.spec.ts.
+exit: 0
