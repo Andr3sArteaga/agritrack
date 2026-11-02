@@ -10,10 +10,9 @@ import {
   Sprout,
   Tractor,
   Wheat,
-  type LucideIcon,
 } from "lucide-react";
-import { Ayuda } from "@/components/ayuda";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
+import { TarjetaMetrica } from "@/components/tarjeta-metrica";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatearFecha } from "@/lib/format";
@@ -51,19 +50,19 @@ export default function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metrica
+        <TarjetaMetrica
           icono={Ruler}
           etiqueta="Hectáreas totales"
           valor={`${resumen.hectareasTotales} ha`}
           ayuda="Suma de la superficie de las parcelas activas."
         />
-        <Metrica
+        <TarjetaMetrica
           icono={Tractor}
           etiqueta="Campañas en curso"
           valor={resumen.campanasEnCurso}
           ayuda="Campañas que se están ejecutando ahora (sembradas y sin cosechar)."
         />
-        <Metrica
+        <TarjetaMetrica
           icono={Wheat}
           ayuda="Rendimiento de la cosecha más reciente, en toneladas por hectárea (t/ha)."
           etiqueta="Última cosecha"
@@ -72,13 +71,13 @@ export default function DashboardPage() {
               ? `${resumen.ultimaCosecha.rendimientoTnHa} t/ha`
               : "Sin datos"
           }
-          subtexto={
+          nota={
             resumen.ultimaCosecha
               ? `${resumen.ultimaCosecha.parcelaNombre} · ${formatearFecha(resumen.ultimaCosecha.fecha)}`
               : undefined
           }
         />
-        <Metrica
+        <TarjetaMetrica
           icono={Sprout}
           ayuda="Estimación del rendimiento (t/ha) a partir del promedio de campañas anteriores. Es orientativa: mejora a medida que hay más historial."
           etiqueta="Predicción próxima campaña"
@@ -88,7 +87,7 @@ export default function DashboardPage() {
               ? `${resumen.prediccionProximaCampana?.rendimientoEstimadoTnHa} t/ha`
               : "Sin datos"
           }
-          subtexto={
+          nota={
             resumen.prediccionProximaCampana
               ? `${resumen.prediccionProximaCampana.parcelaNombre} · ${resumen.prediccionProximaCampana.cultivoNombre}`
               : undefined
@@ -128,32 +127,6 @@ export default function DashboardPage() {
           </ul>
         )}
       </div>
-    </div>
-  );
-}
-
-function Metrica({
-  icono: Icono,
-  etiqueta,
-  valor,
-  subtexto,
-  ayuda,
-}: {
-  icono: LucideIcon;
-  etiqueta: string;
-  valor: string | number;
-  subtexto?: string;
-  ayuda: string;
-}) {
-  return (
-    <div className="rounded-lg border border-stone-200 bg-white p-5">
-      <p className="flex items-center gap-1.5 text-sm text-stone-500">
-        <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
-        {etiqueta}
-        <Ayuda texto={ayuda} />
-      </p>
-      <p className="mt-1 text-2xl font-semibold text-stone-900">{valor}</p>
-      {subtexto && <p className="mt-1 text-xs text-stone-500">{subtexto}</p>}
     </div>
   );
 }

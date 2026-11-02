@@ -14,11 +14,10 @@ import {
   Ruler,
   Scale,
   Wallet,
-  type LucideIcon,
 } from "lucide-react";
-import { Ayuda } from "@/components/ayuda";
 import { BadgeEstadoGasto } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
+import { TarjetaMetrica } from "@/components/tarjeta-metrica";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { calcularResumenCostos } from "@/lib/costos";
@@ -204,20 +203,20 @@ export default function CostosPage() {
       {!cargando && detalle && resumen && campanaActual && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Tarjeta
+            <TarjetaMetrica
               icono={CircleCheck}
               etiqueta="Total gastado (pagado)"
               valor={formatearBs(resumen.gastado)}
               ayuda="Suma de los gastos ya pagados, sin contar los anulados. Es el gasto real de la campaña."
             />
-            <Tarjeta
+            <TarjetaMetrica
               icono={Clock}
               etiqueta="Total comprometido"
               valor={formatearBs(resumen.comprometido)}
               nota="Aparte; no entra en el gasto real"
               ayuda="Gastos acordados que todavía no se pagaron. No se restan del presupuesto hasta que se paguen."
             />
-            <Tarjeta
+            <TarjetaMetrica
               icono={Wallet}
               etiqueta="Presupuesto"
               valor={formatearBs(resumen.presupuesto)}
@@ -238,7 +237,7 @@ export default function CostosPage() {
                 </button>
               }
             />
-            <Tarjeta
+            <TarjetaMetrica
               icono={PiggyBank}
               ayuda="Lo que sobró del presupuesto: presupuesto menos lo ya pagado. Si es negativo, se gastó más de lo planificado."
               etiqueta="Ahorro (presupuesto − gastado)"
@@ -256,14 +255,14 @@ export default function CostosPage() {
                   : undefined
               }
             />
-            <Tarjeta
+            <TarjetaMetrica
               icono={Ruler}
               etiqueta="Costo por hectárea"
               valor={formatearBs(resumen.costoPorHa)}
               nota={`${detalle.hectareas} ha`}
               ayuda="Gasto real dividido entre las hectáreas de la parcela."
             />
-            <Tarjeta
+            <TarjetaMetrica
               icono={Scale}
               ayuda="Gasto real dividido entre las toneladas cosechadas. Solo se calcula cuando ya hay producción registrada."
               etiqueta="Costo por tonelada"
@@ -394,45 +393,6 @@ export default function CostosPage() {
           )}
         </>
       )}
-    </div>
-  );
-}
-
-function Tarjeta({
-  icono: Icono,
-  etiqueta,
-  valor,
-  nota,
-  tono,
-  accion,
-  ayuda,
-}: {
-  icono: LucideIcon;
-  etiqueta: string;
-  valor: string;
-  nota?: string;
-  tono?: "positivo" | "negativo";
-  accion?: React.ReactNode;
-  ayuda: string;
-}) {
-  const colorValor =
-    tono === "positivo"
-      ? "text-emerald-700"
-      : tono === "negativo"
-        ? "text-red-600"
-        : "text-stone-900";
-  return (
-    <div className="rounded-lg border border-stone-200 bg-white p-5">
-      <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-        <p className="flex items-center gap-1.5 text-sm text-stone-500">
-          <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
-          {etiqueta}
-          <Ayuda texto={ayuda} />
-        </p>
-        {accion}
-      </div>
-      <p className={`mt-1 text-2xl font-semibold ${colorValor}`}>{valor}</p>
-      {nota && <p className="mt-1 text-xs text-stone-500">{nota}</p>}
     </div>
   );
 }

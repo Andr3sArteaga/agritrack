@@ -5,20 +5,14 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
-  Beaker,
   CalendarRange,
-  Droplets,
-  FlaskConical,
   Pencil,
   Plus,
-  Sprout,
-  SprayCan,
   Trash2,
-  Wheat,
-  type LucideIcon,
 } from "lucide-react";
 import { Ayuda } from "@/components/ayuda";
 import { BadgeEstadoCampana } from "@/components/badge";
+import { IconoActividad } from "@/components/icono-actividad";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatearFecha } from "@/lib/format";
@@ -30,26 +24,11 @@ import {
   type Cultivo,
   type EstadoCampana,
   type Parcela,
-  type TipoActividad,
 } from "@/lib/types";
 import { CampanaForm } from "./campana-form";
 import { ActividadForm } from "./actividad-form";
 
 const ESTADOS: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"];
-
-const ICONO_ACTIVIDAD: Record<TipoActividad, LucideIcon> = {
-  SIEMBRA: Sprout,
-  FUMIGACION: SprayCan,
-  FERTILIZACION: FlaskConical,
-  MEDICION_HUMEDAD_SUELO: Droplets,
-  MEDICION_HUMEDAD_GRANO: Beaker,
-  COSECHA: Wheat,
-};
-
-function IconoActividad({ tipo }: { tipo: TipoActividad }) {
-  const Icono = ICONO_ACTIVIDAD[tipo];
-  return <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />;
-}
 
 export default function ParcelaPrivadaDetallePage() {
   const params = useParams<{ id: string }>();
