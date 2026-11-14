@@ -2,39 +2,28 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Map as MapaIcono,
-  MapPinned,
-  PanelLeft,
-  Pencil,
-  Plus,
-  Power,
-  RotateCcw,
-  Tag,
-} from "lucide-react";
-import { Badge, BadgeEstadoParcela } from "@/components/badge";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Map as MapaIcono, MapPinned, Pencil, Plus, Power, RotateCcw, Tag } from "lucide-react";
+import { Badge } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
+import { Advertencia } from "@/components/estado/advertencia";
+import { EstadoDeParcela } from "@/components/estado/estado-parcela";
+import { LeyendaMapa } from "@/components/map/leyenda-mapa";
 import type { EnfoqueMapa } from "@/components/map/parcelas-mapa";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useResumenesParcelas } from "@/lib/cargar-resumen";
+import type { EstadoIndicador } from "@/lib/estado";
 import { calcularCampanaVigentePorParcela, type CampanaVigente } from "@/lib/parcelas";
 import type { Campana, Cultivo, Parcela } from "@/lib/types";
+import { PanelFlotanteParcela } from "./panel-flotante-parcela";
 import { ParcelaForm } from "./parcela-form";
 import { ParcelasLista } from "./parcelas-lista";
 
 const ParcelasMapa = dynamic(
   () => import("@/components/map/parcelas-mapa").then((m) => m.ParcelasMapa),
-  { ssr: false, loading: () => <p className="text-sm text-stone-500">Cargando mapa...</p> },
+  { ssr: false, loading: () => <p className="p-4 text-sm text-stone-600">Cargando mapa...</p> },
 );
-
-type VistaMapa = "mapa" | "mapa-lista";
-
-// Alto casi completo de la pantalla (descuenta encabezado y controles del panel).
-const ALTO_MAPA: Record<VistaMapa, string> = {
-  mapa: "h-[calc(100dvh-17rem)] min-h-[420px] md:h-[calc(100dvh-13rem)]",
-  "mapa-lista": "h-[55dvh] min-h-[320px] lg:h-[calc(100dvh-13rem)] lg:min-h-[420px]",
-};
 
 export default function ParcelasPage() {
   const { usuario } = useAuth();
@@ -44,9 +33,24 @@ export default function ParcelasPage() {
   const [campanaVigentePorParcela, setCampanaVigentePorParcela] = useState<
     Record<string, CampanaVigente>
   >({});
-  const [vista, setVista] = useState<VistaMapa>("mapa");
   const [seleccionadaId, setSeleccionadaId] = useState<string | null>(null);
+  const [resaltadaId, setResaltadaId] = useState<string | null>(null);
   const [enfoque, setEnfoque] = useState<EnfoqueMapa | null>(null);
+  // Cambia cuando una parcela se activa, desactiva o edita: se recalculan los estados.
+  const [versionEstados, setVersionEstados] = useState(0);
+  const { datos: resumenes, error: errorEstados } = useResumenesParcelas(versionEstados);
+  const estadoListo = resumenes !== null || errorEstados !== null;
+  const resumenPorParcela = useMemo(
+    () => new Map((resumenes ?? []).map((r) => [r.parcelaId, r])),
+    [resumenes],
+  );
+  const estadoPorParcela = useMemo(() => {
+    const estados: Record<string, EstadoIndicador> = {};
+    resumenPorParcela.forEach((resumen, id) => {
+      estados[id] = resumen.estado;
+    });
+    return estados;
+  }, [resumenPorParcela]);
   const mapaRef = useRef<HTMLDivElement>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +81,11 @@ export default function ParcelasPage() {
     cargar();
   }, [cargar]);
 
+  function recargarTodo() {
+    cargar();
+    setVersionEstados((v) => v + 1);
+  }
+
   async function toggleActiva(parcela: Parcela) {
     try {
       if (parcela.activa) {
@@ -84,7 +93,7 @@ export default function ParcelasPage() {
       } else {
         await api.patch(`/parcelas/${parcela.id}`, { activa: true });
       }
-      cargar();
+      recargarTodo();
     } catch (err) {
       alert(apiErrorMessage(err, "No se pudo actualizar la parcela"));
     }
@@ -101,8 +110,8 @@ export default function ParcelasPage() {
     }
   }
 
-  // Clic en una card: resalta, centra el mapa y (en celular, donde la lista queda
-  // debajo) sube hasta el mapa para que se vea el cambio.
+  // Clic en una card: selecciona (abre el panel), centra el mapa y (en celular, donde
+  // la lista queda debajo) sube hasta el mapa para que se vea el cambio.
   function seleccionarDesdeLista(parcela: Parcela) {
     setSeleccionadaId(parcela.id);
     if (parcela.activa && parcela.poligono) {
@@ -112,6 +121,9 @@ export default function ParcelasPage() {
       }
     }
   }
+
+  const parcelaElegida = parcelas.find((p) => p.id === seleccionadaId && p.activa) ?? null;
+  const cerrarPanel = useCallback(() => setSeleccionadaId(null), []);
 
   return (
     <div className="space-y-6">
@@ -145,60 +157,53 @@ export default function ParcelasPage() {
               <MapaIcono className="h-5 w-5 text-emerald-700" aria-hidden />
               Mapa de parcelas
             </h2>
-            <div
-              role="group"
-              aria-label="Vista del mapa"
-              className="inline-flex overflow-hidden rounded-md border border-stone-300 bg-white text-sm font-medium"
-            >
-              <button
-                type="button"
-                aria-pressed={vista === "mapa"}
-                title="Solo el mapa, a pantalla casi completa"
-                onClick={() => setVista("mapa")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${
-                  vista === "mapa" ? "bg-emerald-700 text-white" : "text-stone-700 hover:bg-stone-100"
-                }`}
-              >
-                <MapaIcono className="h-4 w-4" aria-hidden />
-                Mapa
-              </button>
-              <button
-                type="button"
-                aria-pressed={vista === "mapa-lista"}
-                title="Mapa con la lista de parcelas al lado"
-                onClick={() => setVista("mapa-lista")}
-                className={`inline-flex items-center gap-1.5 border-l border-stone-300 px-3 py-1.5 ${
-                  vista === "mapa-lista" ? "bg-emerald-700 text-white" : "text-stone-700 hover:bg-stone-100"
-                }`}
-              >
-                <PanelLeft className="h-4 w-4" aria-hidden />
-                Mapa + lista
-              </button>
-            </div>
+            <p className="text-base text-stone-700">
+              Toca una parcela en el mapa o en la lista para ver su resumen.
+            </p>
           </div>
 
-          {/* El mapa ocupa siempre el mismo lugar en el arbol: cambiar de vista no lo reinicia. */}
-          <div className={vista === "mapa-lista" ? "grid gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]" : ""}>
-            {vista === "mapa-lista" && (
-              <ParcelasLista
-                parcelas={parcelas}
-                campanaVigentePorParcela={campanaVigentePorParcela}
-                seleccionadaId={seleccionadaId}
-                onSeleccionar={seleccionarDesdeLista}
-                className="order-2 lg:order-1"
-              />
-            )}
+          {errorEstados && (
+            <Advertencia tipo="ATENCION" titulo="No pudimos revisar el estado de las parcelas" rol="alert">
+              Por ahora se muestran como “Sin datos”. {errorEstados}
+            </Advertencia>
+          )}
+
+          <div className="grid gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <ParcelasLista
+              parcelas={parcelas}
+              campanaVigentePorParcela={campanaVigentePorParcela}
+              estadoPorParcela={estadoPorParcela}
+              estadoListo={estadoListo}
+              seleccionadaId={seleccionadaId}
+              resaltadaId={resaltadaId}
+              onSeleccionar={seleccionarDesdeLista}
+              onResaltar={setResaltadaId}
+              className="order-2 lg:order-1"
+            />
+            {/* relative: la leyenda y el panel flotante se posicionan sobre el mapa. */}
             <div
               ref={mapaRef}
-              className={`order-1 overflow-hidden rounded-lg border border-stone-200 lg:order-2 ${ALTO_MAPA[vista]}`}
+              className="relative order-1 h-[70dvh] min-h-[440px] overflow-hidden rounded-lg border border-stone-200 lg:order-2 lg:h-[calc(100dvh-13rem)] lg:min-h-[420px]"
             >
               <ParcelasMapa
                 parcelas={parcelas}
-                campanaVigentePorParcela={campanaVigentePorParcela}
+                estadoPorParcela={estadoPorParcela}
                 seleccionadaId={seleccionadaId}
+                resaltadaId={resaltadaId}
                 enfoque={enfoque}
                 onSeleccionar={setSeleccionadaId}
+                onResaltar={setResaltadaId}
               />
+              <LeyendaMapa />
+              {parcelaElegida && (
+                <PanelFlotanteParcela
+                  parcela={parcelaElegida}
+                  cultivo={campanaVigentePorParcela[parcelaElegida.id]?.cultivo ?? null}
+                  resumen={resumenPorParcela.get(parcelaElegida.id) ?? null}
+                  estadoListo={estadoListo}
+                  onCerrar={cerrarPanel}
+                />
+              )}
             </div>
           </div>
         </section>
@@ -260,9 +265,10 @@ export default function ParcelasPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <BadgeEstadoParcela
+                    <EstadoDeParcela
                       activa={parcela.activa}
-                      conCampanaVigente={!!campanaVigentePorParcela[parcela.id]}
+                      estado={estadoPorParcela[parcela.id]}
+                      listo={estadoListo}
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -312,7 +318,7 @@ export default function ParcelasPage() {
           onClose={() => setMostrarForm(false)}
           onSaved={() => {
             setMostrarForm(false);
-            cargar();
+            recargarTodo();
           }}
         />
       )}
@@ -322,7 +328,7 @@ export default function ParcelasPage() {
           onClose={() => setEditando(null)}
           onSaved={() => {
             setEditando(null);
-            cargar();
+            recargarTodo();
           }}
         />
       )}

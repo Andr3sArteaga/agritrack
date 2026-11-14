@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Activity as IconoEstado,
   ArrowLeft,
   CalendarRange,
   Pencil,
@@ -12,9 +13,11 @@ import {
 } from "lucide-react";
 import { Ayuda } from "@/components/ayuda";
 import { BadgeEstadoCampana } from "@/components/badge";
+import { PanelEstadoParcela } from "@/components/estado/panel-estado-parcela";
 import { IconoActividad } from "@/components/icono-actividad";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useResumenParcela } from "@/lib/cargar-resumen";
 import { formatearFecha } from "@/lib/format";
 import {
   ESTADO_CAMPANA_LABEL,
@@ -48,6 +51,7 @@ export default function ParcelaPrivadaDetallePage() {
   const [mostrarFormCampana, setMostrarFormCampana] = useState(false);
   const [mostrarFormActividad, setMostrarFormActividad] = useState(false);
   const [corrigiendo, setCorrigiendo] = useState<Actividad | null>(null);
+  const { datos: resumenEstado, error: errorEstado } = useResumenParcela(parcela, campanas, cultivos);
 
   const cargarParcela = useCallback(() => {
     api
@@ -127,9 +131,23 @@ export default function ParcelaPrivadaDetallePage() {
         </p>
       </div>
 
+      <section className="space-y-3" aria-labelledby="estado-parcela">
+        <h2 id="estado-parcela" className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+          <IconoEstado className="h-6 w-6 text-emerald-700" aria-hidden />
+          Estado de la parcela
+        </h2>
+        {errorEstado ? (
+          <p className="text-red-700">{errorEstado}</p>
+        ) : resumenEstado ? (
+          <PanelEstadoParcela resumen={resumenEstado} />
+        ) : (
+          <p className="text-stone-600">Cargando el estado de la parcela...</p>
+        )}
+      </section>
+
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-          <CalendarRange className="h-5 w-5 text-emerald-700" aria-hidden />
+        <h2 className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+          <CalendarRange className="h-6 w-6 text-emerald-700" aria-hidden />
           Campañas
           <Ayuda texto="Una campaña es un ciclo de cultivo en esta parcela: desde la siembra hasta la cosecha." />
         </h2>

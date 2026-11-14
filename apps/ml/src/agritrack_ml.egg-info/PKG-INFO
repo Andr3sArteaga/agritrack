@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: agritrack-ml
+Version: 0.1.0
+Summary: Base del modelo Random Forest de rendimiento (t/ha) de AgriTrack: dominio, datos sinteticos y evaluacion contra la linea base.
+Requires-Python: >=3.11
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"

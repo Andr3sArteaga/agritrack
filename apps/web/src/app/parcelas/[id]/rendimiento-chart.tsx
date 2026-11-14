@@ -9,14 +9,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { EstadoVacio } from "@/components/estado/estado-vacio";
 import type { HistoricoPublicoItem } from "@/lib/types";
 
 export function RendimientoChart({ datos }: { datos: HistoricoPublicoItem[] }) {
   if (datos.length === 0) {
     return (
-      <p className="text-sm text-stone-500">
-        Todavía no hay campañas anteriores registradas para esta parcela.
-      </p>
+      <EstadoVacio mini titulo="Todavía no hay campañas anteriores">
+        <p>Cuando se cosechen campañas, su rendimiento aparecerá aquí.</p>
+      </EstadoVacio>
     );
   }
 
@@ -25,11 +26,11 @@ export function RendimientoChart({ datos }: { datos: HistoricoPublicoItem[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={datos} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-          <XAxis dataKey="temporada" tick={{ fontSize: 12 }} />
+          <XAxis dataKey="temporada" tick={{ fontSize: 14 }} />
           <YAxis
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 14 }}
             unit=" t/ha"
-            width={70}
+            width={80}
           />
           <Tooltip
             formatter={(value) => [`${value} t/ha`, "Rendimiento"]}
