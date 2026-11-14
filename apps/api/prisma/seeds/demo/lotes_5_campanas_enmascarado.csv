@@ -1,0 +1,180 @@
+﻿campana,lote,variedad,fecha_siembra,fecha_cosecha,ha_sembradas,ha_cosechadas,toneladas_descargadas,bascula_o_calculo,origen_toneladas,calc_prorrateo,calc_rendimiento_t_ha,calc_dias_siembra_desde_1oct,calc_dias_cosecha_desde_1oct,calc_fecha_siembra_faltante
+2021-2022,L02,6410,2021-12-25,2022-04-07,57.4,57.4,87.8,Cálculo,Cuaderno del encargado,False,1.529616724738676,85.0,188.0,False
+2021-2022,L03,6410,,2022-04-05,34.7,34.7,52.3,Báscula,Cuaderno del encargado,False,1.5072046109510084,,186.0,True
+2021-2022,L04,MUNASQA,2021-12-16,2022-04-06,40.5,40.5,63.2,Báscula,Cuaderno del encargado,False,1.560493827160494,76.0,187.0,False
+2021-2022,L06,6410,2021-12-19,2022-04-01,58.0,58.0,98.89,Báscula,Cuaderno del encargado,False,1.705,79.0,182.0,False
+2021-2022,L07,6410,2022-01-08,2022-04-20,59.9,59.9,90.5,Báscula,Cuaderno del encargado,False,1.5108514190317195,99.0,201.0,False
+2021-2022,L09,6410,2021-12-20,2022-03-31,42.5,42.5,85.47,Cálculo,Cuaderno del encargado,False,2.0110588235294116,80.0,181.0,False
+2021-2022,L10,MUNASQA Y 6410,2021-12-22,2022-04-05,38.9,38.9,74.17,Cálculo,Cuaderno del encargado,False,1.9066838046272494,82.0,186.0,False
+2021-2022,L15,6410,,2022-03-29,58.2,58.2,98.02,Báscula,Cuaderno del encargado,False,1.6841924398625427,,179.0,True
+2021-2022,L19,6410,,2022-04-06,59.3,59.3,126.79,Báscula,Cuaderno del encargado,False,2.1381112984822934,,187.0,True
+2021-2022,L22,6410,2021-12-08,2022-03-24,60.6,60.6,133.59,Báscula,Cuaderno del encargado,False,2.2044554455445544,68.0,174.0,False
+2021-2022,L23,6410,2021-12-07,2022-03-19,37.8,37.8,66.89,Cálculo,Cuaderno del encargado,False,1.7695767195767198,67.0,169.0,False
+2021-2022,L24,6410,2021-12-21,2022-04-04,47.8,47.8,82.03,Cálculo,Cuaderno del encargado,False,1.7161087866108788,81.0,185.0,False
+2021-2022,L25,6410,2021-12-18,2022-03-29,31.8,31.8,61.83,Báscula,Cuaderno del encargado,False,1.9443396226415093,78.0,179.0,False
+2021-2022,L27,6410,2021-12-09,2022-03-20,56.9,56.9,111.83,Cálculo,Cuaderno del encargado,False,1.965377855887522,69.0,170.0,False
+2021-2022,L30,6410,,2022-04-06,62.0,62.0,111.62,Báscula,Cuaderno del encargado,False,1.8003225806451613,,187.0,True
+2021-2022,L34,6410,2021-12-30,2022-04-14,58.8,58.8,102.82,Báscula,Cuaderno del encargado,False,1.7486394557823128,90.0,195.0,False
+2021-2022,L36,6410,2021-12-09,2022-03-19,59.1,59.1,120.7,Cálculo,Cuaderno del encargado,False,2.042301184433164,69.0,169.0,False
+2021-2022,L37,6410,2022-01-01,2022-04-11,58.7,58.7,93.55,Cálculo,Cuaderno del encargado,False,1.5936967632027257,92.0,192.0,False
+2021-2022,L38,6410,,2022-04-05,45.7,45.7,79.33,Báscula,Cuaderno del encargado,False,1.735886214442013,,186.0,True
+2021-2022,L39,6410,2021-12-12,2022-03-30,47.9,47.9,92.1,Cálculo,Cuaderno del encargado,False,1.9227557411273486,72.0,180.0,False
+2021-2022,L41,6410,2021-12-23,2022-04-08,61.6,61.6,97.16,Báscula,Cuaderno del encargado,False,1.5772727272727272,83.0,189.0,False
+2021-2022,L42,6410,,2022-03-31,58.2,58.2,89.9,Báscula,Cuaderno del encargado,False,1.5446735395189004,,181.0,True
+2022-2023,L01,MUNASQA,2022-12-23,2023-04-09,44.8,44.8,77.47,Báscula,Planilla del silo,False,1.7292410714285715,83.0,190.0,False
+2022-2023,L02,6410,2022-12-15,2023-03-29,58.3,58.3,128.18,Báscula,Planilla del silo,False,2.198627787307033,75.0,179.0,False
+2022-2023,L03,6410,2022-12-18,2023-04-05,35.5,35.5,70.78,Báscula,Planilla del silo,False,1.9938028169014086,78.0,186.0,False
+2022-2023,L05,MUNASQA,2023-01-01,2023-04-23,39.2,39.2,60.03,Báscula,Planilla del silo,False,1.5313775510204082,92.0,204.0,False
+2022-2023,L06,6410,2022-12-13,2023-03-31,56.4,56.4,114.87,Báscula,Planilla del silo,False,2.0367021276595745,73.0,181.0,False
+2022-2023,L07,6410,2022-12-23,2023-04-03,58.2,58.2,102.9,Báscula,Planilla del silo,False,1.768041237113402,83.0,184.0,False
+2022-2023,L08,MUNASQA,2022-12-18,2023-04-09,37.4,37.4,69.22,Báscula,Planilla del silo,False,1.8508021390374332,78.0,190.0,False
+2022-2023,L10,MUNASQA Y 6410,2022-12-14,2023-03-28,39.3,39.3,74.75,Báscula,Planilla del silo,False,1.9020356234096694,74.0,178.0,False
+2022-2023,L11,MUNASQA,2022-12-17,2023-04-04,39.2,39.2,72.99,Báscula,Planilla del silo,False,1.861989795918367,77.0,185.0,False
+2022-2023,L13,6410,2022-12-31,2023-04-14,57.4,57.4,122.67,Báscula,Planilla del silo,False,2.1371080139372824,91.0,195.0,False
+2022-2023,L14,6410,2022-12-15,2023-03-25,48.2,48.2,85.88,Báscula,Planilla del silo,False,1.7817427385892115,75.0,175.0,False
+2022-2023,L17,6410,2022-12-22,2023-04-05,59.4,59.4,118.0,Cálculo,Planilla del silo,False,1.9865319865319866,82.0,186.0,False
+2022-2023,L18,6410,2022-12-01,2023-03-17,49.5,49.5,105.8,Báscula,Planilla del silo,False,2.1373737373737374,61.0,167.0,False
+2022-2023,L19,6410,2022-12-18,2023-03-29,59.5,59.5,126.85,Cálculo,Planilla del silo,False,2.1319327731092437,78.0,179.0,False
+2022-2023,L20,MUNASQA,2022-12-07,2023-03-29,39.9,39.9,82.17,Báscula,Planilla del silo,False,2.059398496240602,67.0,179.0,False
+2022-2023,L22,6410,2023-01-02,2023-04-18,59.4,59.4,119.8,Cálculo,Planilla del silo,False,2.016835016835017,93.0,199.0,False
+2022-2023,L23,6410,2022-12-15,2023-03-25,37.1,37.1,70.22,Báscula,Planilla del silo,False,1.892722371967655,75.0,175.0,False
+2022-2023,L24,6410,2022-12-03,2023-03-19,49.5,49.5,110.6,Báscula,Planilla del silo,False,2.234343434343434,63.0,169.0,False
+2022-2023,L25,6410,2022-12-16,2023-03-31,32.3,32.3,67.28,Báscula,Planilla del silo,False,2.0829721362229106,76.0,181.0,False
+2022-2023,L26,6410,2022-11-29,2023-03-09,58.2,58.2,141.35,Báscula,Planilla del silo,False,2.428694158075601,59.0,159.0,False
+2022-2023,L28,MUNASQA,2022-12-07,2023-03-26,48.7,48.7,101.79,Báscula,Planilla del silo,False,2.0901437371663243,67.0,176.0,False
+2022-2023,L29,6410,2022-12-21,2023-03-31,58.7,58.7,109.74,Báscula,Planilla del silo,False,1.8695059625212946,81.0,181.0,False
+2022-2023,L30,6410,2022-12-14,2023-03-25,59.7,59.7,131.59,Báscula,Planilla del silo,False,2.204187604690117,74.0,175.0,False
+2022-2023,L31,6410,2022-12-27,2023-04-07,59.1,59.1,111.07,Báscula,Planilla del silo,False,1.8793570219966158,87.0,188.0,False
+2022-2023,L32,6410,2022-12-16,2023-03-26,6.6,6.6,13.48,Báscula,Planilla del silo,False,2.0424242424242425,76.0,176.0,False
+2022-2023,L33,MUNASQA Y 6410,2022-12-24,2023-04-09,37.8,37.8,73.55,Báscula,Planilla del silo,False,1.9457671957671958,84.0,190.0,False
+2022-2023,L34,6410,2022-12-11,2023-03-28,59.2,59.2,132.41,Báscula,Planilla del silo,False,2.236655405405405,71.0,178.0,False
+2022-2023,L35,6410,2022-12-09,2023-03-21,57.8,57.8,128.01,Báscula,Planilla del silo,False,2.2147058823529413,69.0,171.0,False
+2022-2023,L37,6410,2022-12-05,2023-03-17,58.7,58.7,109.75,Báscula,Planilla del silo,False,1.8696763202725724,65.0,167.0,False
+2022-2023,L38,6410,2022-12-19,2023-04-04,43.9,43.9,97.56,Báscula,Planilla del silo,False,2.222323462414579,79.0,185.0,False
+2022-2023,L39,6410,2022-12-09,2023-03-21,48.1,48.1,110.35,Báscula,Planilla del silo,False,2.294178794178794,69.0,171.0,False
+2022-2023,L40,6410,2022-12-28,2023-04-07,60.4,60.4,124.68,Báscula,Planilla del silo,False,2.0642384105960265,88.0,188.0,False
+2022-2023,L41,6410,2022-12-13,2023-03-26,60.4,60.4,124.72,Báscula,Planilla del silo,False,2.0649006622516555,73.0,176.0,False
+2022-2023,L42,6410,2023-01-05,2023-04-16,58.3,58.3,94.22,Báscula,Planilla del silo,False,1.6161234991423672,96.0,197.0,False
+2023-2024,L01,MUNASQA,2024-01-15,2024-05-04,43.5,43.5,31.71,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7289655172413794,106.0,216.0,False
+2023-2024,L02,6410,2024-01-24,2024-04-29,57.4,57.4,41.95,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.730836236933798,115.0,211.0,False
+2023-2024,L03,6410,2024-01-18,2024-04-16,35.4,36.4,32.26,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8862637362637362,109.0,198.0,False
+2023-2024,L04,MUNASQA,2024-01-17,2024-05-01,40.3,40.3,33.08,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8208436724565757,108.0,213.0,False
+2023-2024,L05,MUNASQA,2024-01-16,2024-05-02,40.1,40.1,31.29,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7802992518703241,107.0,214.0,False
+2023-2024,L06,6410,2024-01-19,2024-04-13,58.0,58.0,59.76,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.0303448275862068,110.0,195.0,False
+2023-2024,L07,6410,2024-01-24,2024-04-30,59.7,59.7,49.12,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8227805695142377,115.0,212.0,False
+2023-2024,L08,MUNASQA,2024-01-16,2024-05-03,39.4,39.4,29.9,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7588832487309645,107.0,215.0,False
+2023-2024,L09,6410,2024-01-18,2024-04-13,43.8,43.8,43.54,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9940639269406393,109.0,195.0,False
+2023-2024,L10,MUNASQA Y 6410,2024-01-17,2024-04-16,38.7,38.7,31.62,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8170542635658914,108.0,198.0,False
+2023-2024,L11,MUNASQA,2024-01-17,2024-05-02,39.6,39.6,30.97,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.782070707070707,108.0,214.0,False
+2023-2024,L12,6410,2024-01-25,2024-05-05,26.4,26.4,20.84,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7893939393939394,116.0,217.0,False
+2023-2024,L13,6410,2024-01-26,2024-05-06,57.9,57.9,54.29,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9376511226252159,117.0,218.0,False
+2023-2024,L14,6410,2024-01-27,2024-05-08,46.3,46.3,34.98,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7555075593952484,118.0,220.0,False
+2023-2024,L15,6410,2024-01-26,2024-05-11,59.2,59.2,56.56,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9554054054054054,117.0,223.0,False
+2023-2024,L16,MUNASQA,2024-01-17,2024-05-02,39.0,39.0,35.82,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9184615384615384,108.0,214.0,False
+2023-2024,L17,6410,2024-01-25,2024-05-05,59.1,59.1,57.18,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9675126903553299,116.0,217.0,False
+2023-2024,L18,6410,2024-01-27,2024-05-08,50.1,50.1,44.45,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8872255489021956,118.0,220.0,False
+2023-2024,L19,6410,2024-01-24,2024-04-29,59.0,59.0,45.74,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7752542372881356,115.0,211.0,False
+2023-2024,L20,MUNASQA,2024-01-15,2024-05-03,40.4,40.4,37.31,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9235148514851486,106.0,215.0,False
+2023-2024,L21,MUNASQA,2024-01-16,2024-05-03,36.9,36.9,30.83,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8355013550135502,107.0,215.0,False
+2023-2024,L22,6410,2024-01-20,2024-04-21,61.2,61.2,62.43,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.0200980392156862,111.0,203.0,False
+2023-2024,L23,6410,2024-01-18,2024-04-14,36.9,36.9,33.62,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9111111111111111,109.0,196.0,False
+2023-2024,L24,6410,2024-01-27,2024-05-09,48.3,48.3,42.6,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8819875776397517,118.0,221.0,False
+2023-2024,L25,6410,2024-01-18,2024-04-15,32.3,32.3,30.63,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.948297213622291,109.0,197.0,False
+2023-2024,L26,6410,2024-01-19,2024-04-18,60.7,60.7,53.06,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8741350906095552,110.0,200.0,False
+2023-2024,L27,6410,2024-01-19,2024-04-20,58.1,58.1,51.92,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.893631669535284,110.0,202.0,False
+2023-2024,L28,MUNASQA,2024-01-15,2024-05-04,48.4,48.4,45.2,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9338842975206613,106.0,216.0,False
+2023-2024,L29,6410,2024-01-27,2024-05-07,58.9,58.9,45.61,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7743633276740238,118.0,219.0,False
+2023-2024,L30,6410,2024-01-24,2024-04-29,59.4,59.4,51.23,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8624579124579125,115.0,211.0,False
+2023-2024,L31,6410,2024-01-26,2024-05-06,59.6,59.6,58.36,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9791946308724832,117.0,218.0,False
+2023-2024,L32,6410,2024-01-19,2024-04-19,7.1,7.1,5.39,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7591549295774648,110.0,201.0,False
+2023-2024,L33,MUNASQA Y 6410,2024-01-17,2024-04-17,37.4,37.4,34.66,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9267379679144384,108.0,199.0,False
+2023-2024,L34,6410,2024-01-24,2024-04-30,58.6,58.6,57.97,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9892491467576792,115.0,212.0,False
+2023-2024,L35,6410,2024-01-19,2024-04-18,60.0,60.0,56.1,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.935,110.0,200.0,False
+2023-2024,L36,6410,2024-01-20,2024-04-19,59.8,59.8,55.75,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9322742474916388,111.0,201.0,False
+2023-2024,L37,6410,2024-01-25,2024-04-30,56.6,56.6,49.44,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8734982332155476,116.0,212.0,False
+2023-2024,L38,6410,2024-01-18,2024-04-14,45.2,45.2,41.14,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9101769911504425,109.0,196.0,False
+2023-2024,L39,6410,2024-01-27,2024-05-09,48.1,48.1,43.71,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9087318087318087,118.0,221.0,False
+2023-2024,L40,6410,2024-01-26,2024-05-07,58.5,58.5,54.91,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.9386324786324786,117.0,219.0,False
+2023-2024,L41,6410,2024-01-19,2024-04-12,61.2,61.2,53.6,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.8758169934640523,110.0,194.0,False
+2023-2024,L42,6410,2024-01-27,2024-05-10,58.9,58.9,43.95,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,0.7461799660441427,118.0,222.0,False
+2024-2025,L01,MUNASQA,2024-12-31,2025-04-21,45.0,45.0,93.96,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.088,91.0,202.0,False
+2024-2025,L02,6410,2024-12-25,2025-04-09,57.7,57.7,134.0,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.3223570190641247,85.0,190.0,False
+2024-2025,L03,MUNASQA,2024-12-26,2025-04-11,35.1,35.1,85.77,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.4435897435897433,86.0,192.0,False
+2024-2025,L04,MUNASQA,2025-01-01,2025-04-19,41.2,41.2,87.99,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.135679611650485,92.0,200.0,False
+2024-2025,L05,MUNASQA,2024-12-27,2025-04-12,39.8,39.8,74.43,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8701005025125632,87.0,193.0,False
+2024-2025,L06,6410,2025-01-04,2025-04-19,57.1,57.1,126.81,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.2208406304728547,95.0,200.0,False
+2024-2025,L07,MUNASQA,2024-12-21,2025-04-08,57.6,57.6,112.78,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.957986111111111,81.0,189.0,False
+2024-2025,L08,MUNASQA,2025-01-03,2025-04-22,37.8,37.8,69.98,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8513227513227515,94.0,203.0,False
+2024-2025,L09,6410,2024-12-27,2025-04-08,43.7,43.7,93.98,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.150572082379863,87.0,189.0,False
+2024-2025,L10,6410,2024-12-29,2025-04-12,38.3,38.3,80.66,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.106005221932115,89.0,193.0,False
+2024-2025,L11,6410,2024-12-27,2025-04-10,38.7,38.7,90.0,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.325581395348837,87.0,191.0,False
+2024-2025,L12,6410,2025-01-06,2025-04-18,25.2,25.2,46.53,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8464285714285715,97.0,199.0,False
+2024-2025,L13,6410,2024-12-29,2025-04-09,58.9,58.9,137.52,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.334804753820034,89.0,190.0,False
+2024-2025,L14,6410,2024-12-24,2025-04-03,47.4,47.4,104.82,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.211392405063291,84.0,184.0,False
+2024-2025,L15,6410,2025-01-12,2025-04-27,57.5,57.5,106.44,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8511304347826087,103.0,208.0,False
+2024-2025,L16,MUNASQA,2025-01-06,2025-04-28,39.5,39.5,72.73,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8412658227848102,97.0,209.0,False
+2024-2025,L17,6410,2024-12-30,2025-04-16,56.9,56.9,126.63,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.225483304042179,90.0,197.0,False
+2024-2025,L18,MUNASQA,2025-01-08,2025-04-29,52.5,52.5,105.14,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.002666666666667,99.0,210.0,False
+2024-2025,L19,6410,2024-12-13,2025-03-28,60.3,60.3,156.83,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.600829187396352,73.0,178.0,False
+2024-2025,L20,MUNASQA,2024-12-31,2025-04-17,38.5,36.5,72.06,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.9742465753424658,91.0,198.0,False
+2024-2025,L21,MUNASQA,2025-01-01,2025-04-17,38.8,38.8,71.88,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.852577319587629,92.0,198.0,False
+2024-2025,L22,6410,2024-12-13,2025-03-23,59.5,59.5,150.15,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.523529411764706,73.0,173.0,False
+2024-2025,L23,6410,2025-01-07,2025-04-24,36.5,36.5,69.15,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8945205479452056,98.0,205.0,False
+2024-2025,L24,6410,2024-12-28,2025-04-07,49.2,49.2,112.59,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.2884146341463416,88.0,188.0,False
+2024-2025,L25,MUNASQA,2025-01-05,2025-04-22,31.8,31.8,65.99,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0751572327044023,96.0,203.0,False
+2024-2025,L26,MUNASQA,2024-12-28,2025-04-12,58.7,58.7,120.31,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0495741056218058,88.0,193.0,False
+2024-2025,L27,MUNASQA,2025-01-07,2025-04-25,58.4,58.4,106.75,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8279109589041096,98.0,206.0,False
+2024-2025,L28,MUNASQA,2025-01-02,2025-04-19,47.2,47.2,92.75,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.9650423728813557,93.0,200.0,False
+2024-2025,L29,MUNASQA,2024-12-22,2025-04-13,57.8,57.8,134.83,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.3326989619377168,82.0,194.0,False
+2024-2025,L30,6410,2024-12-30,2025-04-14,59.6,59.6,123.6,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0738255033557045,90.0,195.0,False
+2024-2025,L31,6410,2024-12-30,2025-04-14,57.8,57.8,141.37,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.445847750865052,90.0,195.0,False
+2024-2025,L32,6410,2025-01-01,2025-04-13,7.1,7.1,14.67,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0661971830985917,92.0,194.0,False
+2024-2025,L33,6410,2024-12-14,2025-03-27,38.0,38.0,94.76,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.493684210526316,74.0,177.0,False
+2024-2025,L34,6410,2025-01-04,2025-04-14,58.9,58.9,112.0,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.901528013582343,95.0,195.0,False
+2024-2025,L35,6410,2024-12-22,2025-04-07,58.9,58.9,121.0,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0543293718166384,82.0,188.0,False
+2024-2025,L36,6410,2024-12-15,2025-03-26,57.8,57.8,147.25,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.5475778546712804,75.0,176.0,False
+2024-2025,L37,6410,2024-12-21,2025-04-03,56.8,56.8,116.08,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.043661971830986,81.0,184.0,False
+2024-2025,L38,MUNASQA,2025-01-04,2025-04-26,44.1,44.1,95.68,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.1696145124716555,95.0,207.0,False
+2024-2025,L39,6410,2025-01-07,2025-04-18,48.7,48.7,106.27,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.182135523613963,98.0,199.0,False
+2024-2025,L40,MUNASQA,2024-12-29,2025-04-19,60.6,60.6,137.06,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.2617161716171617,89.0,200.0,False
+2024-2025,L41,6410,2024-12-21,2025-04-07,60.3,60.3,137.21,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.2754560530679937,81.0,188.0,False
+2024-2025,L42,MUNASQA,2025-01-02,2025-04-19,59.0,59.0,119.78,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.030169491525424,93.0,200.0,False
+2025-2026,L01,6410,2025-12-10,,45.1,45.1,77.25,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.712860310421286,70.0,,False
+2025-2026,L02,6410,2025-12-19,2026-03-30,58.7,58.7,104.44,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.7792163543441226,79.0,180.0,False
+2025-2026,L03,6410,2025-12-05,2026-03-19,36.0,36.0,72.1,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0027777777777778,65.0,169.0,False
+2025-2026,L05,6410,2025-12-26,2026-04-10,40.1,40.1,62.25,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5523690773067331,86.0,191.0,False
+2025-2026,L06,6410,2026-01-01,2026-04-13,57.1,57.1,89.64,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.569877408056042,92.0,194.0,False
+2025-2026,L07,6410,2025-12-26,2026-04-11,60.2,60.2,94.07,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5626245847176077,86.0,192.0,False
+2025-2026,L08,6410,2025-12-10,2026-03-21,38.8,38.8,79.59,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0512886597938147,70.0,171.0,False
+2025-2026,L09,6410,2025-12-13,2026-03-28,44.0,44.0,85.35,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.9397727272727272,73.0,178.0,False
+2025-2026,L10,6410,2025-12-14,2026-03-26,38.9,38.9,73.3,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8843187660668381,74.0,176.0,False
+2025-2026,L11,MUNASQA,2026-01-07,2026-04-24,38.2,38.2,56.23,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.4719895287958114,98.0,205.0,False
+2025-2026,L12,6410,2025-12-24,2026-04-03,25.7,25.7,41.5,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6147859922178989,84.0,184.0,False
+2025-2026,L13,6410,2025-12-08,2026-03-18,60.1,60.1,119.6,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.990016638935108,68.0,168.0,False
+2025-2026,L14,MUNASQA,2025-12-28,2026-04-18,48.1,48.1,68.55,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.4251559251559252,88.0,199.0,False
+2025-2026,L15,6410,2026-01-03,2026-04-16,59.4,59.4,107.91,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8166666666666667,94.0,197.0,False
+2025-2026,L16,MUNASQA,2025-12-27,2026-04-14,39.8,39.8,72.49,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.821356783919598,87.0,195.0,False
+2025-2026,L17,MUNASQA,2025-12-18,2026-04-03,59.5,59.5,98.68,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6584873949579833,78.0,184.0,False
+2025-2026,L18,6410,2026-01-01,2026-04-18,49.5,49.5,82.13,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.659191919191919,92.0,199.0,False
+2025-2026,L19,6410,2025-12-28,2026-04-13,59.8,59.8,105.85,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.770066889632107,88.0,194.0,False
+2025-2026,L21,MUNASQA,2025-12-09,2026-03-27,37.1,37.1,71.49,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.9269541778975738,69.0,177.0,False
+2025-2026,L22,MUNASQA,2026-01-09,2026-04-25,59.0,59.0,92.43,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5666101694915255,100.0,206.0,False
+2025-2026,L23,6410,2025-12-14,2026-03-24,36.9,34.9,69.28,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.9851002865329515,74.0,174.0,False
+2025-2026,L24,6410,2025-12-08,2026-03-23,49.1,49.1,102.26,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.0826883910386966,68.0,173.0,False
+2025-2026,L25,6410,2025-12-17,2026-04-02,32.3,32.3,51.78,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6030959752321983,77.0,183.0,False
+2025-2026,L26,MUNASQA,2025-12-12,2026-03-28,61.1,61.1,100.32,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6418985270049098,72.0,178.0,False
+2025-2026,L27,6410,2025-12-19,2026-04-01,57.9,57.9,99.45,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.717616580310881,79.0,182.0,False
+2025-2026,L28,MUNASQA,2026-01-05,2026-04-24,48.8,48.8,71.86,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.4725409836065575,96.0,205.0,False
+2025-2026,L29,6410,2025-12-18,2026-03-30,58.1,58.1,109.51,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.8848537005163513,78.0,180.0,False
+2025-2026,L30,MUNASQA,2025-12-28,2026-04-17,59.5,59.5,94.39,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5863865546218487,88.0,198.0,False
+2025-2026,L31,MUNASQA,2025-12-16,2026-04-02,58.9,57.4,95.33,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.660801393728223,76.0,183.0,False
+2025-2026,L33,6410,2025-12-29,2026-04-14,37.1,35.2,55.01,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5627840909090907,89.0,195.0,False
+2025-2026,L34,MUNASQA,2025-12-18,2026-04-08,59.0,59.0,94.36,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5993220338983052,78.0,189.0,False
+2025-2026,L35,6410,2025-12-10,2026-03-23,57.4,57.4,111.27,Cálculo,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.9385017421602788,70.0,173.0,False
+2025-2026,L36,6410,2025-12-15,2026-03-31,60.0,60.0,127.2,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.12,75.0,181.0,False
+2025-2026,L37,MUNASQA,2025-12-29,2026-04-13,57.0,57.0,84.56,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.4835087719298246,89.0,194.0,False
+2025-2026,L38,MUNASQA,2025-12-22,2026-04-13,43.7,43.7,69.84,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.5981693363844394,82.0,194.0,False
+2025-2026,L39,6410,2025-12-14,2026-03-31,48.1,48.1,97.45,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,2.025987525987526,74.0,181.0,False
+2025-2026,L40,6410,2025-12-22,2026-04-08,59.2,59.2,96.58,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6314189189189188,82.0,189.0,False
+2025-2026,L41,6410,2025-12-21,2026-04-03,60.2,60.2,97.49,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6194352159468437,81.0,184.0,False
+2025-2026,L42,6410,2025-12-24,2026-04-07,58.0,58.0,97.49,Báscula,Cálculo (prorrateo por fecha de cosecha y hectáreas),True,1.6808620689655172,84.0,188.0,False

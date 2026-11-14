@@ -114,7 +114,9 @@ model Cultivo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  campanas Campana[]
+  campanas       Campana[]
+  totalesCampana TotalCampana[]
+  modelosIa      ModeloIa[]
 
   @@map("cultivos")
 }
@@ -132,9 +134,11 @@ model Campana {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  actividades Actividad[]
-  gastos      Gasto[]
-  presupuesto Presupuesto?
+  actividades     Actividad[]
+  gastos          Gasto[]
+  presupuesto     Presupuesto?
+  // Solo la relacion inversa: la tabla campanas no cambia (la FK vive en registros_cosecha).
+  registroCosecha RegistroCosecha?
 
   // Regla de negocio "solo una EN_CURSO por parcela" se valida en el
   // service (CampanasService) antes de crear/actualizar el estado.
@@ -279,4 +283,70 @@ model Presupuesto {
   updatedAt  DateTime @updatedAt
 
   @@map("presupuestos")
+}
+
+// =========================================
+// Estimacion de rendimiento (RF-31 a RF-35)
+// =========================================
+
+// Datos de siembra y cosecha por parcela y campana (una fila por campana).
+// Es la fuente del modelo de rendimiento. No reemplaza a las actividades ni
+// participa en la cadena de hashes. origen: "demo_enmascarado" | "real".
+model RegistroCosecha {
+  id           String    @id @default(cuid())
+  campanaId    String    @unique
+  campana      Campana   @relation(fields: [campanaId], references: [id], onDelete: Restrict)
+  variedad     String?
+  fechaSiembra DateTime?
+  fechaCosecha DateTime?
+  haSembradas  Float
+  haCosechadas Float?
+  toneladas    Float?
+  origen       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([origen])
+  @@map("registros_cosecha")
+}
+
+// Rendimiento total de una campana de un cultivo (toneladas totales /
+// hectareas cosechadas totales). Es la base de la linea base oficial.
+// rendimientoTotalTnHa null = la superficie total no se conoce: esa campana
+// no entra en la linea base.
+model TotalCampana {
+  id                   String   @id @default(cuid())
+  cultivoId            String
+  cultivo              Cultivo  @relation(fields: [cultivoId], references: [id])
+  temporada            String
+  rendimientoTotalTnHa Float?
+  origen               String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([cultivoId, temporada, origen])
+  @@map("totales_campana")
+}
+
+// Versiones del modelo de rendimiento. estado: "experimental" (por defecto),
+// "activo" o "archivado". origenDatos: "demo_enmascarado" | "real".
+model ModeloIa {
+  id                 String   @id @default(cuid())
+  cultivoId          String
+  cultivo            Cultivo  @relation(fields: [cultivoId], references: [id])
+  version            Int
+  origenDatos        String
+  campanasUsadas     Json
+  hashDatos          String
+  predictores        Json
+  categoriasVariedad Json
+  medianaDiasSiembra Float?
+  metricas           Json
+  modelo             Json
+  estado             String   @default("experimental")
+  createdAt          DateTime @default(now())
+
+  @@unique([cultivoId, version])
+  @@index([cultivoId, estado])
+  @@map("modelos_ia")
 }
