@@ -22,6 +22,8 @@ import { TarjetaMetrica } from "@/components/tarjeta-metrica";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useResumenesParcelas } from "@/lib/cargar-resumen";
+import { useIdsDemo } from "@/lib/prediccion";
+import { FiltroDemo } from "@/components/estado/datos-demo";
 import { contarPorEstado } from "@/lib/estado";
 import { formatearFecha } from "@/lib/format";
 import type { ResumenDashboard } from "@/lib/types";
@@ -33,7 +35,10 @@ export default function DashboardPage() {
   const [resumen, setResumen] = useState<ResumenDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [elegidaId, setElegidaId] = useState<string | null>(null);
-  const { datos: parcelas, error: errorParcelas } = useResumenesParcelas();
+  // Datos de demostracion (enmascarados): ocultos salvo que se pida verlos.
+  const [mostrarDemo, setMostrarDemo] = useState(false);
+  const idsDemo = useIdsDemo();
+  const { datos: parcelas, error: errorParcelas } = useResumenesParcelas(0, mostrarDemo);
 
   useEffect(() => {
     if (usuario?.rol === "OPERATIVO") {
@@ -67,6 +72,7 @@ export default function DashboardPage() {
           <MapPinned className="h-6 w-6 text-emerald-700" aria-hidden />
           Estado de las parcelas
         </h2>
+        <FiltroDemo activo={mostrarDemo} onCambiar={setMostrarDemo} cantidad={idsDemo?.size ?? 0} />
 
         {errorParcelas ? (
           <p className="text-red-700">{errorParcelas}</p>
@@ -110,7 +116,13 @@ export default function DashboardPage() {
           <TarjetaMetrica
             icono={Ruler}
             etiqueta="Hectáreas totales"
-            valor={`${resumen.hectareasTotales} ha`}
+            // Se suma aqui (y no con resumen.hectareasTotales) para no contar las
+            // parcelas de demostracion cuando estan ocultas.
+            valor={
+              parcelas === null
+                ? "Cargando..."
+                : `${Math.round(parcelas.reduce((total, p) => total + p.hectareas, 0) * 100) / 100} ha`
+            }
             ayuda="Suma de la superficie de las parcelas activas."
           />
           <TarjetaMetrica

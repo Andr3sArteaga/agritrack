@@ -7,6 +7,7 @@ import { Map as MapaIcono, MapPinned, Pencil, Plus, Power, RotateCcw, Tag } from
 import { Badge } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { Advertencia } from "@/components/estado/advertencia";
+import { EtiquetaDemo, FiltroDemo } from "@/components/estado/datos-demo";
 import { EstadoDeParcela } from "@/components/estado/estado-parcela";
 import { LeyendaMapa } from "@/components/map/leyenda-mapa";
 import type { EnfoqueMapa } from "@/components/map/parcelas-mapa";
@@ -14,6 +15,7 @@ import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useResumenesParcelas } from "@/lib/cargar-resumen";
 import type { EstadoIndicador } from "@/lib/estado";
+import { useIdsDemo } from "@/lib/prediccion";
 import { calcularCampanaVigentePorParcela, type CampanaVigente } from "@/lib/parcelas";
 import type { Campana, Cultivo, Parcela } from "@/lib/types";
 import { PanelFlotanteParcela } from "./panel-flotante-parcela";
@@ -29,7 +31,17 @@ export default function ParcelasPage() {
   const { usuario } = useAuth();
   const puedeEditar = usuario?.rol === "JEFE";
 
-  const [parcelas, setParcelas] = useState<Parcela[]>([]);
+  const [todasLasParcelas, setParcelas] = useState<Parcela[]>([]);
+  // Datos de demostracion (enmascarados): ocultos salvo que se pida verlos.
+  const [mostrarDemo, setMostrarDemo] = useState(false);
+  const idsDemo = useIdsDemo();
+  const parcelas = useMemo(
+    () =>
+      mostrarDemo
+        ? todasLasParcelas
+        : todasLasParcelas.filter((p) => idsDemo !== null && !idsDemo.has(p.id)),
+    [todasLasParcelas, mostrarDemo, idsDemo],
+  );
   const [campanaVigentePorParcela, setCampanaVigentePorParcela] = useState<
     Record<string, CampanaVigente>
   >({});
@@ -38,7 +50,10 @@ export default function ParcelasPage() {
   const [enfoque, setEnfoque] = useState<EnfoqueMapa | null>(null);
   // Cambia cuando una parcela se activa, desactiva o edita: se recalculan los estados.
   const [versionEstados, setVersionEstados] = useState(0);
-  const { datos: resumenes, error: errorEstados } = useResumenesParcelas(versionEstados);
+  const { datos: resumenes, error: errorEstados } = useResumenesParcelas(
+    versionEstados,
+    mostrarDemo,
+  );
   const estadoListo = resumenes !== null || errorEstados !== null;
   const resumenPorParcela = useMemo(
     () => new Map((resumenes ?? []).map((r) => [r.parcelaId, r])),
@@ -150,6 +165,7 @@ export default function ParcelasPage() {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+      <FiltroDemo activo={mostrarDemo} onCambiar={setMostrarDemo} cantidad={idsDemo?.size ?? 0} />
       {!cargando && parcelas.some((p) => p.poligono) && (
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -233,6 +249,11 @@ export default function ParcelasPage() {
                     >
                       {parcela.nombre}
                     </Link>
+                    {idsDemo?.has(parcela.id) && (
+                      <div className="mt-1">
+                        <EtiquetaDemo />
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">{parcela.hectareas} ha</td>
                   <td className="px-4 py-3 text-stone-600">{parcela.ubicacionTexto}</td>

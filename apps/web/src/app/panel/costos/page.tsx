@@ -19,6 +19,7 @@ import { BadgeEstadoGasto } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { TarjetaMetrica } from "@/components/tarjeta-metrica";
 import { api, apiErrorMessage } from "@/lib/api";
+import { cargarIdsDemo } from "@/lib/prediccion";
 import { useAuth } from "@/lib/auth-context";
 import { calcularResumenCostos } from "@/lib/costos";
 import { formatearBs, formatearFecha } from "@/lib/format";
@@ -115,11 +116,13 @@ export default function CostosPage() {
       api.get<Campana[]>("/campanas"),
       api.get<Parcela[]>("/parcelas"),
       api.get<Cultivo[]>("/cultivos"),
+      cargarIdsDemo(),
     ])
-      .then(([campanasRes, parcelasRes, cultivosRes]) => {
-        const ordenadas = [...campanasRes.data].sort((a, b) =>
-          b.fechaInicio.localeCompare(a.fechaInicio),
-        );
+      .then(([campanasRes, parcelasRes, cultivosRes, idsDemo]) => {
+        // Las campañas de demostracion (enmascaradas) no llevan costos.
+        const ordenadas = campanasRes.data
+          .filter((c) => !idsDemo.has(c.parcelaId))
+          .sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio));
         setCampanas(ordenadas);
         setParcelas(parcelasRes.data);
         setCultivos(cultivosRes.data);

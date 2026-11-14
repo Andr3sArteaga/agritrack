@@ -7,18 +7,21 @@ import {
   Activity as IconoEstado,
   ArrowLeft,
   CalendarRange,
+  LineChart,
   Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
 import { Ayuda } from "@/components/ayuda";
 import { BadgeEstadoCampana } from "@/components/badge";
+import { EstimacionComponente } from "@/components/estado/estimacion-componente";
 import { PanelEstadoParcela } from "@/components/estado/panel-estado-parcela";
 import { IconoActividad } from "@/components/icono-actividad";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useResumenParcela } from "@/lib/cargar-resumen";
 import { formatearFecha } from "@/lib/format";
+import { elegirCampanaActual } from "@/lib/parcelas";
 import {
   ESTADO_CAMPANA_LABEL,
   TIPO_ACTIVIDAD_LABEL,
@@ -112,6 +115,12 @@ export default function ParcelaPrivadaDetallePage() {
     return cultivos.find((c) => c.id === id)?.nombre ?? "—";
   }
 
+  // Se estima la campaña actual; si no hay, la mas reciente.
+  const campanaParaEstimar =
+    elegirCampanaActual(campanas) ??
+    [...campanas].sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio))[0] ??
+    null;
+
   if (error) return <p className="text-red-600">{error}</p>;
   if (!parcela) return <p className="text-stone-500">Cargando...</p>;
 
@@ -144,6 +153,20 @@ export default function ParcelaPrivadaDetallePage() {
           <p className="text-stone-600">Cargando el estado de la parcela...</p>
         )}
       </section>
+
+      {campanaParaEstimar && (
+        <section className="space-y-3" aria-labelledby="estimacion-rendimiento">
+          <h2 id="estimacion-rendimiento" className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+            <LineChart className="h-6 w-6 text-emerald-700" aria-hidden />
+            Estimación de rendimiento
+          </h2>
+          <EstimacionComponente
+            parcelaId={parcela.id}
+            campanaId={campanaParaEstimar.id}
+            temporada={campanaParaEstimar.temporada}
+          />
+        </section>
+      )}
 
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-[22px] font-bold text-stone-900">

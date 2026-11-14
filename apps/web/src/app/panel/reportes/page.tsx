@@ -12,6 +12,7 @@ import {
 import { Ayuda } from "@/components/ayuda";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { api, apiErrorMessage } from "@/lib/api";
+import { cargarIdsDemo } from "@/lib/prediccion";
 import { formatearFecha } from "@/lib/format";
 import type {
   Cultivo,
@@ -72,7 +73,10 @@ function TabHistorico() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    api.get<Parcela[]>("/parcelas").then((res) => setParcelas(res.data));
+    // Las parcelas de demostracion (enmascaradas) no entran en los reportes.
+    Promise.all([api.get<Parcela[]>("/parcelas"), cargarIdsDemo()]).then(([res, idsDemo]) =>
+      setParcelas(res.data.filter((p) => !idsDemo.has(p.id))),
+    );
     api.get<Cultivo[]>("/cultivos").then((res) => setCultivos(res.data));
   }, []);
 

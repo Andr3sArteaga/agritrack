@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { api, apiErrorMessage } from "./api";
 import { useAuth } from "./auth-context";
 import { elegirCampanaActual } from "./parcelas";
+import { cargarIdsDemo } from "./prediccion";
 import {
   construirResumenParcela,
   type ActividadResumen,
@@ -93,8 +94,12 @@ interface EstadoCarga<T> {
 /**
  * Resumen de TODAS las parcelas activas (dashboard y mapa de parcelas).
  * `version`: al cambiarla se vuelve a pedir todo (ej. tras activar o editar una parcela).
+ * `incluirDemo`: por defecto las parcelas de demostracion (enmascaradas) quedan fuera.
  */
-export function useResumenesParcelas(version = 0): EstadoCarga<ResumenParcela[]> {
+export function useResumenesParcelas(
+  version = 0,
+  incluirDemo = false,
+): EstadoCarga<ResumenParcela[]> {
   const rol = useAuth().usuario?.rol;
   const [estado, setEstado] = useState<EstadoCarga<ResumenParcela[]>>({ datos: null, error: null });
 
@@ -102,15 +107,16 @@ export function useResumenesParcelas(version = 0): EstadoCarga<ResumenParcela[]>
     if (!rol) return;
     let cancelado = false;
     (async () => {
-      const [parcelas, campanas, cultivos, historico] = await Promise.all([
+      const [parcelas, campanas, cultivos, historico, idsDemo] = await Promise.all([
         api.get<Parcela[]>("/parcelas").then((res) => res.data),
         api.get<Campana[]>("/campanas").then((res) => res.data),
         api.get<Cultivo[]>("/cultivos").then((res) => res.data),
         cargarHistorico(rol),
+        cargarIdsDemo(),
       ]);
       return Promise.all(
         parcelas
-          .filter((p) => p.activa)
+          .filter((p) => p.activa && (incluirDemo || !idsDemo.has(p.id)))
           .map((p) => cargarResumenParcela(p, { campanas, cultivos, historico }, rol)),
       );
     })()
@@ -119,7 +125,7 @@ export function useResumenesParcelas(version = 0): EstadoCarga<ResumenParcela[]>
     return () => {
       cancelado = true;
     };
-  }, [rol, version]);
+  }, [rol, version, incluirDemo]);
 
   return estado;
 }
