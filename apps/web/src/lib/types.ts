@@ -114,6 +114,47 @@ export interface HistoricoItem {
   fecha: string;
 }
 
+/** RF-42: actividad vigente dentro del periodo del reporte. */
+export interface ActividadReporte {
+  id: string;
+  secuencia: number;
+  tipo: TipoActividad;
+  fecha: string;
+  descripcion: string;
+  insumo: string | null;
+  cantidad: number | null;
+  unidad: string | null;
+  responsableNombre: string;
+  tercerizado: boolean;
+  rendimientoTnHa: number | null;
+  correccionDeId: string | null;
+}
+
+/** RF-42: reporte por campana para el periodo consultado. */
+export interface ReporteCampana {
+  periodo: { desde: string; hasta: string; porDefecto: boolean };
+  generadoEn: string;
+  campana: {
+    id: string;
+    temporada: string;
+    estado: EstadoCampana;
+    fechaInicio: string;
+    fechaFin: string | null;
+  };
+  parcela: { id: string; nombre: string; hectareas: number; ubicacionTexto: string };
+  cultivo: { id: string; nombre: string };
+  actividades: ActividadReporte[];
+  cosecha: { rendimientoTnHa: number; fecha: string } | null;
+  costos: {
+    gastado: number;
+    comprometido: number;
+    presupuesto: number | null;
+    ahorro: number | null;
+    costoPorHa: number | null;
+    costoPorTonelada: number | null;
+  };
+}
+
 export interface ProximaCosecha {
   campanaId: string;
   parcelaNombre: string;

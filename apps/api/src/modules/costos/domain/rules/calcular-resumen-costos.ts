@@ -1,8 +1,11 @@
 import { EstadoGasto } from '../../../../generated/prisma/enums';
 import type { GastoEntity } from '../entities/gasto.entity';
 
+/** Solo lo que el calculo necesita de un gasto (lo reusa el reporte por campana). */
+export type GastoParaResumen = Pick<GastoEntity, 'anulado' | 'estado' | 'monto'>;
+
 export interface EntradaResumenCostos {
-  gastos: GastoEntity[];
+  gastos: GastoParaResumen[];
   presupuesto: number | null;
   hectareas: number;
   /** Rendimiento real (t/ha) registrado; null si todavia no hay produccion. */

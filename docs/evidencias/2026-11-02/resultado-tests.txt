@@ -1,0 +1,161 @@
+Comando: cd apps/api && npm run test -- --verbose --reporters=default
+Fecha: 2026-11-02 02:52:26
+Node: v22.18.0
+Rama: prueba/deps-reportes | Commit: 627209f
+------------------------------------------------------------
+PASS src/modules/costos/domain/rules/campana-permite-gastos.spec.ts
+  campanaPermiteGastos (RF-57)
+    √ permite registrar gastos en una campana PLANIFICADA (56 ms)
+    √ permite registrar gastos en una campana EN_CURSO (2 ms)
+    √ permite registrar gastos en una campana COSECHADA (1 ms)
+
+PASS src/app.controller.spec.ts
+  AppController
+    root
+      √ should return "Hello World!" (19 ms)
+
+PASS src/modules/costos/domain/rules/calcular-resumen-costos.spec.ts
+  calcularResumenCostos (RF-30)
+    √ separa lo pagado de lo comprometido (24 ms)
+    √ los gastos anulados no cuentan en ningun total (8 ms)
+    √ ahorro = presupuesto - gasto real (solo pagado), puede ser negativo (3 ms)
+    √ ahorro es null si la campana no tiene presupuesto (4 ms)
+    √ costo por ha = gasto real / hectareas (redondeado a 2 decimales) (3 ms)
+    √ costo por ha es null si la parcela no tiene hectareas (2 ms)
+    √ sin gastos devuelve ceros (no null) y el ahorro es todo el presupuesto (4 ms)
+    costo por tonelada
+      √ es null si no hay produccion real registrada (2 ms)
+      √ es null si el rendimiento registrado es 0 (2 ms)
+      √ con produccion = gasto real / (rendimiento t/ha x hectareas) (3 ms)
+
+PASS src/shared/integridad/canonicalizar-actividad.spec.ts
+  canonicalizarActividad
+    √ produce exactamente el formato canonico esperado (orden fijo de campos) (25 ms)
+    √ el mismo registro produce la misma cadena, aunque sean objetos distintos (2 ms)
+    √ no depende del orden de las propiedades del objeto de entrada (2 ms)
+    √ serializa la fecha como ISO UTC (mismo instante = misma cadena) (3 ms)
+    √ cambiar el campo secuencia cambia la cadena canonica (3 ms)
+    √ cambiar el campo campanaId cambia la cadena canonica (1 ms)
+    √ cambiar el campo tipo cambia la cadena canonica (2 ms)
+    √ cambiar el campo fecha cambia la cadena canonica (2 ms)
+    √ cambiar el campo descripcion cambia la cadena canonica (3 ms)
+    √ cambiar el campo insumo cambia la cadena canonica (2 ms)
+    √ cambiar el campo cantidad cambia la cadena canonica (6 ms)
+    √ cambiar el campo unidad cambia la cadena canonica (1 ms)
+    √ cambiar el campo responsableId cambia la cadena canonica (1 ms)
+    √ cambiar el campo tercerizado cambia la cadena canonica (1 ms)
+    √ cambiar el campo maquinariaUtilizada cambia la cadena canonica (1 ms)
+    √ cambiar el campo rendimientoTnHa cambia la cadena canonica (1 ms)
+    √ cambiar el campo correccionDeId cambia la cadena canonica (1 ms)
+    √ cambiar el campo motivoCorreccion cambia la cadena canonica (1 ms)
+    √ cambiar el campo hashAnterior cambia la cadena canonica (1 ms)
+    √ distingue null de cadena vacia y de cero (2 ms)
+  calcularHashSha256
+    √ coincide con el vector de prueba SHA-256 conocido ("abc") (12 ms)
+    √ el hash del registro canonico coincide con el valor calculado de forma independiente (1 ms)
+    √ devuelve 64 caracteres hexadecimales y es determinista (2 ms)
+    √ un cambio minimo en la entrada cambia por completo el hash (1 ms)
+  encadenamiento con hashAnterior
+    √ la primera actividad no tiene hashAnterior y las siguientes apuntan al hash previo (5 ms)
+    √ cada hash se recalcula igual a partir del contenido guardado (3 ms)
+    √ dos registros con contenido identico pero distinta posicion en la cadena tienen hashes distintos (2 ms)
+    √ el hashAnterior forma parte del hash: alterarlo invalida el hash propio (2 ms)
+
+PASS src/modules/integridad/application/integridad.service.spec.ts
+  IntegridadService.verificarGlobal
+    √ valida una cadena intacta (32 ms)
+    √ considera valida una cadena vacia (4 ms)
+    √ detecta una descripcion modificada y senala el registro alterado (5 ms)
+    √ detecta un rendimiento de cosecha modificado (5 ms)
+    √ detecta la modificacion del campo fecha (5 ms)
+    √ detecta la modificacion del campo cantidad (3 ms)
+    √ detecta la modificacion del campo campanaId (4 ms)
+    √ detecta la modificacion del campo hashAnterior (3 ms)
+    √ informa la primera actividad alterada cuando hay varias (5 ms)
+    √ detecta un registro alterado aunque el atacante recalcule el hash propio (rompe la cadena en el siguiente) (4 ms)
+    √ detecta un registro eliminado del medio (hueco en la secuencia) (5 ms)
+    √ detecta que se elimino el primer registro de la cadena (2 ms)
+    √ detecta registros reordenados (2 ms)
+  IntegridadService.verificarPorParcela
+    √ valida las actividades intactas de una parcela (33 ms)
+    √ detecta un registro de la parcela cuyo contenido fue modificado (4 ms)
+    √ solo valida cada registro contra su propio hashAnterior guardado (no la continuidad global) (2 ms)
+
+PASS src/modules/costos/application/presupuestos.service.spec.ts
+  PresupuestosService
+    √ guarda un unico presupuesto total por campana (RF-29) (29 ms)
+    √ conserva las notas cuando se envian (4 ms)
+    √ 404 al guardar u obtener en una campana inexistente (101 ms)
+    √ 404 si la campana todavia no tiene presupuesto (5 ms)
+    √ bloquea el cambio de presupuesto si la campana no permite gastos (RF-57) (4 ms)
+
+PASS src/modules/actividades/application/actividades.service.spec.ts
+  ActividadesService.crear — correcciones
+    √ una correccion llama a crearConIntegridad con correccionDeId y motivo (31 ms)
+    √ crea un registro nuevo y no modifica el original (7 ms)
+    √ el repositorio de actividades no expone ninguna operacion de update/delete (2 ms)
+    √ rechaza corregir una actividad inexistente sin crear nada (51 ms)
+    √ corregir una COSECHA no cambia el estado de la campana; una cosecha nueva si (3 ms)
+
+PASS src/modules/costos/application/insumos.service.spec.ts
+  InsumosService
+    create
+      √ crea el insumo con su precio inicial (24 ms)
+      √ rechaza un nombre repetido (46 ms)
+    update
+      √ 404 si el insumo no existe (4 ms)
+      √ no deja renombrar a un nombre que ya existe (3 ms)
+      √ permite guardar con su propio nombre sin validar duplicado (1 ms)
+    historial de precios
+      √ agregar un precio nuevo no toca los anteriores (solo agrega) (3 ms)
+      √ sin vigenteDesde el precio rige desde ahora (2 ms)
+      √ 404 al agregar o listar precios de un insumo inexistente (10 ms)
+      √ lista el historial tal como lo entrega el repositorio (2 ms)
+
+PASS src/modules/costos/application/gastos.service.spec.ts
+  GastosService
+    crear
+      √ registra un gasto manual con el monto indicado (16 ms)
+      √ rechaza una campana inexistente (44 ms)
+      √ rechaza cantidad sin insumo del catalogo (7 ms)
+      con insumo del catalogo (precio vigente segun la fecha)
+        √ monto = cantidad x precio vigente a la fecha del gasto (2 ms)
+        √ gastos en fechas distintas usan el precio de cada fecha (2 ms)
+        √ redondea el monto a 2 decimales (2 ms)
+        √ falla si no hay precio vigente a esa fecha (3 ms)
+        √ exige categoria INSUMOS (2 ms)
+        √ rechaza un insumo inexistente o desactivado (2 ms)
+    editar
+      √ actualiza descripcion, fecha y estado de un gasto manual (2 ms)
+      √ en un gasto de insumo no deja cambiar el monto ni la categoria (3 ms)
+      √ no permite editar un gasto anulado (3 ms)
+      √ 404 si el gasto no existe (3 ms)
+    anular (sin borrar, con motivo)
+      √ marca el gasto como anulado guardando el motivo y la fecha (2 ms)
+      √ no anula dos veces el mismo gasto (1 ms)
+      √ 404 si el gasto no existe (1 ms)
+    bloqueo cuando la campana no permite gastos (RF-57)
+      √ no deja crear (2 ms)
+      √ no deja editar (2 ms)
+      √ no deja anular (3 ms)
+      √ consulta la regla con la campana del gasto (3 ms)
+    listar
+      √ excluye anulados por defecto y los incluye si se pide (3 ms)
+
+PASS src/modules/costos/application/dto/anular-gasto.dto.spec.ts
+  AnularGastoDto: el motivo es obligatorio (RF-56)
+    √ acepta un motivo valido (12 ms)
+    √ rechaza: sin motivo (2 ms)
+    √ rechaza: motivo vacio (1 ms)
+    √ rechaza: solo espacios (1 ms)
+    √ rechaza: demasiado corto (1 ms)
+    √ rechaza: no es texto (1 ms)
+    √ rechaza: demasiado largo (1 ms)
+    √ recorta los espacios alrededor del motivo (1 ms)
+
+Test Suites: 10 passed, 10 total
+Tests:       106 passed, 106 total
+Snapshots:   0 total
+Time:        3.911 s
+Ran all test suites.
+exit: 0

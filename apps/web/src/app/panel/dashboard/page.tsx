@@ -6,16 +6,25 @@ import {
   CalendarClock,
   LayoutDashboard,
   LineChart,
+  MapPinned,
   Ruler,
-  Sprout,
   Tractor,
   Wheat,
-  type LucideIcon,
 } from "lucide-react";
-import { Ayuda } from "@/components/ayuda";
+import { EnlaceBoton } from "@/components/enlace-boton";
+import { ContadorEstados } from "@/components/estado/contador-estados";
+import { EstadoVacio } from "@/components/estado/estado-vacio";
+import { EstimacionRendimiento } from "@/components/estado/estimacion-rendimiento";
+import { PanelEstadoParcela } from "@/components/estado/panel-estado-parcela";
+import { SelectorParcelas } from "@/components/estado/selector-parcelas";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
+import { TarjetaMetrica } from "@/components/tarjeta-metrica";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useResumenesParcelas } from "@/lib/cargar-resumen";
+import { useIdsDemo } from "@/lib/prediccion";
+import { FiltroDemo } from "@/components/estado/datos-demo";
+import { contarPorEstado } from "@/lib/estado";
 import { formatearFecha } from "@/lib/format";
 import type { ResumenDashboard } from "@/lib/types";
 import { DashboardChart } from "./dashboard-chart";
@@ -25,6 +34,11 @@ export default function DashboardPage() {
   const router = useRouter();
   const [resumen, setResumen] = useState<ResumenDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [elegidaId, setElegidaId] = useState<string | null>(null);
+  // Datos de demostracion (enmascarados): ocultos salvo que se pida verlos.
+  const [mostrarDemo, setMostrarDemo] = useState(false);
+  const idsDemo = useIdsDemo();
+  const { datos: parcelas, error: errorParcelas } = useResumenesParcelas(0, mostrarDemo);
 
   useEffect(() => {
     if (usuario?.rol === "OPERATIVO") {
@@ -36,68 +50,120 @@ export default function DashboardPage() {
     api
       .get<ResumenDashboard>("/reportes/dashboard")
       .then((res) => setResumen(res.data))
-      .catch((err) => setError(apiErrorMessage(err, "No se pudo cargar el dashboard")));
+      .catch((err) => setError(apiErrorMessage(err, "No se pudo cargar el resumen")));
   }, []);
 
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!resumen) return <p className="text-stone-500">Cargando dashboard...</p>;
+  if (error) return <p className="text-red-700">{error}</p>;
+  if (!resumen) return <p className="text-stone-600">Cargando resumen...</p>;
+
+  const proxima = resumen.prediccionProximaCampana;
+  const elegida = parcelas?.find((p) => p.parcelaId === elegidaId) ?? parcelas?.[0];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <EncabezadoPagina
         icono={LayoutDashboard}
-        titulo="Dashboard"
-        descripcion="Resumen general de la operación"
+        titulo="Resumen"
+        descripcion="Estado de tus parcelas y de la operación"
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metrica
-          icono={Ruler}
-          etiqueta="Hectáreas totales"
-          valor={`${resumen.hectareasTotales} ha`}
-          ayuda="Suma de la superficie de las parcelas activas."
-        />
-        <Metrica
-          icono={Tractor}
-          etiqueta="Campañas en curso"
-          valor={resumen.campanasEnCurso}
-          ayuda="Campañas que se están ejecutando ahora (sembradas y sin cosechar)."
-        />
-        <Metrica
-          icono={Wheat}
-          ayuda="Rendimiento de la cosecha más reciente, en toneladas por hectárea (t/ha)."
-          etiqueta="Última cosecha"
-          valor={
-            resumen.ultimaCosecha
-              ? `${resumen.ultimaCosecha.rendimientoTnHa} t/ha`
-              : "Sin datos"
-          }
-          subtexto={
-            resumen.ultimaCosecha
-              ? `${resumen.ultimaCosecha.parcelaNombre} · ${formatearFecha(resumen.ultimaCosecha.fecha)}`
-              : undefined
-          }
-        />
-        <Metrica
-          icono={Sprout}
-          ayuda="Estimación del rendimiento (t/ha) a partir del promedio de campañas anteriores. Es orientativa: mejora a medida que hay más historial."
-          etiqueta="Predicción próxima campaña"
-          valor={
-            resumen.prediccionProximaCampana?.rendimientoEstimadoTnHa !== null &&
-            resumen.prediccionProximaCampana !== null
-              ? `${resumen.prediccionProximaCampana?.rendimientoEstimadoTnHa} t/ha`
-              : "Sin datos"
-          }
-          subtexto={
-            resumen.prediccionProximaCampana
-              ? `${resumen.prediccionProximaCampana.parcelaNombre} · ${resumen.prediccionProximaCampana.cultivoNombre}`
-              : undefined
-          }
-        />
-      </div>
+      <section className="space-y-4" aria-labelledby="estado-parcelas">
+        <h2 id="estado-parcelas" className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+          <MapPinned className="h-6 w-6 text-emerald-700" aria-hidden />
+          Estado de las parcelas
+        </h2>
+        <FiltroDemo activo={mostrarDemo} onCambiar={setMostrarDemo} cantidad={idsDemo?.size ?? 0} />
+
+        {errorParcelas ? (
+          <p className="text-red-700">{errorParcelas}</p>
+        ) : parcelas === null ? (
+          <p className="text-stone-600">Cargando el estado de las parcelas...</p>
+        ) : parcelas.length === 0 || !elegida ? (
+          <EstadoVacio titulo="Todavía no hay parcelas">
+            <p>Crea la primera para empezar a registrar su trabajo.</p>
+            {usuario?.rol === "JEFE" && (
+              <p>
+                <EnlaceBoton href="/panel/parcelas">Crear parcela</EnlaceBoton>
+              </p>
+            )}
+          </EstadoVacio>
+        ) : (
+          <>
+            <ContadorEstados
+              conteo={contarPorEstado(parcelas.map((p) => p.estado))}
+              sinDatosBasicos={parcelas.filter((p) => p.estado === "SIN_DATOS" && p.sinDatosBasicos).length}
+            />
+            <SelectorParcelas
+              resumenes={parcelas}
+              seleccionadaId={elegida.parcelaId}
+              onSeleccionar={setElegidaId}
+            />
+            <PanelEstadoParcela
+              resumen={elegida}
+              mostrarEnlace
+              idPestana={`pestana-${elegida.parcelaId}`}
+            />
+          </>
+        )}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="resumen-operacion">
+        <h2 id="resumen-operacion" className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+          <Tractor className="h-6 w-6 text-emerald-700" aria-hidden />
+          Resumen de la operación
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <TarjetaMetrica
+            icono={Ruler}
+            etiqueta="Hectáreas totales"
+            // Se suma aqui (y no con resumen.hectareasTotales) para no contar las
+            // parcelas de demostracion cuando estan ocultas.
+            valor={
+              parcelas === null
+                ? "Cargando..."
+                : `${Math.round(parcelas.reduce((total, p) => total + p.hectareas, 0) * 100) / 100} ha`
+            }
+            ayuda="Suma de la superficie de las parcelas activas."
+          />
+          <TarjetaMetrica
+            icono={Tractor}
+            etiqueta="Campañas en curso"
+            valor={resumen.campanasEnCurso}
+            ayuda="Campañas que se están ejecutando ahora (sembradas y sin cosechar)."
+          />
+          <TarjetaMetrica
+            icono={Wheat}
+            ayuda="Rendimiento de la cosecha más reciente, en toneladas por hectárea (t/ha)."
+            etiqueta="Última cosecha"
+            valor={
+              resumen.ultimaCosecha
+                ? `${resumen.ultimaCosecha.rendimientoTnHa} t/ha`
+                : "Sin datos"
+            }
+            nota={
+              resumen.ultimaCosecha
+                ? `${resumen.ultimaCosecha.parcelaNombre} · ${formatearFecha(resumen.ultimaCosecha.fecha)}`
+                : undefined
+            }
+          />
+        </div>
+
+        <h3 className="pt-2 text-lg font-bold text-stone-900">Estimación de la próxima campaña</h3>
+        {proxima ? (
+          <EstimacionRendimiento
+            rendimientoTnHa={proxima.rendimientoEstimadoTnHa}
+            campanasUsadas={proxima.campanasHistoricasUsadas}
+            contexto={`${proxima.parcelaNombre} · ${proxima.cultivoNombre} · ${proxima.temporada}`}
+          />
+        ) : (
+          <EstadoVacio mini titulo="Estimación de la próxima campaña: sin datos">
+            <p>No hay campañas planificadas.</p>
+          </EstadoVacio>
+        )}
+      </section>
 
       <div className="rounded-lg border border-stone-200 bg-white p-6">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+        <h2 className="flex items-center gap-2 text-xl font-bold text-stone-900">
           <LineChart className="h-5 w-5 text-emerald-700" aria-hidden />
           Histórico de rendimiento
         </h2>
@@ -107,53 +173,27 @@ export default function DashboardPage() {
       </div>
 
       <div className="rounded-lg border border-stone-200 bg-white p-6">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+        <h2 className="flex items-center gap-2 text-xl font-bold text-stone-900">
           <CalendarClock className="h-5 w-5 text-emerald-700" aria-hidden />
           Próximas cosechas
         </h2>
         {resumen.proximasCosechas.length === 0 ? (
-          <p className="mt-3 text-sm text-stone-500">
+          <p className="mt-3 text-stone-600">
             No hay campañas en curso con fecha de finalización.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-stone-100">
             {resumen.proximasCosechas.map((cosecha) => (
-              <li key={cosecha.campanaId} className="flex items-center justify-between py-2 text-sm">
+              <li key={cosecha.campanaId} className="flex flex-wrap items-center justify-between gap-2 py-2">
                 <span className="font-medium text-stone-900">
                   {cosecha.parcelaNombre} · {cosecha.cultivoNombre}
                 </span>
-                <span className="text-stone-500">{formatearFecha(cosecha.fechaFin)}</span>
+                <span className="text-stone-600">{formatearFecha(cosecha.fechaFin)}</span>
               </li>
             ))}
           </ul>
         )}
       </div>
-    </div>
-  );
-}
-
-function Metrica({
-  icono: Icono,
-  etiqueta,
-  valor,
-  subtexto,
-  ayuda,
-}: {
-  icono: LucideIcon;
-  etiqueta: string;
-  valor: string | number;
-  subtexto?: string;
-  ayuda: string;
-}) {
-  return (
-    <div className="rounded-lg border border-stone-200 bg-white p-5">
-      <p className="flex items-center gap-1.5 text-sm text-stone-500">
-        <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
-        {etiqueta}
-        <Ayuda texto={ayuda} />
-      </p>
-      <p className="mt-1 text-2xl font-semibold text-stone-900">{valor}</p>
-      {subtexto && <p className="mt-1 text-xs text-stone-500">{subtexto}</p>}
     </div>
   );
 }

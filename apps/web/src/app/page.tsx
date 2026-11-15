@@ -1,17 +1,22 @@
-import Link from "next/link";
+import { Handshake, LineChart, ShieldCheck, type LucideIcon } from "lucide-react";
+import { EnlaceBoton } from "@/components/enlace-boton";
+import { EncabezadoPublico } from "@/components/publico/encabezado-publico";
 
-const BENEFICIOS = [
+const BENEFICIOS: { icono: LucideIcon; titulo: string; descripcion: string }[] = [
   {
-    titulo: "Trazabilidad completa",
+    icono: ShieldCheck,
+    titulo: "Registros protegidos",
     descripcion:
-      "Cada actividad queda registrada con fecha, responsable e insumos, protegida por una cadena de integridad verificable.",
+      "Cada labor queda anotada con su fecha, quién la hizo y qué insumos se usaron. Si alguien cambia un registro, se nota.",
   },
   {
-    titulo: "Datos en tiempo real",
+    icono: LineChart,
+    titulo: "Datos claros",
     descripcion:
-      "Rendimientos históricos, campañas en curso y predicciones de cosecha en un solo panel.",
+      "Mira los rendimientos de cosechas anteriores y las campañas en curso en un solo lugar.",
   },
   {
+    icono: Handshake,
     titulo: "Preventa transparente",
     descripcion:
       "Compradores e inversionistas pueden ver el estado y el historial de cada parcela disponible antes de negociar.",
@@ -21,72 +26,48 @@ const BENEFICIOS = [
 export default function WelcomePage() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-stone-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <span className="text-xl font-bold text-emerald-700">AgriTrack</span>
-          <nav className="flex items-center gap-3">
-            <Link
-              href="/parcelas"
-              className="rounded-md px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100"
-            >
-              Ver parcelas disponibles
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
-            >
-              Ingresar
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <EncabezadoPublico>
+        <EnlaceBoton href="/parcelas" variante="secundario">
+          Ver parcelas disponibles
+        </EnlaceBoton>
+        <EnlaceBoton href="/login">Ingresar</EnlaceBoton>
+      </EncabezadoPublico>
 
       <main className="flex-1">
-        <section className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">
+        <section className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 sm:py-20">
+          <h1 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight text-stone-900 sm:text-5xl">
             Encuentra tu próxima producción de forma rápida y sencilla
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-600">
-            AgriTrack es la plataforma de gestión agrícola de AgroAn: registra
-            cada actividad de campo, mide el rendimiento de tus parcelas y
-            comparte información verificable con compradores e inversionistas.
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-700">
+            AgriTrack es la plataforma de AgroAn. Anota cada labor de campo, mira el
+            rendimiento de cada parcela y comparte información clara con compradores e
+            inversionistas.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <Link
-              href="/parcelas"
-              className="rounded-md bg-emerald-700 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-800"
-            >
-              Ver parcelas disponibles
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-md border border-stone-300 bg-white px-6 py-3 text-base font-semibold text-stone-800 hover:bg-stone-100"
-            >
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <EnlaceBoton href="/parcelas">Ver parcelas disponibles</EnlaceBoton>
+            <EnlaceBoton href="/login" variante="secundario">
               Ingresar
-            </Link>
+            </EnlaceBoton>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 pb-20">
+        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
           <div className="grid gap-6 sm:grid-cols-3">
-            {BENEFICIOS.map((beneficio) => (
+            {BENEFICIOS.map(({ icono: Icono, titulo, descripcion }) => (
               <div
-                key={beneficio.titulo}
+                key={titulo}
                 className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm"
               >
-                <h3 className="text-lg font-semibold text-emerald-800">
-                  {beneficio.titulo}
-                </h3>
-                <p className="mt-2 text-sm text-stone-600">
-                  {beneficio.descripcion}
-                </p>
+                <Icono className="h-8 w-8 text-emerald-700" aria-hidden />
+                <h2 className="mt-3 text-xl font-bold text-emerald-800">{titulo}</h2>
+                <p className="mt-2 text-base text-stone-700">{descripcion}</p>
               </div>
             ))}
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-stone-200 bg-white py-6 text-center text-sm text-stone-500">
+      <footer className="border-t border-stone-200 bg-white py-6 text-center text-base text-stone-600">
         AgroAn © {new Date().getFullYear()}
       </footer>
     </div>

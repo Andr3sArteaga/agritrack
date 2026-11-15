@@ -1,0 +1,10 @@
+Comando: cd apps/api && npm run build
+Fecha: 2026-11-02 02:52:39
+Node: v22.18.0
+Rama: prueba/deps-reportes | Commit: 627209f
+------------------------------------------------------------
+
+> api@0.0.1 build
+> nest build
+
+exit: 0

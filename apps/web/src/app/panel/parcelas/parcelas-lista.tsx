@@ -3,22 +3,37 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowRight, Info, MapPin, Ruler, Sprout, Tag } from "lucide-react";
-import { Badge, BadgeEstadoCampana, BadgeEstadoParcela } from "@/components/badge";
+import { Badge } from "@/components/badge";
+import { EstadoDeParcela } from "@/components/estado/estado-parcela";
+import type { EstadoIndicador } from "@/lib/estado";
 import type { CampanaVigente } from "@/lib/parcelas";
 import type { Parcela } from "@/lib/types";
 
-/** Cards de parcelas para el panel lateral del mapa: clic = seleccionar/centrar. */
+/**
+ * Cards de parcelas junto al mapa. Clic = seleccionar y centrar.
+ * Cursor o foco sobre una card resalta su poligono (y al reves: la card
+ * se resalta cuando el cursor esta sobre su poligono).
+ */
 export function ParcelasLista({
   parcelas,
   campanaVigentePorParcela,
+  estadoPorParcela,
+  estadoListo,
   seleccionadaId,
+  resaltadaId,
   onSeleccionar,
+  onResaltar,
   className = "",
 }: {
   parcelas: Parcela[];
   campanaVigentePorParcela: Record<string, CampanaVigente>;
+  estadoPorParcela: Record<string, EstadoIndicador>;
+  /** false mientras se calculan los estados. */
+  estadoListo: boolean;
   seleccionadaId: string | null;
+  resaltadaId: string | null;
   onSeleccionar: (parcela: Parcela) => void;
+  onResaltar: (id: string | null) => void;
   className?: string;
 }) {
   const contenedorRef = useRef<HTMLUListElement>(null);
@@ -45,14 +60,21 @@ export function ParcelasLista({
       {parcelas.map((parcela) => {
         const vigente = campanaVigentePorParcela[parcela.id];
         const seleccionada = parcela.id === seleccionadaId;
+        const resaltada = parcela.id === resaltadaId;
         return (
           <li
             key={parcela.id}
             data-parcela-id={parcela.id}
+            onMouseEnter={() => onResaltar(parcela.id)}
+            onMouseLeave={() => onResaltar(null)}
+            onFocus={() => onResaltar(parcela.id)}
+            onBlur={() => onResaltar(null)}
             className={`rounded-lg border bg-white ${
               seleccionada
-                ? "border-amber-400 ring-2 ring-amber-300"
-                : "border-stone-200 hover:border-stone-300"
+                ? "border-stone-900 ring-2 ring-stone-900"
+                : resaltada
+                  ? "border-stone-500 bg-stone-50 ring-2 ring-stone-300"
+                  : "border-stone-200"
             } ${parcela.activa ? "" : "opacity-60"}`}
           >
             <button
@@ -61,25 +83,31 @@ export function ParcelasLista({
               aria-pressed={seleccionada}
               className="block w-full space-y-2 p-3 text-left"
             >
-              <p className="font-semibold text-stone-900">{parcela.nombre}</p>
-              <p className="flex items-start gap-1.5 text-sm text-stone-600">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-stone-400" aria-hidden />
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <p className="text-base font-bold text-stone-900">{parcela.nombre}</p>
+                <EstadoDeParcela
+                  activa={parcela.activa}
+                  estado={estadoPorParcela[parcela.id]}
+                  listo={estadoListo}
+                  tamano="sm"
+                />
+              </div>
+              <p className="flex items-start gap-1.5 text-sm text-stone-700">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-stone-500" aria-hidden />
                 {parcela.ubicacionTexto}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-700">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-800">
                 <span className="inline-flex items-center gap-1.5" title="Superficie de la parcela">
-                  <Ruler className="h-4 w-4 text-stone-400" aria-hidden />
+                  <Ruler className="h-4 w-4 text-stone-500" aria-hidden />
                   {parcela.hectareas} ha
                 </span>
                 <span className="inline-flex items-center gap-1.5" title="Cultivo de la campaña en curso o planificada">
-                  <Sprout className="h-4 w-4 text-stone-400" aria-hidden />
+                  <Sprout className="h-4 w-4 text-stone-500" aria-hidden />
                   {vigente?.cultivo ?? "Sin campaña"}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                <BadgeEstadoParcela activa={parcela.activa} conCampanaVigente={!!vigente} />
-                {vigente && <BadgeEstadoCampana estado={vigente.estado} />}
-                {parcela.disponibleParaPreventa && (
+              {parcela.disponibleParaPreventa && (
+                <div>
                   <Badge
                     tono="verde"
                     icono={Tag}
@@ -87,18 +115,18 @@ export function ParcelasLista({
                   >
                     En preventa
                   </Badge>
-                )}
-              </div>
+                </div>
+              )}
               {!parcela.poligono && (
-                <p className="flex items-center gap-1.5 text-xs text-stone-500">
-                  <Info className="h-3.5 w-3.5" aria-hidden />
+                <p className="flex items-center gap-1.5 text-sm text-stone-600">
+                  <Info className="h-4 w-4 shrink-0" aria-hidden />
                   Sin polígono dibujado: no aparece en el mapa
                 </p>
               )}
             </button>
             <Link
               href={`/panel/parcelas/${parcela.id}`}
-              className="flex items-center justify-end gap-1 border-t border-stone-100 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+              className="flex min-h-11 items-center justify-end gap-1 border-t border-stone-100 px-3 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
             >
               Ver detalle
               <ArrowRight className="h-4 w-4" aria-hidden />

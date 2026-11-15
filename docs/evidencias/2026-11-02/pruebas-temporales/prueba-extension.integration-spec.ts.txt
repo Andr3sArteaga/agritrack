@@ -1,0 +1,259 @@
+/**
+ * TEMPORAL (paso 0, rama prueba/deps-reportes): valida el mecanismo propuesto
+ * para la bitacora (RF-55) antes de implementarlo: extension $extends de
+ * Prisma 7 que envuelve cada escritura en
+ * $transaction([set_config('app.usuario_id'), query]) para que un trigger de
+ * PostgreSQL lea el usuario en la MISMA transaccion. Corre contra
+ * agritrack_test con un trigger/tabla de prueba que se eliminan al terminar.
+ *
+ * IMPORTANTE: las PrismaPromise son perezosas (se ejecutan al hacer await).
+ * El await debe ocurrir DENTRO de contexto.run(...); si no, la extension no
+ * ve el usuario y la bitacora registra null.
+ */
+jest.mock('@nestjs/common', () => ({
+  Injectable: () => () => undefined,
+  Inject: () => () => undefined,
+}));
+
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../../src/generated/prisma/client';
+
+const URL_PRUEBAS =
+  process.env.DATABASE_URL_TEST ??
+  'postgresql://agritrack:agritrack@localhost:5433/agritrack_test?schema=public';
+
+if (!/\/[^/?]*_test(\?|$)/.test(URL_PRUEBAS)) {
+  throw new Error('Debe correr contra una base que termine en "_test".');
+}
+
+const ESCRITURAS = new Set([
+  'create',
+  'createMany',
+  'update',
+  'updateMany',
+  'upsert',
+  'delete',
+  'deleteMany',
+]);
+
+const contexto = new AsyncLocalStorage<{ usuarioId: string }>();
+
+function extender(base: PrismaClient, modelosExcluidos: string[] = []) {
+  return base.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ model, operation, args, query }) {
+          const ctx = contexto.getStore();
+          if (
+            !ctx ||
+            !ESCRITURAS.has(operation) ||
+            modelosExcluidos.includes(model)
+          ) {
+            return query(args);
+          }
+          const [, resultado] = await base.$transaction([
+            base.$executeRaw`SELECT set_config('app.usuario_id', ${ctx.usuarioId}, true)`,
+            query(args),
+          ]);
+          return resultado;
+        },
+      },
+    },
+  });
+}
+
+class RollbackForzado extends Error {}
+
+describe('Paso 0: extension $extends + set_config + trigger (Prisma 7)', () => {
+  let base: PrismaClient;
+  let cliente: ReturnType<typeof extender>;
+  let clienteExcluyeCultivo: ReturnType<typeof extender>;
+
+  beforeAll(async () => {
+    base = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: URL_PRUEBAS }),
+    });
+    cliente = extender(base);
+    clienteExcluyeCultivo = extender(base, ['Cultivo']);
+    await base.$executeRawUnsafe(
+      'CREATE TABLE IF NOT EXISTS prueba_eventos (id serial PRIMARY KEY, tabla text, usuario text, txid bigint)',
+    );
+    await base.$executeRawUnsafe(`
+      CREATE OR REPLACE FUNCTION prueba_registrar() RETURNS trigger AS $$
+      BEGIN
+        INSERT INTO prueba_eventos (tabla, usuario, txid)
+        -- NULLIF: tras usarse en la sesion, current_setting devuelve '' (no NULL).
+        VALUES (TG_TABLE_NAME, NULLIF(current_setting('app.usuario_id', true), ''), txid_current());
+        RETURN NULL;
+      END $$ LANGUAGE plpgsql`);
+    await base.$executeRawUnsafe(
+      'CREATE TRIGGER prueba_trigger AFTER INSERT OR UPDATE ON cultivos FOR EACH ROW EXECUTE FUNCTION prueba_registrar()',
+    );
+  });
+
+  beforeEach(async () => {
+    await base.$executeRawUnsafe(
+      'TRUNCATE prueba_eventos, actividades, campanas, cultivos RESTART IDENTITY CASCADE',
+    );
+  });
+
+  afterAll(async () => {
+    await base.$executeRawUnsafe('DROP TRIGGER IF EXISTS prueba_trigger ON cultivos');
+    await base.$executeRawUnsafe('DROP FUNCTION IF EXISTS prueba_registrar()');
+    await base.$executeRawUnsafe('DROP TABLE IF EXISTS prueba_eventos');
+    await base.$disconnect();
+  });
+
+  const eventos = () =>
+    base.$queryRawUnsafe<{ tabla: string; usuario: string | null }[]>(
+      'SELECT tabla, usuario FROM prueba_eventos ORDER BY id',
+    );
+  const cultivos = () =>
+    base.cultivo.findMany({ select: { nombre: true }, orderBy: { nombre: 'asc' } });
+
+  describe('mecanismo base', () => {
+    it('el cliente extendido sigue siendo asignable a PrismaClient (tipos)', () => {
+      const comoCliente: Pick<PrismaClient, 'cultivo' | '$transaction'> = cliente;
+      expect(comoCliente).toBeDefined();
+    });
+
+    it('el trigger ve el usuario fijado con set_config (misma transaccion)', async () => {
+      await contexto.run({ usuarioId: 'usuario_A' }, async () => {
+        await cliente.cultivo.create({ data: { nombre: 'Soya prueba' } });
+      });
+      await contexto.run({ usuarioId: 'usuario_B' }, async () => {
+        await cliente.cultivo.updateMany({ data: { nombre: 'Soya editada' } });
+      });
+
+      expect(await eventos()).toEqual([
+        { tabla: 'cultivos', usuario: 'usuario_A' },
+        { tabla: 'cultivos', usuario: 'usuario_B' },
+      ]);
+    });
+
+    it('TRAMPA: si el await queda fuera del contexto, la bitacora registra null', async () => {
+      // La PrismaPromise se crea dentro del contexto pero se ejecuta (await)
+      // afuera: la extension corre sin contexto.
+      const promesaPerezosa = contexto.run({ usuarioId: 'usuario_A' }, () =>
+        cliente.cultivo.create({ data: { nombre: 'Await afuera' } }),
+      );
+      await promesaPerezosa;
+
+      expect(await eventos()).toEqual([{ tabla: 'cultivos', usuario: null }]);
+    });
+
+    it('el usuario no se filtra a otra escritura sin contexto (set_config es local)', async () => {
+      await contexto.run({ usuarioId: 'usuario_A' }, async () => {
+        await cliente.cultivo.create({ data: { nombre: 'Trigo' } });
+      });
+      await cliente.cultivo.create({ data: { nombre: 'Sorgo' } });
+
+      expect((await eventos()).map((e) => e.usuario)).toEqual(['usuario_A', null]);
+    });
+
+    it('escrituras concurrentes de usuarios distintos no se mezclan', async () => {
+      await Promise.all(
+        Array.from({ length: 20 }, (_, i) =>
+          contexto.run({ usuarioId: `u${i}` }, async () => {
+            await cliente.cultivo.create({ data: { nombre: `Cultivo ${i}` } });
+          }),
+        ),
+      );
+      const usuarios = (await eventos()).map((e) => e.usuario).sort();
+      expect(usuarios).toEqual(Array.from({ length: 20 }, (_, i) => `u${i}`).sort());
+    });
+
+    it('si la escritura falla, no queda evento (rollback conjunto)', async () => {
+      await cliente.cultivo.create({ data: { nombre: 'Duplicado' } });
+      await base.$executeRawUnsafe('TRUNCATE prueba_eventos');
+
+      await expect(
+        contexto.run({ usuarioId: 'usuario_A' }, async () => {
+          await cliente.cultivo.create({ data: { nombre: 'Duplicado' } });
+        }),
+      ).rejects.toThrow();
+      expect(await eventos()).toEqual([]);
+    });
+  });
+
+  describe('atomicidad dentro de una transaccion interactiva externa', () => {
+    it('A) HALLAZGO: escritura interceptada dentro de la transaccion externa NO es atomica', async () => {
+      await expect(
+        contexto.run({ usuarioId: 'usuario_A' }, async () => {
+          await cliente.$transaction(async (tx) => {
+            await tx.cultivo.create({ data: { nombre: 'Debe revertirse' } });
+            throw new RollbackForzado('rollback de la transaccion externa');
+          });
+        }),
+      ).rejects.toThrow();
+
+      const filas = await cultivos();
+      const eventosQuedados = await eventos();
+      console.log('A) tras rollback externo => cultivos:', filas, 'eventos:', eventosQuedados);
+      // Se documenta lo observado: la transaccion por lotes de la extension
+      // se escapa de la transaccion externa y queda confirmada pese al rollback.
+      expect(filas).toEqual([{ nombre: 'Debe revertirse' }]);
+      expect(eventosQuedados).toEqual([{ tabla: 'cultivos', usuario: 'usuario_A' }]);
+    });
+
+    it('B) modelo excluido (caso Actividad) + error en la transaccion externa', async () => {
+      await expect(
+        contexto.run({ usuarioId: 'usuario_A' }, async () => {
+          await clienteExcluyeCultivo.$transaction(async (tx) => {
+            await tx.cultivo.create({ data: { nombre: 'Debe revertirse' } });
+            throw new RollbackForzado('rollback de la transaccion externa');
+          });
+        }),
+      ).rejects.toThrow();
+
+      expect(await cultivos()).toEqual([]);
+      expect(await eventos()).toEqual([]);
+    });
+
+    it('B2) modelo excluido + commit: queda en la misma transaccion que el resto', async () => {
+      const txids = await contexto.run({ usuarioId: 'usuario_A' }, async () =>
+        clienteExcluyeCultivo.$transaction(async (tx) => {
+          const [{ txid }] = await tx.$queryRawUnsafe<{ txid: bigint }[]>(
+            'SELECT txid_current() AS txid',
+          );
+          await tx.cultivo.create({ data: { nombre: 'Commit' } });
+          return txid;
+        }),
+      );
+      const [evento] = await base.$queryRawUnsafe<{ txid: bigint }[]>(
+        'SELECT txid FROM prueba_eventos',
+      );
+      expect(evento.txid).toBe(txids);
+    });
+
+    it('C) transaccion abierta desde el cliente BASE con set_config al inicio', async () => {
+      const transaccionAuditada = <T>(
+        usuarioId: string,
+        fn: (tx: Parameters<Parameters<PrismaClient['$transaction']>[0]>[0]) => Promise<T>,
+      ) =>
+        base.$transaction(async (tx) => {
+          await tx.$executeRaw`SELECT set_config('app.usuario_id', ${usuarioId}, true)`;
+          return fn(tx);
+        });
+
+      // C1: rollback => no queda nada.
+      await expect(
+        transaccionAuditada('usuario_A', async (tx) => {
+          await tx.cultivo.create({ data: { nombre: 'Debe revertirse' } });
+          throw new RollbackForzado('rollback');
+        }),
+      ).rejects.toThrow();
+      expect(await cultivos()).toEqual([]);
+      expect(await eventos()).toEqual([]);
+
+      // C2: commit => cambio y evento con usuario, juntos.
+      await transaccionAuditada('usuario_A', async (tx) => {
+        await tx.cultivo.create({ data: { nombre: 'Uno' } });
+        await tx.cultivo.create({ data: { nombre: 'Dos' } });
+      });
+      expect(await cultivos()).toEqual([{ nombre: 'Dos' }, { nombre: 'Uno' }]);
+      expect((await eventos()).map((e) => e.usuario)).toEqual(['usuario_A', 'usuario_A']);
+    });
+  });
+});

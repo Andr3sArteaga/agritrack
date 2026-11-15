@@ -27,8 +27,8 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   {
     href: "/panel/dashboard",
-    label: "Dashboard",
-    ayuda: "Resumen general: hectáreas, campañas y rendimientos",
+    label: "Resumen",
+    ayuda: "Estado de las parcelas y resumen de la operación",
     icono: LayoutDashboard,
     roles: ["JEFE", "CONTABILIDAD"],
   },

@@ -1,0 +1,196 @@
+Comando: cd apps/api && npm run test -- --verbose --reporters=default
+Fecha: 2026-11-02 16:58:01
+Node: v22.18.0
+Rama: feat/reportes | Commit: 40e9bd5
+Contexto: reporte por campana (RF-42), vista de detalle; rama con cherry-pick de 265fb38
+------------------------------------------------------------
+PASS src/modules/reportes/application/reportes.service.reporte-campana.spec.ts
+  ReportesService.reporteCampana (RF-42)
+    √ periodo por defecto: fechas de la campana y fecha de generacion (17 ms)
+    √ filtro por rango: consulta solo el periodo pedido (hasta inclusivo) (4 ms)
+    √ 400 si desde es posterior a hasta, sin consultar movimientos (34 ms)
+    √ 400 tambien cuando solo desde queda despues del fin de la campana (3 ms)
+    √ 404 si la campana no existe (5 ms)
+    √ cosecha y costos salen de los movimientos del periodo (3 ms)
+    √ sin cosecha en el periodo: cosecha y costo por tonelada en null (2 ms)
+
+PASS src/shared/integridad/canonicalizar-actividad.spec.ts
+  canonicalizarActividad
+    √ produce exactamente el formato canonico esperado (orden fijo de campos) (10 ms)
+    √ el mismo registro produce la misma cadena, aunque sean objetos distintos (4 ms)
+    √ no depende del orden de las propiedades del objeto de entrada (1 ms)
+    √ serializa la fecha como ISO UTC (mismo instante = misma cadena) (1 ms)
+    √ cambiar el campo secuencia cambia la cadena canonica (1 ms)
+    √ cambiar el campo campanaId cambia la cadena canonica (1 ms)
+    √ cambiar el campo tipo cambia la cadena canonica (1 ms)
+    √ cambiar el campo fecha cambia la cadena canonica (1 ms)
+    √ cambiar el campo descripcion cambia la cadena canonica (1 ms)
+    √ cambiar el campo insumo cambia la cadena canonica (1 ms)
+    √ cambiar el campo cantidad cambia la cadena canonica (2 ms)
+    √ cambiar el campo unidad cambia la cadena canonica
+    √ cambiar el campo responsableId cambia la cadena canonica (1 ms)
+    √ cambiar el campo tercerizado cambia la cadena canonica (1 ms)
+    √ cambiar el campo maquinariaUtilizada cambia la cadena canonica
+    √ cambiar el campo rendimientoTnHa cambia la cadena canonica
+    √ cambiar el campo correccionDeId cambia la cadena canonica (1 ms)
+    √ cambiar el campo motivoCorreccion cambia la cadena canonica (1 ms)
+    √ cambiar el campo hashAnterior cambia la cadena canonica
+    √ distingue null de cadena vacia y de cero (1 ms)
+  calcularHashSha256
+    √ coincide con el vector de prueba SHA-256 conocido ("abc") (2 ms)
+    √ el hash del registro canonico coincide con el valor calculado de forma independiente (1 ms)
+    √ devuelve 64 caracteres hexadecimales y es determinista (1 ms)
+    √ un cambio minimo en la entrada cambia por completo el hash (1 ms)
+  encadenamiento con hashAnterior
+    √ la primera actividad no tiene hashAnterior y las siguientes apuntan al hash previo (2 ms)
+    √ cada hash se recalcula igual a partir del contenido guardado (1 ms)
+    √ dos registros con contenido identico pero distinta posicion en la cadena tienen hashes distintos (1 ms)
+    √ el hashAnterior forma parte del hash: alterarlo invalida el hash propio (1 ms)
+
+PASS src/modules/integridad/application/integridad.service.spec.ts
+  IntegridadService.verificarGlobal
+    √ valida una cadena intacta (13 ms)
+    √ considera valida una cadena vacia (2 ms)
+    √ detecta una descripcion modificada y senala el registro alterado (2 ms)
+    √ detecta un rendimiento de cosecha modificado (2 ms)
+    √ detecta la modificacion del campo fecha (8 ms)
+    √ detecta la modificacion del campo cantidad (1 ms)
+    √ detecta la modificacion del campo campanaId (1 ms)
+    √ detecta la modificacion del campo hashAnterior (1 ms)
+    √ informa la primera actividad alterada cuando hay varias (1 ms)
+    √ detecta un registro alterado aunque el atacante recalcule el hash propio (rompe la cadena en el siguiente) (1 ms)
+    √ detecta un registro eliminado del medio (hueco en la secuencia) (1 ms)
+    √ detecta que se elimino el primer registro de la cadena (1 ms)
+    √ detecta registros reordenados (2 ms)
+  IntegridadService.verificarPorParcela
+    √ valida las actividades intactas de una parcela (2 ms)
+    √ detecta un registro de la parcela cuyo contenido fue modificado (1 ms)
+    √ solo valida cada registro contra su propio hashAnterior guardado (no la continuidad global) (1 ms)
+
+PASS src/modules/costos/application/insumos.service.spec.ts
+  InsumosService
+    create
+      √ crea el insumo con su precio inicial (13 ms)
+      √ rechaza un nombre repetido (35 ms)
+    update
+      √ 404 si el insumo no existe (2 ms)
+      √ no deja renombrar a un nombre que ya existe (2 ms)
+      √ permite guardar con su propio nombre sin validar duplicado (3 ms)
+    historial de precios
+      √ agregar un precio nuevo no toca los anteriores (solo agrega) (3 ms)
+      √ sin vigenteDesde el precio rige desde ahora (1 ms)
+      √ 404 al agregar o listar precios de un insumo inexistente (2 ms)
+      √ lista el historial tal como lo entrega el repositorio (1 ms)
+
+PASS src/modules/reportes/domain/rules/periodo-reporte.spec.ts
+  resolverPeriodo (RF-42)
+    √ sin desde ni hasta usa las fechas de la campana (periodo por defecto) (11 ms)
+    √ con desde y hasta usa el rango pedido; hasta es inclusivo (todo ese dia) (2 ms)
+    √ si solo viene uno, el otro se completa con la fecha de la campana (1 ms)
+    √ campana sin fecha de fin (en curso): el fin por defecto es hoy, sin la hora (1 ms)
+    √ campana planificada que aun no empieza: el periodo por defecto no queda invertido (1 ms)
+    √ no corrige un rango invertido: lo detecta quien llama (400)
+
+PASS src/modules/costos/domain/rules/calcular-resumen-costos.spec.ts
+  calcularResumenCostos (RF-30)
+    √ separa lo pagado de lo comprometido (18 ms)
+    √ los gastos anulados no cuentan en ningun total (1 ms)
+    √ ahorro = presupuesto - gasto real (solo pagado), puede ser negativo (1 ms)
+    √ ahorro es null si la campana no tiene presupuesto (2 ms)
+    √ costo por ha = gasto real / hectareas (redondeado a 2 decimales) (1 ms)
+    √ costo por ha es null si la parcela no tiene hectareas (1 ms)
+    √ sin gastos devuelve ceros (no null) y el ahorro es todo el presupuesto (2 ms)
+    costo por tonelada
+      √ es null si no hay produccion real registrada (1 ms)
+      √ es null si el rendimiento registrado es 0 (1 ms)
+      √ con produccion = gasto real / (rendimiento t/ha x hectareas) (2 ms)
+
+PASS src/modules/actividades/application/actividades.service.spec.ts
+  ActividadesService.crear — correcciones
+    √ una correccion llama a crearConIntegridad con correccionDeId y motivo (17 ms)
+    √ crea un registro nuevo y no modifica el original (4 ms)
+    √ el repositorio de actividades no expone ninguna operacion de update/delete (1 ms)
+    √ rechaza corregir una actividad inexistente sin crear nada (35 ms)
+    √ corregir una COSECHA no cambia el estado de la campana; una cosecha nueva si (3 ms)
+
+PASS src/modules/costos/application/gastos.service.spec.ts
+  GastosService
+    crear
+      √ registra un gasto manual con el monto indicado (13 ms)
+      √ rechaza una campana inexistente (31 ms)
+      √ rechaza cantidad sin insumo del catalogo (3 ms)
+      con insumo del catalogo (precio vigente segun la fecha)
+        √ monto = cantidad x precio vigente a la fecha del gasto (2 ms)
+        √ gastos en fechas distintas usan el precio de cada fecha (2 ms)
+        √ redondea el monto a 2 decimales (1 ms)
+        √ falla si no hay precio vigente a esa fecha (2 ms)
+        √ exige categoria INSUMOS (2 ms)
+        √ rechaza un insumo inexistente o desactivado (3 ms)
+    editar
+      √ actualiza descripcion, fecha y estado de un gasto manual (2 ms)
+      √ en un gasto de insumo no deja cambiar el monto ni la categoria (3 ms)
+      √ no permite editar un gasto anulado (3 ms)
+      √ 404 si el gasto no existe (2 ms)
+    anular (sin borrar, con motivo)
+      √ marca el gasto como anulado guardando el motivo y la fecha (2 ms)
+      √ no anula dos veces el mismo gasto (5 ms)
+      √ 404 si el gasto no existe (2 ms)
+    bloqueo cuando la campana no permite gastos (RF-57)
+      √ no deja crear (2 ms)
+      √ no deja editar (2 ms)
+      √ no deja anular (2 ms)
+      √ consulta la regla con la campana del gasto (2 ms)
+    listar
+      √ excluye anulados por defecto y los incluye si se pide (2 ms)
+
+PASS src/app.controller.spec.ts
+  AppController
+    root
+      √ should return "Hello World!" (1 ms)
+
+PASS src/modules/costos/domain/rules/campana-permite-gastos.spec.ts
+  campanaPermiteGastos (RF-57)
+    √ permite registrar gastos en una campana PLANIFICADA (1 ms)
+    √ permite registrar gastos en una campana EN_CURSO
+    √ permite registrar gastos en una campana COSECHADA
+
+PASS src/modules/costos/application/presupuestos.service.spec.ts
+  PresupuestosService
+    √ guarda un unico presupuesto total por campana (RF-29) (2 ms)
+    √ conserva las notas cuando se envian
+    √ 404 al guardar u obtener en una campana inexistente (15 ms)
+    √ 404 si la campana todavia no tiene presupuesto (1 ms)
+    √ bloquea el cambio de presupuesto si la campana no permite gastos (RF-57)
+
+PASS src/modules/reportes/application/dto/reporte-campana-query.dto.spec.ts
+  ReporteCampanaQueryDto: fechas del periodo (400 si son invalidas)
+    √ acepta sin fechas y con fechas AAAA-MM-DD validas (11 ms)
+    √ rechaza: formato dd/mm/aaaa (5 ms)
+    √ rechaza: mes inexistente
+    √ rechaza: dia inexistente (1 ms)
+    √ rechaza: con hora (1 ms)
+    √ rechaza: texto
+
+PASS src/modules/costos/application/dto/anular-gasto.dto.spec.ts
+  AnularGastoDto: el motivo es obligatorio (RF-56)
+    √ acepta un motivo valido (10 ms)
+    √ rechaza: sin motivo (5 ms)
+    √ rechaza: motivo vacio (2 ms)
+    √ rechaza: solo espacios (1 ms)
+    √ rechaza: demasiado corto (1 ms)
+    √ rechaza: no es texto (1 ms)
+    √ rechaza: demasiado largo (1 ms)
+    √ recorta los espacios alrededor del motivo (1 ms)
+
+PASS src/modules/reportes/presentation/reportes.controller.roles.spec.ts
+  GET /reportes/campanas/:id: acceso por rol
+    √ CONTABILIDAD puede ver el detalle del reporte (6 ms)
+    √ JEFE puede ver el detalle del reporte
+    √ OPERATIVO no puede (403)
+
+Test Suites: 14 passed, 14 total
+Tests:       128 passed, 128 total
+Snapshots:   0 total
+Time:        2.25 s
+Ran all test suites.
+exit: 0

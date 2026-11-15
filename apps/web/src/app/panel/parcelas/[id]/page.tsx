@@ -4,24 +4,24 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Activity as IconoEstado,
   ArrowLeft,
-  Beaker,
   CalendarRange,
-  Droplets,
-  FlaskConical,
+  LineChart,
   Pencil,
   Plus,
-  Sprout,
-  SprayCan,
   Trash2,
-  Wheat,
-  type LucideIcon,
 } from "lucide-react";
 import { Ayuda } from "@/components/ayuda";
 import { BadgeEstadoCampana } from "@/components/badge";
+import { EstimacionComponente } from "@/components/estado/estimacion-componente";
+import { PanelEstadoParcela } from "@/components/estado/panel-estado-parcela";
+import { IconoActividad } from "@/components/icono-actividad";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useResumenParcela } from "@/lib/cargar-resumen";
 import { formatearFecha } from "@/lib/format";
+import { elegirCampanaActual } from "@/lib/parcelas";
 import {
   ESTADO_CAMPANA_LABEL,
   TIPO_ACTIVIDAD_LABEL,
@@ -30,26 +30,11 @@ import {
   type Cultivo,
   type EstadoCampana,
   type Parcela,
-  type TipoActividad,
 } from "@/lib/types";
 import { CampanaForm } from "./campana-form";
 import { ActividadForm } from "./actividad-form";
 
 const ESTADOS: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"];
-
-const ICONO_ACTIVIDAD: Record<TipoActividad, LucideIcon> = {
-  SIEMBRA: Sprout,
-  FUMIGACION: SprayCan,
-  FERTILIZACION: FlaskConical,
-  MEDICION_HUMEDAD_SUELO: Droplets,
-  MEDICION_HUMEDAD_GRANO: Beaker,
-  COSECHA: Wheat,
-};
-
-function IconoActividad({ tipo }: { tipo: TipoActividad }) {
-  const Icono = ICONO_ACTIVIDAD[tipo];
-  return <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />;
-}
 
 export default function ParcelaPrivadaDetallePage() {
   const params = useParams<{ id: string }>();
@@ -69,6 +54,7 @@ export default function ParcelaPrivadaDetallePage() {
   const [mostrarFormCampana, setMostrarFormCampana] = useState(false);
   const [mostrarFormActividad, setMostrarFormActividad] = useState(false);
   const [corrigiendo, setCorrigiendo] = useState<Actividad | null>(null);
+  const { datos: resumenEstado, error: errorEstado } = useResumenParcela(parcela, campanas, cultivos);
 
   const cargarParcela = useCallback(() => {
     api
@@ -129,6 +115,12 @@ export default function ParcelaPrivadaDetallePage() {
     return cultivos.find((c) => c.id === id)?.nombre ?? "—";
   }
 
+  // Se estima la campaña actual; si no hay, la mas reciente.
+  const campanaParaEstimar =
+    elegirCampanaActual(campanas) ??
+    [...campanas].sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio))[0] ??
+    null;
+
   if (error) return <p className="text-red-600">{error}</p>;
   if (!parcela) return <p className="text-stone-500">Cargando...</p>;
 
@@ -148,9 +140,37 @@ export default function ParcelaPrivadaDetallePage() {
         </p>
       </div>
 
+      <section className="space-y-3" aria-labelledby="estado-parcela">
+        <h2 id="estado-parcela" className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+          <IconoEstado className="h-6 w-6 text-emerald-700" aria-hidden />
+          Estado de la parcela
+        </h2>
+        {errorEstado ? (
+          <p className="text-red-700">{errorEstado}</p>
+        ) : resumenEstado ? (
+          <PanelEstadoParcela resumen={resumenEstado} />
+        ) : (
+          <p className="text-stone-600">Cargando el estado de la parcela...</p>
+        )}
+      </section>
+
+      {campanaParaEstimar && (
+        <section className="space-y-3" aria-labelledby="estimacion-rendimiento">
+          <h2 id="estimacion-rendimiento" className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+            <LineChart className="h-6 w-6 text-emerald-700" aria-hidden />
+            Estimación de rendimiento
+          </h2>
+          <EstimacionComponente
+            parcelaId={parcela.id}
+            campanaId={campanaParaEstimar.id}
+            temporada={campanaParaEstimar.temporada}
+          />
+        </section>
+      )}
+
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-          <CalendarRange className="h-5 w-5 text-emerald-700" aria-hidden />
+        <h2 className="flex items-center gap-2 text-[22px] font-bold text-stone-900">
+          <CalendarRange className="h-6 w-6 text-emerald-700" aria-hidden />
           Campañas
           <Ayuda texto="Una campaña es un ciclo de cultivo en esta parcela: desde la siembra hasta la cosecha." />
         </h2>

@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía visual AgriTrack</title>
+<style>
+/* ============ TOKENS (se copian tal cual a globals.css en la fase 2) ============ */
+:root{
+  --texto:#1c1917; --texto-suave:#57534e; --texto-tenue:#78716c;
+  --borde:#d6d3d1; --fondo:#fafaf9; --tarjeta:#ffffff;
+  --marca:#047857; --marca-fuerte:#065f46;
+  --bien-fondo:#ecfdf5;      --bien-borde:#047857;      --bien-texto:#064e3b;      --bien-icono:#047857;
+  --atencion-fondo:#fffbeb;  --atencion-borde:#b45309;  --atencion-texto:#78350f;  --atencion-icono:#b45309;
+  --critico-fondo:#fef2f2;   --critico-borde:#b91c1c;   --critico-texto:#7f1d1d;   --critico-icono:#b91c1c;
+  --sindatos-fondo:#f1f5f9;  --sindatos-borde:#475569;  --sindatos-texto:#1e293b;  --sindatos-icono:#475569;
+  --pend-fondo:#eef2ff;      --pend-borde:#4338ca;      --pend-texto:#312e81;      --pend-icono:#4338ca;
+  --radio:8px; --radio-boton:6px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5}
+.ic{flex:none;vertical-align:-3px}
+a{color:var(--marca)}
+code,.mono{font-family:Consolas,Menlo,monospace;font-size:.88em}
+h1{font-size:30px;line-height:1.25;margin:0 0 8px}
+h2{font-size:22px;line-height:1.3;margin:0 0 12px}
+h3{font-size:18px;line-height:1.35;margin:0 0 8px}
+p{margin:0 0 12px}
+.suave{color:var(--texto-suave)} .tenue{color:var(--texto-tenue)}
+.pagina{max-width:1080px;margin:0 auto;padding:0 16px 64px}
+@media(min-width:720px){.pagina{padding:0 24px 64px}}
+header.cab{background:#fff;border-bottom:1px solid var(--borde)}
+header.cab .pagina{padding-top:24px;padding-bottom:20px}
+.marca{color:var(--marca);font-weight:700}
+nav.indice{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:14px}
+.barra{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--borde);padding:4px 0}
+.barra .pagina{padding-bottom:0;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;font-size:14px}
+.barra label{display:inline-flex;align-items:center;gap:8px;min-height:36px;cursor:pointer}
+.barra input{width:20px;height:20px}
+section.bloque-guia{margin-top:48px;scroll-margin-top:110px}
+section.bloque-guia>h2{padding-bottom:8px;border-bottom:2px solid var(--marca)}
+.cuadricula{display:grid;gap:16px}
+.c2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.c3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.c4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.caja{background:var(--tarjeta);border:1px solid var(--borde);border-radius:var(--radio);padding:20px}
+.nota{background:#fff;border-left:4px solid var(--marca);padding:12px 16px;border-radius:4px;margin:12px 0}
+table.t{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+table.t th,table.t td{border:1px solid var(--borde);padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{background:#f5f5f4}
+.scroll{overflow-x:auto}
+.ok{color:#064e3b;font-weight:700}
+.ph{border-bottom:2px dashed var(--texto-tenue);font-family:Consolas,Menlo,monospace;font-size:.92em;color:var(--texto-suave)}
+
+/* ============ ESTADOS ============ */
+.est-bien{--e-fondo:var(--bien-fondo);--e-borde:var(--bien-borde);--e-texto:var(--bien-texto);--e-icono:var(--bien-icono)}
+.est-atencion{--e-fondo:var(--atencion-fondo);--e-borde:var(--atencion-borde);--e-texto:var(--atencion-texto);--e-icono:var(--atencion-icono)}
+.est-critico{--e-fondo:var(--critico-fondo);--e-borde:var(--critico-borde);--e-texto:var(--critico-texto);--e-icono:var(--critico-icono)}
+.est-sindatos{--e-fondo:var(--sindatos-fondo);--e-borde:var(--sindatos-borde);--e-texto:var(--sindatos-texto);--e-icono:var(--sindatos-icono)}
+.est-pend{--e-fondo:var(--pend-fondo);--e-borde:var(--pend-borde);--e-texto:var(--pend-texto);--e-icono:var(--pend-icono)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:2px solid var(--e-borde);background:var(--e-fondo);color:var(--e-texto);border-radius:999px;font-weight:700;font-size:14px;line-height:1.4;white-space:nowrap}
+.chip .ic{color:var(--e-icono)}
+.chip.lg{padding:7px 14px;font-size:16px}
+.chip.sm{padding:1px 8px;font-size:13px}
+.est-sindatos .chip,.est-sindatos.chip,.est-pend.chip{border-style:dashed}
+.est-pend.chip{border-style:dotted}
+.bloque{border:2px solid var(--e-borde);border-left-width:10px;background:var(--e-fondo);color:var(--e-texto);border-radius:var(--radio);padding:14px 16px}
+.est-sindatos.bloque{border-style:dashed;border-left-style:solid}
+.est-pend.bloque{border-style:dotted;border-left-style:solid}
+.bloque .ic{color:var(--e-icono)}
+.bloque h3{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.bloque p{margin:0 0 6px;font-size:15px}
+.cifra{font-size:32px;font-weight:700;line-height:1.1}
+
+/* ============ TARJETA DE PARCELA ============ */
+.parcela{background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:20px}
+.parcela .cab-p{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.parcela .cab-p h3{font-size:20px;margin:0}
+.resumen-linea{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 0;font-size:15px;color:var(--texto-suave)}
+.datos-clave{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0;padding:12px 0;border-top:1px solid var(--borde);border-bottom:1px solid var(--borde)}
+.dato{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--texto-suave)}
+.dato .ic{color:var(--texto-suave);margin-top:2px}
+.dato b{display:block;color:var(--texto);font-size:16px}
+.dato .pend-mini{display:inline-flex;align-items:center;gap:4px;margin-top:2px;padding:0 6px;border:1.5px dotted var(--pend-borde);background:var(--pend-fondo);color:var(--pend-texto);border-radius:4px;font-size:13px;font-weight:700}
+.areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.area-mini{border:2px solid var(--e-borde);background:var(--e-fondo);color:var(--e-texto);border-radius:var(--radio);padding:10px 12px;font-size:14px}
+.est-sindatos.area-mini{border-style:dashed}
+.area-mini .tit{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px;margin-bottom:6px}
+.area-mini .tit .ic{color:var(--e-icono)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--radio-boton);border:2px solid var(--marca);background:var(--marca);color:#fff;font:700 16px Arial,sans-serif;text-decoration:none;cursor:pointer}
+.btn.sec{background:#fff;color:var(--marca)}
+.btn:focus-visible,summary:focus-visible,.tab:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}
+.btn[disabled]{opacity:1;background:#fff;color:var(--texto-suave);border:2px dotted var(--texto-tenue);cursor:not-allowed}
+
+/* ============ SELECTOR ============ */
+.selector{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}
+.tab{scroll-snap-align:start;min-width:190px;flex:none;text-align:left;background:#fff;border:2px solid var(--borde);border-radius:var(--radio);padding:10px 12px;font:inherit;cursor:pointer}
+.tab[aria-selected=true]{border-color:var(--marca);box-shadow:0 0 0 2px var(--marca) inset}
+.tab .fila{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tab .nombre{font-weight:700}
+.tab .sub{font-size:14px;color:var(--texto-suave);margin-top:4px}
+
+/* ============ DESGLOSE ============ */
+details.area-d{background:#fff;border:1px solid var(--borde);border-radius:var(--radio);margin-bottom:12px}
+details.area-d>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:14px 16px;min-height:52px;cursor:pointer;font-weight:700;font-size:17px}
+details.area-d>summary::-webkit-details-marker{display:none}
+details.area-d>summary .cuenta{font-weight:400;font-size:14px;color:var(--texto-suave)}
+details.area-d>summary .chev{margin-left:auto;transition:transform .15s}
+details.area-d[open]>summary .chev{transform:rotate(180deg)}
+.indicadores{border-top:1px solid var(--borde)}
+details.ind{border-bottom:1px solid var(--borde)}
+details.ind:last-child{border-bottom:0}
+details.ind>summary{list-style:none;display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:12px 16px;min-height:52px;cursor:pointer}
+details.ind>summary::-webkit-details-marker{display:none}
+details.ind>summary .nom{font-weight:700}
+details.ind>summary .val{font-size:14px;color:var(--texto-suave)}
+details.ind>summary .est{justify-self:end}
+details.ind .detalle{padding:4px 16px 16px;font-size:14px;color:var(--texto-suave)}
+details.ind .detalle dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0 0 8px}
+details.ind .detalle dt{font-weight:700;color:var(--texto)}
+details.ind .detalle dd{margin:0}
+@media(min-width:720px){details.ind>summary{grid-template-columns:1.4fr 1fr auto}}
+
+/* ============ ALERTA / VACIO / RESERVADO ============ */
+.alerta{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--e-borde);border-left-width:10px;background:var(--e-fondo);color:var(--e-texto);border-radius:var(--radio);padding:12px 14px}
+.est-sindatos.alerta{border-style:dashed;border-left-style:solid}
+.est-pend.alerta{border-style:dotted;border-left-style:solid}
+.alerta .ic{color:var(--e-icono);margin-top:2px}
+.alerta strong{display:block}
+.alerta p{margin:4px 0 0;font-size:15px}
+.etq-rev{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:1px 8px;border:2px dotted var(--pend-borde);background:var(--pend-fondo);color:var(--pend-texto);border-radius:999px;font-size:13px;font-weight:700}
+.vacio{border:2px dashed var(--sindatos-borde);background:var(--sindatos-fondo);color:var(--sindatos-texto);border-radius:var(--radio);padding:28px 20px;text-align:center}
+.vacio .circulo{width:56px;height:56px;margin:0 auto 12px;border-radius:50%;border:2px dashed var(--sindatos-borde);display:grid;place-items:center;background:#fff;color:var(--sindatos-icono)}
+.vacio h3{font-size:20px;margin-bottom:6px}
+.vacio.mini{padding:12px 14px;text-align:left;display:flex;gap:10px;align-items:center}
+.vacio.mini .circulo{width:32px;height:32px;margin:0;flex:none}
+.vacio.mini p{margin:0;font-size:15px}
+.reservado{border:2px dotted var(--pend-borde);background:#fff;border-radius:var(--radio);padding:16px;color:var(--pend-texto);display:flex;gap:12px;align-items:flex-start}
+.publica{background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:20px}
+.publica dl{margin:12px 0;display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:15px}
+.publica dt{color:var(--texto-suave)} .publica dd{margin:0;font-weight:700;text-align:right}
+.caja-prod{margin:12px 0;border:1px solid var(--borde);border-radius:var(--radio);padding:12px;background:#fafaf9}
+
+/* ============ TIPOGRAFIA / ESPACIADO ============ */
+.muestra-tipo>div{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--borde)}
+.muestra-tipo small{color:var(--texto-suave);font-size:13px;min-width:210px}
+.esp{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:14px}
+.esp i{display:block;height:16px;background:var(--marca);border-radius:2px}
+.iconos{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.iconos div{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:10px 12px;font-size:14px}
+.iconos .ic{color:var(--texto)}
+
+/* ============ INTERRUPTORES DE PRUEBA ============ */
+body.gris .demo{filter:grayscale(1)}
+body.chico .demo{max-width:360px;margin-inline:auto;border:2px dashed var(--texto-tenue);padding:8px;background:#fafaf9}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="cab"><div class="pagina">
+  <div class="marca" style="font-size:20px">AgriTrack</div>
+  <h1>Guía visual — propuesta para aprobar (fase 1)</h1>
+  <p class="suave" style="max-width:760px">Esta es solo la guía. <b>Todavía no se cambió ninguna pantalla.</b> Los valores entre corchetes, como <span class="ph">[valor]</span>, <span class="ph">[n]</span> o <span class="ph">[fecha]</span>, son marcadores de diseño: no son datos de AgroAn ni reglas agronómicas.</p>
+  <nav class="indice" aria-label="Contenido">
+    <a href="#principios">1. Principios</a><a href="#estados">2. Estados</a><a href="#pendientes">3. Marcadores pendientes</a><a href="#tipografia">4. Tipografía</a><a href="#espaciado">5. Espaciado</a><a href="#iconos">6. Iconos</a><a href="#componentes">7. Componentes</a><a href="#publico">8. Parte pública</a><a href="#lenguaje">9. Lenguaje y textos</a><a href="#datos">10. Qué datos existen</a><a href="#decisiones">11. Decisiones para ti</a><a href="#orden">12. Orden de la fase 2</a>
+  </nav>
+</div></header>
+
+<div class="barra"><div class="pagina">
+  <strong>Probar la guía:</strong>
+  <label><input type="checkbox" id="chk-gris"> Ver en escala de grises</label>
+  <label><input type="checkbox" id="chk-chico"> Ver en pantalla pequeña (360 px)</label>
+</div></div>
+
+<main class="pagina">
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="principios"><h2>1. Principios</h2>
+<ol>
+  <li><b>“Sin datos” es un estado normal, no un error.</b> Tiene el mismo tamaño, borde e importancia que los otros tres.</li>
+  <li><b>Un dato que falta o está vencido nunca se ve como “Bien”.</b> “Bien” solo aparece si el dato existe, está al día y cumple una regla validada.</li>
+  <li><b>Cada estado se reconoce por color, icono y palabra.</b> Si falta una de las tres, las otras dos bastan (pantalla pequeña, escala de grises, daltonismo).</li>
+  <li><b>No se inventan números.</b> Si falta una regla o un dato, se dice con claridad y no se rellena.</li>
+  <li><b>Palabras simples.</b> Frases cortas y botones que dicen lo que hacen.</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="estados"><h2>2. Los cuatro estados</h2>
+<div class="demo">
+  <div class="cuadricula c4">
+    <div class="bloque est-bien"><h3><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</h3><p>Hay dato, está al día y cumple la regla validada.</p><span class="chip est-bien lg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</span></div>
+    <div class="bloque est-atencion"><h3><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</h3><p>Hay dato, pero conviene revisarlo pronto.</p><span class="chip est-atencion lg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</span></div>
+    <div class="bloque est-critico"><h3><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</h3><p>Hay dato y requiere acción ahora.</p><span class="chip est-critico lg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span></div>
+    <div class="bloque est-sindatos"><h3><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</h3><p>Falta el dato o está vencido. No se puede saber el estado.</p><span class="chip est-sindatos lg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></div>
+  </div>
+</div>
+<p class="suave" style="margin-top:12px">Cómo se distinguen sin color: <b>forma del icono</b> (círculo con ✓, triángulo, octágono, círculo punteado), <b>forma del borde</b> (“Sin datos” es punteado) y <b>la palabra</b>. Activa “Ver en escala de grises” arriba para comprobarlo.</p>
+
+<h3 style="margin-top:24px">Tamaños del distintivo</h3>
+<div class="demo caja" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+  <span class="chip sm est-bien"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</span><span class="chip sm est-atencion"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</span><span class="chip sm est-critico"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span>
+  <span class="tenue">pequeño (listas)</span>
+</div>
+<div class="demo caja" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px">
+  <span class="chip est-bien"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</span><span class="chip est-atencion"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</span><span class="chip est-critico"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span><span class="chip est-sindatos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span>
+  <span class="tenue">normal (tarjetas)</span>
+</div>
+
+<h3 style="margin-top:24px">Contraste (medido con la fórmula WCAG; AA exige 4,5 para texto y 3 para iconos y bordes)</h3>
+<div class="scroll"><table class="t"><thead><tr><th>Estado</th><th>Texto sobre su fondo (mín. 4,5)</th><th>Icono sobre su fondo (mín. 3)</th><th>Borde sobre blanco (mín. 3)</th><th>Gris del borde (0–255)</th></tr></thead><tbody><tr><td>Bien</td><td><span class="ok">9.23 ✓</span></td><td><span class="ok">5.21 ✓</span></td><td><span class="ok">5.48 ✓</span></td><td>105</td></tr><tr><td>Atención</td><td><span class="ok">8.75 ✓</span></td><td><span class="ok">4.84 ✓</span></td><td><span class="ok">5.02 ✓</span></td><td>111</td></tr><tr><td>Crítico</td><td><span class="ok">9.16 ✓</span></td><td><span class="ok">5.91 ✓</span></td><td><span class="ok">6.47 ✓</span></td><td>94</td></tr><tr><td>Sin datos</td><td><span class="ok">13.35 ✓</span></td><td><span class="ok">6.92 ✓</span></td><td><span class="ok">7.58 ✓</span></td><td>85</td></tr><tr><td>Pendiente (marcador)</td><td><span class="ok">10.22 ✓</span></td><td><span class="ok">7.07 ✓</span></td><td><span class="ok">7.90 ✓</span></td><td>82</td></tr><tr><td>Botón principal (blanco sobre verde AgriTrack)</td><td><span class="ok">5.48 ✓</span></td><td>—</td><td>—</td><td>—</td></tr><tr><td>Texto secundario (gris) sobre blanco</td><td><span class="ok">7.63 ✓</span></td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+<p class="suave" style="margin-top:8px">En escala de grises los cinco bordes quedan casi iguales (valores 82–111 de 255). Por eso <b>nunca</b> se usa el color solo.</p>
+
+<h3 style="margin-top:24px">Regla del estado general de una parcela</h3>
+<div class="caja">
+<p><b>Orden de gravedad: Crítico → Atención → Sin datos → Bien.</b> El estado general es el peor de sus indicadores.</p>
+<ul>
+  <li>Si hay un indicador <b>Crítico</b>, la parcela es <b>Crítico</b>.</li>
+  <li>Si no, y hay uno en <b>Atención</b>, es <b>Atención</b>.</li>
+  <li>Si no, y falta o está vencido algún dato, es <b>Sin datos</b>. <b>Nunca “Bien”.</b></li>
+  <li>Solo si <b>todos</b> los indicadores tienen dato al día y cumplen su regla, es <b>Bien</b>.</li>
+</ul>
+<p class="suave">Con esta regla, “0 alertas” nunca se puede leer como “todo bien” cuando faltan datos: en ese caso se muestra “Sin datos” y no “0 alertas”. <b>Pendiente de definir:</b> cuántos días vale un dato antes de considerarse vencido (depende de cada indicador y de una fuente validada).</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="pendientes"><h2>3. Marcadores “Pendiente” (no son estados)</h2>
+<p>Sirven para decir <b>por qué</b> algo no se muestra. “Sin datos” significa que falta el dato; “Pendiente” significa que falta una regla, una aprobación o una pieza del sistema. Se ven distintos: borde de puntos y color violeta.</p>
+<div class="demo cuadricula c3">
+  <div class="bloque est-pend"><h3><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pendiente de regla validada por agrónomo</h3><p>Para valores y recomendaciones agronómicas. No hay umbrales fijos.</p></div>
+  <div class="bloque est-pend"><h3><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Pendiente de revisión</h3><p>Para textos de advertencia o recomendación. No se publican hasta que los apruebe el Responsable del equipo.</p></div>
+  <div class="bloque est-pend"><h3><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Pendiente de datos</h3><p>Para un campo que la API todavía no entrega. Se deja el espacio, no se inventa.</p></div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="tipografia"><h2>4. Tipografía</h2>
+<div class="nota"><b>Hallazgo:</b> hoy se ve <b>Arial</b>. El diseño carga la fuente Geist, pero <code>globals.css</code> la reemplaza por Arial en el <code>body</code>, así que Geist no se usa. <b>Propuesta:</b> mantener Arial/Helvetica (clara, sin descargas, funciona en cualquier equipo) y quitar la carga de Geist en la fase 2. Ver decisión D5.</div>
+<div class="muestra-tipo caja">
+  <div><small>Título de página · 30/38 px · negrita</small><span style="font-size:30px;font-weight:700;line-height:1.25">Resumen de parcelas</span></div>
+  <div><small>Título de sección · 22/28 px · negrita</small><span style="font-size:22px;font-weight:700">Estado por parcela</span></div>
+  <div><small>Subtítulo / tarjeta · 18/24 px · negrita</small><span style="font-size:18px;font-weight:700">Parcela [nombre]</span></div>
+  <div><small>Texto base · 16/24 px</small><span>Escribe frases cortas y claras para todas las personas.</span></div>
+  <div><small>Texto secundario · 14/20 px · mínimo permitido</small><span style="font-size:14px;color:var(--texto-suave)">Última actualización: [fecha]</span></div>
+  <div><small>Cifra grande (contadores) · 32/36 px · negrita</small><span style="font-size:32px;font-weight:700;line-height:1.1"><span class="ph">[n]</span></span></div>
+  <div><small>Botón · 16 px · negrita · alto mínimo 44 px</small><a class="btn" href="#tipografia">Ver detalle</a></div>
+</div>
+<p class="suave" style="margin-top:8px">Hoy muchos textos son de 14 px (<code>text-sm</code>) y ayudas de 12 px. Propuesta: <b>base de 16 px</b>, y <b>nada por debajo de 14 px</b>.</p>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="espaciado"><h2>5. Espaciado y formas</h2>
+<div class="caja">
+  <div class="esp"><i style="width:4px"></i> 4 px — separación mínima (icono y texto)</div>
+  <div class="esp"><i style="width:8px"></i> 8 px — dentro de distintivos y filas</div>
+  <div class="esp"><i style="width:12px"></i> 12 px — entre elementos de una tarjeta</div>
+  <div class="esp"><i style="width:16px"></i> 16 px — espacio entre tarjetas; margen lateral en celular</div>
+  <div class="esp"><i style="width:24px"></i> 24 px — espacio entre tarjetas en escritorio; margen lateral en escritorio</div>
+  <div class="esp"><i style="width:32px"></i> 32 px — entre secciones de una pantalla</div>
+  <div class="esp"><i style="width:48px"></i> 48 px — entre bloques grandes</div>
+</div>
+<ul style="margin-top:12px">
+  <li><b>Tarjeta:</b> relleno 20 px (16 px en celular), borde de 1 px gris, esquinas de 8 px.</li>
+  <li><b>Elementos de estado:</b> borde de 2 px (el del estado) y, en bloques, una franja izquierda de 10 px. “Sin datos” lleva borde punteado.</li>
+  <li><b>Botones y filas que se tocan:</b> alto mínimo de <b>44 px</b>. Botón principal verde AgriTrack con texto blanco (5,48:1).</li>
+  <li><b>Foco con teclado:</b> contorno azul de 3 px, siempre visible.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="iconos"><h2>6. Iconos</h2>
+<p>Se usa la librería que ya está instalada (<code>lucide-react</code>): <b>no se agrega nada</b>. Tamaño 16 px dentro del texto, 20 px en títulos, 24 px en bloques de estado. Trazo de 2 px. Cada icono lleva siempre su palabra al lado; el icono solo es decorativo (<code>aria-hidden</code>).</p>
+<div class="iconos">
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pendiente de regla</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Pendiente de revisión / datos</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg> Área Suelo</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></svg> Área Cultivo</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg> Área Clima</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg> Tamaño</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 14v2.2l1.6 1"/><path d="M16 2v3"/><path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338"/><path d="M3 9h5.859"/><path d="M8 2v3"/><circle cx="16" cy="16" r="6"/></svg> Etapa</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 22h2a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v2.85"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 14v2.2l1.6 1"/><circle cx="8" cy="16" r="6"/></svg> Última actualización</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Registros protegidos</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Ayuda (pasar el cursor o tocar)</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg> Abrir / cerrar</div>
+  <div><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Información</div>
+</div>
+<p class="suave" style="margin-top:8px">Hallazgo: los iconos de ayuda de hoy usan gris muy claro (2,52:1) y no llegan a 3:1. En la fase 2 pasan a un gris más oscuro.</p>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="componentes"><h2>7. Componentes</h2>
+<div class="nota">Los ejemplos son <b>de diseño</b>: hoy no existen reglas validadas, así que en la app real casi todo lo agronómico mostrará <b>Sin datos</b> o <b>Pendiente de regla validada por agrónomo</b>. Los estados Bien, Atención y Crítico aparecen aquí para dejar el diseño listo.</div>
+
+<h3 style="margin-top:24px">7.1 Contador de parcelas por estado (arriba del dashboard)</h3>
+<p class="suave">“Sin datos” pesa igual que los demás y se lee primero porque es el caso más frecuente.</p>
+<div class="demo cuadricula c4">
+  <div class="bloque est-sindatos"><div class="cifra"><span class="ph">[n]</span></div><span class="chip est-sindatos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span><p style="margin-top:6px">parcelas sin datos</p></div>
+  <div class="bloque est-bien"><div class="cifra"><span class="ph">[n]</span></div><span class="chip est-bien"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</span><p style="margin-top:6px">parcelas bien</p></div>
+  <div class="bloque est-atencion"><div class="cifra"><span class="ph">[n]</span></div><span class="chip est-atencion"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</span><p style="margin-top:6px">parcelas en atención</p></div>
+  <div class="bloque est-critico"><div class="cifra"><span class="ph">[n]</span></div><span class="chip est-critico"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span><p style="margin-top:6px">parcelas críticas</p></div>
+</div>
+<p class="suave" style="margin-top:8px">El número de “Sin datos” se podría calcular en pantalla con datos que ya existen (ver decisión D2). Si no lo aprobas, queda como <b>Pendiente de datos</b>.</p>
+
+<h3 style="margin-top:28px">7.2 Selector de parcelas (tarjetas horizontales)</h3>
+<div class="demo">
+  <div class="selector" role="tablist" aria-label="Parcelas">
+    <button class="tab" role="tab" aria-selected="true"><div class="fila"><span class="nombre">Parcela [nombre]</span></div><div class="sub"><span class="ph">[n]</span> ha · <span class="ph">[cultivo]</span></div><div style="margin-top:6px"><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></div></button>
+    <button class="tab" role="tab" aria-selected="false"><div class="fila"><span class="nombre">Parcela [nombre]</span></div><div class="sub"><span class="ph">[n]</span> ha · <span class="ph">[cultivo]</span></div><div style="margin-top:6px"><span class="chip sm est-atencion"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</span></div></button>
+    <button class="tab" role="tab" aria-selected="false"><div class="fila"><span class="nombre">Parcela [nombre]</span></div><div class="sub"><span class="ph">[n]</span> ha · <span class="ph">[cultivo]</span></div><div style="margin-top:6px"><span class="chip sm est-bien"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</span></div></button>
+    <button class="tab" role="tab" aria-selected="false"><div class="fila"><span class="nombre">Parcela [nombre]</span></div><div class="sub"><span class="ph">[n]</span> ha · <span class="ph">[cultivo]</span></div><div style="margin-top:6px"><span class="chip sm est-critico"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span></div></button>
+  </div>
+</div>
+<p class="suave">Se desliza con el dedo en celular y con las flechas del teclado en escritorio. La parcela elegida lleva borde verde grueso (no solo color: también la marca de selección).</p>
+
+<h3 style="margin-top:28px">7.3 Tarjeta de parcela — caso más común hoy</h3>
+<div class="demo">
+<article class="parcela">
+  <div class="cab-p"><h3>Parcela <span class="ph">[nombre]</span></h3><span class="chip lg est-sindatos"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></div>
+  <div class="resumen-linea"><span><b>Estado general:</b> Sin datos</span><span><b>Alertas:</b> no se pueden contar</span><span><b>Áreas sin datos:</b> <span class="ph">[n]</span> de 3</span></div>
+  <div class="datos-clave">
+    <div class="dato"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg><div>Tamaño<b><span class="ph">[n]</span> ha</b></div></div>
+    <div class="dato"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></svg><div>Cultivo<b><span class="ph">[cultivo]</span></b><span class="pend-mini"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> % de superficie: pendiente</span></div></div>
+    <div class="dato"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 14v2.2l1.6 1"/><path d="M16 2v3"/><path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338"/><path d="M3 9h5.859"/><path d="M8 2v3"/><circle cx="16" cy="16" r="6"/></svg><div>Etapa de la campaña<b>En curso</b><span class="pend-mini"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Etapa del cultivo: pendiente</span></div></div>
+    <div class="dato"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 22h2a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v2.85"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 14v2.2l1.6 1"/><circle cx="8" cy="16" r="6"/></svg><div>Último registro de labor<b><span class="ph">[fecha]</span></b></div></div>
+  </div>
+  <div class="areas">
+    <div class="area-mini est-sindatos"><div class="tit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg> Suelo</div><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></div>
+    <div class="area-mini est-sindatos"><div class="tit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></svg> Cultivo</div><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></div>
+    <div class="area-mini est-sindatos"><div class="tit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg> Clima</div><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></div>
+  </div>
+  <p style="margin:16px 0 0"><a class="btn" href="#componentes">Ver detalle</a></p>
+</article>
+</div>
+
+<h3 style="margin-top:28px">7.4 Tarjeta de parcela — ejemplo con todos los estados (cuando existan reglas validadas)</h3>
+<div class="demo">
+<article class="parcela">
+  <div class="cab-p"><h3>Parcela <span class="ph">[nombre]</span></h3><span class="chip lg est-critico"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span></div>
+  <div class="resumen-linea"><span><b>Estado general:</b> Crítico</span><span><b>Alertas:</b> <span class="ph">[n]</span> (<span class="ph">[n]</span> críticas, <span class="ph">[n]</span> en atención)</span><span><b>Sin datos:</b> <span class="ph">[n]</span> áreas</span></div>
+  <div class="areas" style="margin-top:14px">
+    <div class="area-mini est-critico"><div class="tit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg> Suelo</div><span class="chip sm est-critico"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg> Crítico</span><div style="margin-top:6px"><span class="ph">[n]</span> alertas</div></div>
+    <div class="area-mini est-atencion"><div class="tit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></svg> Cultivo</div><span class="chip sm est-atencion"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Atención</span><div style="margin-top:6px"><span class="ph">[n]</span> alerta</div></div>
+    <div class="area-mini est-sindatos"><div class="tit"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg> Clima</div><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span><div style="margin-top:6px">No se puede contar</div></div>
+  </div>
+</article>
+</div>
+
+<h3 style="margin-top:28px">7.5 Desglose por indicador (se abre y se cierra)</h3>
+<p class="suave">Cada área muestra su estado y cuántos indicadores tiene. Cada indicador muestra su valor, su estado y, si falta, “Sin datos” o “Pendiente de regla validada por agrónomo”. Haz clic para abrir.</p>
+<div class="demo">
+<details class="area-d est-sindatos" open>
+  <summary><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg> Suelo <span class="chip est-sindatos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span> <span class="cuenta"><span class="ph">[n]</span> indicadores, ninguno con datos</span><span class="chev"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+  <div class="indicadores">
+    <details class="ind est-sindatos"><summary><span class="nom">Acidez del suelo (pH)</span><span class="val">Valor: sin análisis cargado</span><span class="est"><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></span></summary>
+      <div class="detalle"><dl><dt>Qué mide</dt><dd>Qué tan ácida o alcalina es la tierra.</dd><dt>Última medición</dt><dd><span class="ph">[fecha]</span> — no hay ninguna</dd><dt>Regla</dt><dd><span class="chip sm est-pend"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pendiente de regla validada por agrónomo</span></dd></dl></div></details>
+    <details class="ind est-sindatos"><summary><span class="nom">Nitrógeno</span><span class="val">Valor: sin análisis cargado</span><span class="est"><span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></span></summary>
+      <div class="detalle"><dl><dt>Última medición</dt><dd>No hay ninguna</dd><dt>Regla</dt><dd><span class="chip sm est-pend"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pendiente de regla validada por agrónomo</span></dd></dl></div></details>
+  </div>
+</details>
+
+<details class="area-d">
+  <summary><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></svg> Cultivo <span class="chip est-sindatos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span> <span class="cuenta"><span class="ph">[n]</span> indicadores: <span class="ph">[n]</span> con dato, <span class="ph">[n]</span> sin dato</span><span class="chev"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+  <div class="indicadores">
+    <details class="ind"><summary><span class="nom">Rendimiento de la última cosecha</span><span class="val">Valor: <span class="ph">[valor]</span> t/ha</span><span class="est"><span class="chip sm est-pend"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Pendiente de regla</span></span></summary>
+      <div class="detalle"><dl><dt>Última medición</dt><dd><span class="ph">[fecha]</span></dd><dt>Regla</dt><dd>Pendiente de regla validada por agrónomo. Se muestra el dato, pero no se dice si es bueno o malo.</dd></dl></div></details>
+    <details class="ind"><summary><span class="nom">Registros protegidos contra cambios</span><span class="val">Se revisa en el momento</span><span class="est"><span class="chip sm est-bien"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg> Bien</span></span></summary>
+      <div class="detalle"><dl><dt>Qué mide</dt><dd>Que nadie haya cambiado los registros de labores.</dd><dt>Regla</dt><dd>Esta revisión <b>sí existe hoy</b>: da “Bien” si todo coincide, “Crítico” si algo cambió y “Sin datos” si aún no hay registros.</dd></dl></div></details>
+  </div>
+</details>
+
+<details class="area-d est-sindatos">
+  <summary><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg> Clima <span class="chip est-sindatos"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span> <span class="cuenta">Lluvia y temperatura: <span class="chip sm est-pend"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Pendiente de datos</span></span><span class="chev"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+  <div class="indicadores"><div class="detalle" style="padding-top:12px">El sistema todavía no guarda datos de clima. Este espacio queda reservado.</div></div>
+</details>
+</div>
+
+<h3 style="margin-top:28px">7.6 Advertencias</h3>
+<div class="demo cuadricula c2">
+  <div class="alerta est-atencion" role="note"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><div><strong>Estimación de rendimiento: no se puede validar</strong><p>Se calculó con menos de 3 campañas.</p><span class="etq-rev"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Texto pendiente de revisión</span></div></div>
+  <div class="alerta est-critico" role="note"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg><div><strong>Título de la advertencia crítica</strong><p><span class="ph">[texto corto de lo que pasó y qué hacer]</span></p><span class="etq-rev"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Texto pendiente de revisión</span></div></div>
+  <div class="alerta est-sindatos" role="note"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg><div><strong>Faltan datos</strong><p>No se puede saber el estado de esta parte.</p></div></div>
+  <div class="alerta est-pend" role="note"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><div><strong>Recomendación</strong><p><span class="ph">[texto de la recomendación]</span></p><span class="etq-rev"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Pendiente de revisión — no se publica todavía</span></div></div>
+</div>
+
+<h3 style="margin-top:28px">7.7 Estimación de rendimiento (siempre con la línea base y la advertencia de menos de 3 campañas)</h3>
+<p class="suave">Este bloque aparece en <b>todo lugar</b> donde haya una estimación: dashboard, detalle de parcela y reportes.</p>
+<div class="demo cuadricula c2">
+  <div class="caja">
+    <p class="suave" style="margin:0">Línea base por cultivo <span class="tenue">(promedio de campañas anteriores)</span></p>
+    <div class="cifra" style="margin:4px 0 2px"><span class="ph">[valor]</span> <span style="font-size:18px">t/ha</span></div>
+    <p class="suave" style="font-size:14px">Calculada con <span class="ph">[n]</span> campañas.</p>
+    <div class="alerta est-atencion" role="note"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><div><strong>No se puede validar</strong><p>Con menos de 3 campañas, este número no se puede validar.</p><span class="etq-rev"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Texto pendiente de revisión</span></div></div>
+  </div>
+  <div class="caja">
+    <p class="suave" style="margin:0">Línea base por cultivo <span class="tenue">(promedio de campañas anteriores)</span></p>
+    <div class="cifra" style="margin:4px 0 2px"><span class="ph">[valor]</span> <span style="font-size:18px">t/ha</span></div>
+    <p class="suave" style="font-size:14px">Calculada con 3 o más campañas.</p>
+    <div class="alerta est-pend" role="note"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><div><strong>Todavía no hay una estimación validada</strong><p>Es el promedio de campañas anteriores, nada más.</p><span class="etq-rev"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Texto pendiente de revisión</span></div></div>
+  </div>
+</div>
+<div class="demo" style="margin-top:12px"><div class="vacio mini est-sindatos"><span class="circulo"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg></span><p><b>Línea base por cultivo: sin datos.</b> Todavía no hay cosechas registradas de este cultivo.</p></div></div>
+
+<h3 style="margin-top:28px">7.8 Estados vacíos</h3>
+<div class="demo cuadricula c2">
+  <div class="vacio"><span class="circulo"><svg class="ic" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg></span><h3>Todavía no hay análisis de suelo</h3><p>Cuando se carguen los resultados, aparecerán aquí.</p><p><span class="chip sm est-pend"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg> Pendiente de datos: la carga aún no está disponible</span></p></div>
+  <div class="vacio"><span class="circulo"><svg class="ic" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg></span><h3>Todavía no hay parcelas</h3><p>Crea la primera para empezar a registrar su trabajo.</p><p><a class="btn" href="#componentes">Crear parcela</a></p></div>
+</div>
+<div class="demo" style="margin-top:12px"><div class="vacio mini"><span class="circulo"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg></span><p>Sin datos — <span class="tenue">tamaño pequeño, dentro de una fila o tarjeta.</span></p></div></div>
+
+<h3 style="margin-top:28px">7.9 Espacios reservados (no se implementan en esta fase)</h3>
+<div class="demo cuadricula c3">
+  <div class="reservado"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg><div><b>Agregar a tarea</b><br><span style="font-size:14px">Espacio reservado. Pendiente de aprobación.</span></div></div>
+  <div class="reservado"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg><div><b>Mapa con índices satelitales o de dron</b><br><span style="font-size:14px">Espacio reservado. Pendiente de datos.</span></div></div>
+  <div class="reservado"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg><div><b>Gráficos de tendencia</b><br><span style="font-size:14px">Espacio reservado. Pendiente de aprobación.</span></div></div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="publico"><h2>8. Parte pública: catálogo de parcelas</h2>
+<p>Por RF-52 el catálogo <b>no muestra estimaciones de producción</b>. En su lugar va el texto que pediste, con la advertencia.</p>
+<div class="demo cuadricula c2">
+  <article class="publica">
+    <h3>Parcela <span class="ph">[nombre]</span></h3>
+    <dl><dt>Hectáreas</dt><dd><span class="ph">[n]</span> ha</dd><dt>Cultivo actual</dt><dd><span class="ph">[cultivo]</span></dd></dl>
+    <div class="caja-prod">
+      <p style="margin:0 0 6px"><b>Producción: sin estimación validada.</b></p>
+      <p style="margin:0 0 8px">Línea base por cultivo: <b><span class="ph">[valor]</span> t/ha</b></p>
+      <div class="alerta est-atencion" role="note" style="padding:8px 10px"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><div><p style="margin:0">Con menos de 3 campañas, este número no se puede validar.</p></div></div>
+    </div>
+    <a class="btn sec" href="#publico">Ver detalle</a>
+  </article>
+  <article class="publica">
+    <h3>Parcela <span class="ph">[nombre]</span></h3>
+    <dl><dt>Hectáreas</dt><dd><span class="ph">[n]</span> ha</dd><dt>Cultivo actual</dt><dd>Sin campaña activa</dd></dl>
+    <div class="caja-prod">
+      <p style="margin:0 0 6px"><b>Producción: sin estimación validada.</b></p>
+      <p style="margin:0">Línea base por cultivo: <span class="chip sm est-sindatos"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg> Sin datos</span></p>
+    </div>
+    <a class="btn sec" href="#publico">Ver detalle</a>
+  </article>
+</div>
+<p class="suave" style="margin-top:12px">El detalle público lleva el mismo bloque de la sección 7.7, y “Registros protegidos contra cambios” con su estado. La bienvenida mantiene su estructura; solo mejora tipografía, tamaño de botones y textos.</p>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="lenguaje"><h2>9. Lenguaje y textos</h2>
+<h3>Cambios de palabras (propuesta)</h3>
+<div class="scroll"><table class="t"><thead><tr><th>Hoy</th><th>Propuesta</th><th>Por qué</th></tr></thead><tbody>
+<tr><td>Dashboard</td><td>Resumen</td><td>Palabra técnica en inglés</td></tr>
+<tr><td>Predicción próxima campaña</td><td>Estimación de la próxima campaña</td><td>“Predicción” promete más de lo que hoy es: un promedio</td></tr>
+<tr><td>Línea base</td><td>Línea base (promedio de campañas anteriores)</td><td>Se mantiene el término pedido y se explica al lado</td></tr>
+<tr><td>Ejecutar verificación global</td><td>Revisar que los registros no cambiaron</td><td>Verbo de acción, sin tecnicismo</td></tr>
+<tr><td>Integridad</td><td>Registros protegidos</td><td>Se entiende sin conocer la técnica</td></tr>
+<tr><td>Sin datos suficientes / Sin datos</td><td>Sin datos</td><td>Un solo término para todo</td></tr>
+<tr><td>Nueva parcela / Nuevo contacto</td><td>Crear parcela / Crear contacto</td><td>Verbo + qué hace</td></tr>
+</tbody></table></div>
+<h3 style="margin-top:20px">Botones</h3>
+<p>Ver parcelas disponibles · Ingresar · Ver detalle · Crear parcela · Crear contacto · Guardar · Cancelar · Volver. Siempre texto, nunca solo un icono.</p>
+
+<h3 style="margin-top:20px">Textos nuevos que quedan PENDIENTES DE REVISIÓN</h3>
+<div class="nota">Ningún texto nuevo de advertencia o recomendación se publica hasta que lo apruebe el Responsable del equipo. Mientras tanto, cada uno lleva la etiqueta “Pendiente de revisión”. Ver decisión D4 sobre cómo se muestran en la parte pública.</div>
+<div class="scroll"><table class="t"><thead><tr><th>#</th><th>Texto</th><th>Dónde aparece</th><th>Estado</th></tr></thead><tbody>
+<tr><td>T1</td><td>Producción: sin estimación validada.</td><td>Catálogo público</td><td>Dado en tu pedido (punto 8). Confirmar</td></tr>
+<tr><td>T2</td><td>Línea base por cultivo: [valor] t/ha</td><td>Catálogo y detalle público; panel</td><td>Dado en tu pedido. Confirmar</td></tr>
+<tr><td>T3</td><td>Con menos de 3 campañas, este número no se puede validar.</td><td>Toda estimación (RF-32)</td><td><b>Pendiente de revisión</b></td></tr>
+<tr><td>T4</td><td>Todavía no hay una estimación validada. Es el promedio de campañas anteriores, nada más.</td><td>Estimación con 3 o más campañas</td><td><b>Pendiente de revisión</b></td></tr>
+<tr><td>T5</td><td>Pendiente de regla validada por agrónomo</td><td>Indicadores agronómicos</td><td>Dado en tu pedido. Confirmar</td></tr>
+<tr><td>T6</td><td>Sin datos · Dato vencido: última vez [fecha]</td><td>Todo indicador</td><td><b>Pendiente de revisión</b></td></tr>
+<tr><td>T7</td><td>Todavía no hay análisis de suelo. Cuando se carguen los resultados, aparecerán aquí.</td><td>Área Suelo vacía</td><td><b>Pendiente de revisión</b></td></tr>
+<tr><td>T8</td><td>Qué significa Bien / Atención / Crítico / Sin datos (ayuda corta de cada estado)</td><td>Ayuda de los distintivos</td><td><b>Pendiente de revisión</b></td></tr>
+<tr><td>T9</td><td>Esta recomendación está pendiente de revisión y todavía no se publica.</td><td>Espacio de recomendaciones</td><td><b>Pendiente de revisión</b></td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="datos"><h2>10. Qué datos existen hoy (y qué queda pendiente)</h2>
+<p>Revisé lo que la API entrega hoy. <b>No se crea ningún campo.</b> Lo que no existe queda marcado como pendiente.</p>
+<div class="scroll"><table class="t"><thead><tr><th>Elemento de la pantalla</th><th>¿Existe?</th><th>Cómo se resuelve</th></tr></thead><tbody>
+<tr><td>Tamaño de la parcela</td><td class="ok">Sí</td><td>Hectáreas de la parcela</td></tr>
+<tr><td>Cultivo</td><td class="ok">Sí</td><td>Cultivo de la campaña actual</td></tr>
+<tr><td>Cultivos con porcentaje</td><td><b>No</b></td><td>No hay porcentaje de superficie por cultivo. Se muestra el cultivo y “% de superficie: pendiente”</td></tr>
+<tr><td>Etapa</td><td>Parcial</td><td>Existe el estado de la campaña (Planificada, En curso, Cosechada). La etapa del cultivo (siembra, floración…) no existe: pendiente</td></tr>
+<tr><td>Fecha de última actualización</td><td class="ok">Sí</td><td>Se propone “Último registro de labor” (fecha de la actividad más reciente)</td></tr>
+<tr><td>Alertas de Suelo</td><td><b>No</b></td><td>No hay análisis de suelo ni reglas. Siempre “Sin datos” + “Pendiente de regla validada por agrónomo”</td></tr>
+<tr><td>Alertas de Clima</td><td><b>No</b></td><td>No hay datos de clima. “Sin datos” + “Pendiente de datos”</td></tr>
+<tr><td>Alertas de Cultivo</td><td>Parcial</td><td>Hay rendimiento y labores, pero sin reglas validadas. Solo la revisión de registros protegidos tiene regla objetiva hoy</td></tr>
+<tr><td>Conteo de parcelas en “Sin datos”</td><td>Se puede calcular</td><td>No hay un número ya hecho, pero se puede sacar en pantalla de datos que sí existen (ver D2)</td></tr>
+<tr><td>Campañas usadas en la línea base (RF-32)</td><td>Parcial</td><td>La API del panel lo entrega; <b>la API pública no</b>. En el catálogo público queda como “pendiente”</td></tr>
+<tr><td>Línea base en t/ha en el catálogo público</td><td>Parcial</td><td>El catálogo solo trae toneladas totales; el detalle sí trae t/ha. Ver D3</td></tr>
+<tr><td>Si la línea base es de la propia parcela o prestada de otras</td><td><b>No</b></td><td>El sistema lo decide por dentro pero no lo informa. Pendiente (importa para la honestidad de la cifra)</td></tr>
+<tr><td>Dato vencido (plazo de vigencia)</td><td><b>No</b></td><td>No hay plazos definidos. Pendiente de una fuente validada</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="decisiones"><h2>11. Decisiones que necesito de ti</h2>
+<ol>
+  <li><b>D1 — Regla del estado general</b> (Crítico → Atención → Sin datos → Bien, nunca “Bien” si falta algo). ¿La aprobas?</li>
+  <li><b>D2 — Contador “Parcelas sin datos”.</b> Propongo calcularlo en pantalla: una parcela cuenta como “Sin datos” si no tiene campaña actual, o si su cultivo no tiene ninguna cosecha con rendimiento registrada. Usa datos que ya existen y no toca la API. Si no te convence, queda como “Pendiente de datos”.</li>
+  <li><b>D3 — Línea base en el catálogo público.</b> El catálogo solo trae toneladas. Opción A: dividir toneladas entre hectáreas para obtener t/ha (cuenta de pantalla, sin cambiar la API). Opción B: mostrar “Línea base por cultivo: pendiente” hasta que la API entregue t/ha. <b>Recomiendo A.</b></li>
+  <li><b>D4 — Textos pendientes de revisión.</b> En el panel privado se muestran con la etiqueta “Pendiente de revisión”. En la parte pública, ¿se ocultan hasta que el Responsable los apruebe (y solo se ve T1/T2), o se muestran con la etiqueta? Y ¿T1, T2 y T5 cuentan como ya aprobados porque los escribiste tú?</li>
+  <li><b>D5 — Tipografía.</b> Mantener Arial y quitar la carga de Geist que no se usa (recomendado), o usar Geist de verdad.</li>
+  <li><b>D6 — Dónde va cada pieza.</b> Dashboard: contador de estados + selector de parcelas + resumen y desglose de la parcela elegida. Detalle de parcela (panel): el mismo resumen y desglose arriba de las campañas. ¿Está bien?</li>
+  <li><b>D7 — Palabras.</b> “Dashboard” → “Resumen” y “Predicción” → “Estimación”. ¿De acuerdo?</li>
+  <li><b>D8 — “Etapa”.</b> ¿Usamos el estado de la campaña (Planificada, En curso, Cosechada) como etapa mientras no exista la etapa del cultivo?</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="bloque-guia" id="orden"><h2>12. Orden de la fase 2 (después de tu aprobación)</h2>
+<ol>
+  <li><b>Base:</b> colores y tamaños en <code>globals.css</code> y componentes reutilizables (distintivo de estado, advertencia, desglose, estado vacío, tarjeta de parcela).</li>
+  <li><b>Dashboard</b> (resumen).</li>
+  <li><b>Detalle de parcela</b> del panel.</li>
+  <li><b>Parte pública:</b> catálogo y detalle (sin estimaciones de producción).</li>
+  <li>Bienvenida, listado y creación de parcelas, reportes y contactos.</li>
+</ol>
+<p><b>No se toca:</b> base de datos, tablas, campañas, actividades, parcelas, cadena de hashes, API ni lógica de datos. Después de cada pantalla se corre lint y build y se revisa en pantalla pequeña y en escala de grises.</p>
+<h3 style="margin-top:20px">Tokens de color que pasarían a <code>globals.css</code></h3>
+<pre class="caja mono" style="overflow:auto;font-size:13px">:root {
+  --texto:#1c1917;
+  --texto-suave:#57534e;
+  --texto-tenue:#78716c;
+  --borde:#d6d3d1;
+  --fondo:#fafaf9;
+  --tarjeta:#ffffff;
+  --marca:#047857;
+  --marca-fuerte:#065f46;
+  --bien-fondo:#ecfdf5;
+  --bien-borde:#047857;
+  --bien-texto:#064e3b;
+  --bien-icono:#047857;
+  --atencion-fondo:#fffbeb;
+  --atencion-borde:#b45309;
+  --atencion-texto:#78350f;
+  --atencion-icono:#b45309;
+  --critico-fondo:#fef2f2;
+  --critico-borde:#b91c1c;
+  --critico-texto:#7f1d1d;
+  --critico-icono:#b91c1c;
+  --sindatos-fondo:#f1f5f9;
+  --sindatos-borde:#475569;
+  --sindatos-texto:#1e293b;
+  --sindatos-icono:#475569;
+  --pend-fondo:#eef2ff;
+  --pend-borde:#4338ca;
+  --pend-texto:#312e81;
+  --pend-icono:#4338ca;
+  --radio:8px;
+  --radio-boton:6px;
+}</pre>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var b=document.body;
+  function enlazar(id,clase){var c=document.getElementById(id);c.addEventListener('change',function(){b.classList.toggle(clase,c.checked)})}
+  enlazar('chk-gris','gris');enlazar('chk-chico','chico');
+})();
+</script>
+</body>
+</html>

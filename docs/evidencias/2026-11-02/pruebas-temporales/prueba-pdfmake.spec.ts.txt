@@ -1,0 +1,51 @@
+// TEMPORAL (paso 0, rama prueba/deps-reportes): prueba de humo de pdfmake bajo Jest CJS.
+import { dirname, join } from 'node:path';
+import pdfmake from 'pdfmake';
+
+const DIR_FUENTES = join(
+  dirname(require.resolve('pdfmake/package.json')),
+  'build',
+  'fonts',
+  'Roboto',
+);
+
+describe('pdfmake 0.3 en el servidor (Jest CJS)', () => {
+  beforeAll(() => {
+    pdfmake.setFonts({
+      Roboto: {
+        normal: join(DIR_FUENTES, 'Roboto-Regular.ttf'),
+        bold: join(DIR_FUENTES, 'Roboto-Medium.ttf'),
+        italics: join(DIR_FUENTES, 'Roboto-Italic.ttf'),
+        bolditalics: join(DIR_FUENTES, 'Roboto-MediumItalic.ttf'),
+      },
+    });
+    // Sin descargas externas y solo lectura de las fuentes del paquete.
+    pdfmake.setUrlAccessPolicy(() => false);
+    pdfmake.setLocalAccessPolicy((ruta) => ruta.startsWith(DIR_FUENTES));
+  });
+
+  it('genera un PDF con tabla, tildes y ñ', async () => {
+    const buffer = await pdfmake
+      .createPdf({
+        info: { title: 'Reporte de campaña' },
+        content: [
+          { text: 'Reporte de campaña — Parcela El Ceibo', bold: true },
+          'Período: 01/06/2026 – 01/12/2026 · Año, señal, acción, ü',
+          {
+            table: {
+              body: [
+                ['Campo', 'Valor'],
+                ['Rendimiento', '3,40 t/ha'],
+                ['Costo por hectárea', 'Bs 2.193,50'],
+              ],
+            },
+          },
+        ],
+        footer: { text: 'Hash: 0123abcd', fontSize: 8 },
+      })
+      .getBuffer();
+
+    expect(buffer.subarray(0, 5).toString('latin1')).toBe('%PDF-');
+    expect(buffer.length).toBeGreaterThan(1000);
+  });
+});

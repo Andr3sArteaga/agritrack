@@ -1,0 +1,62 @@
+Comando: cd apps/api && npm audit --omit=dev   (solo dependencias de produccion)
+Fecha: 2026-11-02 02:51:58
+Node: v22.18.0
+Rama: prueba/deps-reportes | Commit: 627209f
+------------------------------------------------------------
+# npm audit report
+
+body-parser  2.0.0 - 2.3.0
+Severity: high
+body-parser vulnerable to Denial of Service via trailing bytes after a compressed request body - https://github.com/advisories/GHSA-27r3-jxmh-p828
+fix available via `npm audit fix`
+node_modules/body-parser
+
+deepmerge-ts  <8.0.0
+Severity: high
+DeepmergeTS has stack exhaustion when merging recursive object graphs - https://github.com/advisories/GHSA-ggr8-5vv4-36mx
+fix available via `npm audit fix`
+node_modules/deepmerge-ts
+  @prisma/config  6.13.0-dev.1 - 7.10.0 || 8.1.0-dev.1 - 8.1.0-dev.4
+  Depends on vulnerable versions of deepmerge-ts
+  node_modules/@prisma/config
+    prisma  6.13.0-dev.1 - 7.10.0 || 8.0.0-rc.3 - 8.1.0-dev.6
+    Depends on vulnerable versions of @prisma/config
+    Depends on vulnerable versions of mysql2
+    node_modules/prisma
+
+fast-uri  3.0.0 - 3.1.8
+Severity: moderate
+fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding - https://github.com/advisories/GHSA-w74x-v6f9-j3xg
+fast-uri vulnerable to improper path equivalence in relative reference normalization - https://github.com/advisories/GHSA-xhq7-xmqj-769h
+fast-uri vulnerable to host confusion via unchecked WHATWG host canonicalization - https://github.com/advisories/GHSA-wjr9-j795-jxcr
+fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references - https://github.com/advisories/GHSA-333x-w4r6-6crp
+fix available via `npm audit fix`
+node_modules/fast-uri
+
+multer  2.0.0 - 2.4.0
+Severity: high
+multer vulnerable to Denial of Service via a pending asynchronous fileFilter after request teardown - https://github.com/advisories/GHSA-q7qp-rjg7-q26m
+fix available via `npm audit fix`
+node_modules/multer
+  @nestjs/platform-express  10.4.18 - 10.4.22 || 11.1.2 - 12.2.0
+  Depends on vulnerable versions of multer
+  node_modules/@nestjs/platform-express
+
+mysql2  <=3.23.0
+Severity: high
+MySQL2: Auth Plugin Downgrade to mysql_clear_password Leaks Plaintext Credentials - https://github.com/advisories/GHSA-3f6p-5ww8-9rcr
+MySQL2: Unbounded zlib inflate in compressed MySQL protocol handler allows decompression-bomb DoS - https://github.com/advisories/GHSA-rgwj-5xj2-c3m3
+fix available via `npm audit fix`
+node_modules/mysql2
+
+qs  6.7.0 - 6.16.0
+Severity: moderate
+qs : qs.stringify with arrayFormat 'comma' throws an uncaught TypeError on array elements carrying a non-callable own toString (DoS) - https://github.com/advisories/GHSA-6pq8-jhm2-2vcw
+fix available via `npm audit fix`
+node_modules/qs
+
+9 vulnerabilities (2 moderate, 7 high)
+
+To address all issues, run:
+  npm audit fix
+exit: 1
