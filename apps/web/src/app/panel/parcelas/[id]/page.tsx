@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   CalendarRange,
@@ -146,8 +146,9 @@ function TarjetaCategoriaAmbiente({
   );
 }
 
-export default function ParcelaPrivadaDetallePage() {
+function ParcelaPrivadaDetalleContenido() {
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const parcelaId = params.id;
   const { usuario } = useAuth();
   const rol = usuario?.rol;
@@ -155,7 +156,9 @@ export default function ParcelaPrivadaDetallePage() {
   const puedeRegistrarActividad = rol === "JEFE" || rol === "OPERATIVO";
   const puedeVerReportesIntegridad = rol === "JEFE" || rol === "CONTABILIDAD";
 
-  const [pestanaActiva, setPestanaActiva] = useState<PestanaParcela>("registro");
+  const [pestanaActiva, setPestanaActiva] = useState<PestanaParcela>(
+    searchParams.get("tab") === "estimacion" ? "estimacion" : "registro",
+  );
 
   // Datos principales de la parcela
   const [parcela, setParcela] = useState<Parcela | null>(null);
@@ -1272,5 +1275,19 @@ export default function ParcelaPrivadaDetallePage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ParcelaPrivadaDetallePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+          Cargando detalle de la parcela...
+        </div>
+      }
+    >
+      <ParcelaPrivadaDetalleContenido />
+    </Suspense>
   );
 }

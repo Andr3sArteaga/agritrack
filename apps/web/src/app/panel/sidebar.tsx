@@ -87,19 +87,19 @@ export function Sidebar({
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-[950] flex w-60 flex-col border-r border-stone-200 bg-white transition-transform md:static md:z-auto md:h-full md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-[950] flex w-60 flex-col border-r border-[#E4EAE6] bg-white transition-transform md:static md:z-auto md:h-full md:translate-x-0 ${
           abierto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-stone-200 px-6 py-5">
-          <Link href="/panel/dashboard" className="text-lg font-bold text-emerald-700">
+        <div className="flex items-center justify-between border-b border-[#E4EAE6] px-6 py-5">
+          <Link href="/panel/dashboard" className="text-lg font-bold tracking-tight text-[#006B4F]">
             AgriTrack
           </Link>
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
             title="Cerrar menú"
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600 md:hidden"
+            className="rounded-md p-1 text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D] md:hidden"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -116,14 +116,14 @@ export function Sidebar({
                 title={item.ayuda}
                 onClick={onCerrar}
                 aria-current={activo ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                   activo
-                    ? "bg-emerald-50 text-emerald-800"
-                    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                    ? "bg-[#E8F5EF] text-[#006B4F]"
+                    : "text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D]"
                 }`}
               >
                 <Icono
-                  className={`h-5 w-5 shrink-0 ${activo ? "text-emerald-700" : "text-stone-400"}`}
+                  className={`h-5 w-5 shrink-0 ${activo ? "text-[#006B4F]" : "text-[#68736D]"}`}
                   aria-hidden
                 />
                 {item.label}
@@ -132,20 +132,22 @@ export function Sidebar({
           })}
         </nav>
 
-        <div className="border-t border-stone-200 px-4 py-4">
-          <div className="flex items-center gap-2">
-            <UserRound className="h-5 w-5 shrink-0 text-stone-400" aria-hidden />
+        <div className="border-t border-[#E4EAE6] px-4 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E8F5EF] text-[#006B4F]">
+              <UserRound className="h-4 w-4" aria-hidden />
+            </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-stone-900">{usuario.nombre}</p>
-              <p className="text-xs text-stone-500">{ROL_LABEL[usuario.rol]}</p>
+              <p className="truncate text-sm font-semibold text-[#17211D]">{usuario.nombre}</p>
+              <p className="text-xs text-[#68736D]">{ROL_LABEL[usuario.rol]}</p>
             </div>
           </div>
           <button
             onClick={logout}
             title="Cerrar la sesión en este equipo"
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100"
+            className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#E4EAE6] bg-white px-3 py-1.5 text-sm font-medium text-[#17211D] hover:bg-[#F8FAF9]"
           >
-            <LogOut className="h-4 w-4" aria-hidden />
+            <LogOut className="h-4 w-4 text-[#68736D]" aria-hidden />
             Cerrar sesión
           </button>
         </div>

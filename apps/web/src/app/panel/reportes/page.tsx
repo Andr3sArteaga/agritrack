@@ -149,8 +149,8 @@ function TabHistorico() {
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
-              {items.map((item) => (
-                <tr key={item.campanaId}>
+              {items.map((item, idx) => (
+                <tr key={`${item.campanaId}-${item.fecha}-${idx}`}>
                   <td className="px-4 py-3">{item.parcelaNombre}</td>
                   <td className="px-4 py-3">{item.cultivoNombre}</td>
                   <td className="px-4 py-3">{item.temporada}</td>
