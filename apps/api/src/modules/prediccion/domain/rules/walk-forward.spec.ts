@@ -2,6 +2,8 @@ import type { FilaModelo } from '../modelo-rendimiento';
 import type { RegresorPort } from '../ports/regresor.port';
 import type { RendimientoTemporada } from './linea-base';
 import {
+  calcularR2,
+  calcularRmse,
   concluir,
   cortesWalkForward,
   evaluarWalkForward,
@@ -154,5 +156,19 @@ describe('Walk-forward: metricas', () => {
     expect(concluir([-0.3, -0.1])).toBe('supera');
     expect(concluir([0.1, 0.3])).toBe('peor');
     expect(concluir([-0.1, 0.2])).toBe('no_concluyente');
+  });
+
+  it('calcula RMSE y R2 en cada corte y en el resultado global', () => {
+    expect(calcularRmse([3, 4])).toBeCloseTo(Math.sqrt(12.5), 10);
+    expect(calcularR2([2, 4, 6], [2, 4, 6])).toBeCloseTo(1, 10);
+    expect(calcularR2([2, 2, 2], [2, 2, 2])).toBeNull();
+    expect(calcularR2([2], [2])).toBeNull();
+
+    const corte = resultado.cortes[1];
+    expect(corte.rmseModelo).toBeGreaterThanOrEqual(corte.maeModelo);
+    expect(corte.rmseLineaBase).toBeGreaterThanOrEqual(corte.maeLineaBase as number);
+    expect(resultado.global?.rmseModelo).toBeGreaterThanOrEqual(resultado.global!.maeModelo);
+    expect(resultado.global?.rmseLineaBase).toBeGreaterThanOrEqual(resultado.global!.maeLineaBase);
+    expect(typeof resultado.global?.r2Modelo).toBe('number');
   });
 });

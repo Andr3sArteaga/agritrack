@@ -63,9 +63,12 @@ export interface MetricaCorte {
   filasPrueba: number;
   filasImputadas: number;
   maeModelo: number;
+  rmseModelo: number;
+  r2Modelo: number | null;
   icMaeModelo: Intervalo;
   lineaBase: number | null;
   maeLineaBase: number | null;
+  rmseLineaBase: number | null;
   /** MAE del modelo - MAE de la linea base. Negativo = el modelo es mejor. */
   diferencia: number | null;
   icDiferencia: Intervalo | null;
@@ -78,9 +81,26 @@ export interface MetricaGlobal {
   lotes: number;
   maeModelo: number;
   maeLineaBase: number;
+  rmseModelo: number;
+  rmseLineaBase: number;
+  r2Modelo: number | null;
   diferencia: number;
   icDiferencia: Intervalo;
   conclusion: Exclude<ConclusionCorte, 'sin_linea_base'>;
+}
+
+export interface MetricasDesempenoResumen {
+  maeModelo: number;
+  maeLineaBase: number;
+  diferenciaMae: number;
+  icDiferenciaMae: Intervalo;
+  rmseModelo: number;
+  rmseLineaBase: number;
+  r2Modelo: number | null;
+  superaLineaBase: boolean;
+  conclusion: Exclude<ConclusionCorte, 'sin_linea_base'>;
+  filasEvaluadas: number;
+  cortesEvaluados: number;
 }
 
 export interface ResultadoWalkForward {

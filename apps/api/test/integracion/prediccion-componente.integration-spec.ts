@@ -371,6 +371,13 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
     const modelo = await controller.entrenar({ cultivo: cultivo.id });
     expect(modelo.origenDatos).toBe('real');
     expect(modelo.campanasUsadas).toHaveLength(6);
+    expect(modelo.metricas.varianteA.global).not.toBeNull();
+    expect(typeof modelo.metricas.varianteA.global?.maeModelo).toBe('number');
+    expect(typeof modelo.metricas.varianteA.global?.rmseModelo).toBe('number');
+    expect(typeof modelo.metricas.varianteA.global?.r2Modelo).toBe('number');
+    expect(modelo.metricas.varianteA.global!.maeModelo).toBeLessThan(
+      modelo.metricas.varianteA.global!.maeLineaBase,
+    );
 
     const estimacion = await controller.estimar({
       lote: parcela.id,
@@ -378,11 +385,14 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
     });
     expect(estimacion.origen_datos).toBe('real');
     expect(estimacion.oficial.campañas_usadas).toBe(6);
-    const valorModelo =
+    const bloqueModelo =
       estimacion.oficial.fuente === 'modelo'
-        ? estimacion.oficial.valor_t_ha
-        : estimacion.experimental?.valor_t_ha;
-    expect(typeof valorModelo).toBe('number');
+        ? estimacion.oficial
+        : estimacion.experimental;
+    expect(typeof bloqueModelo?.valor_t_ha).toBe('number');
+    expect(bloqueModelo?.metricas_evaluacion).not.toBeNull();
+    expect(typeof bloqueModelo?.metricas_evaluacion?.rmseModelo).toBe('number');
+    expect(typeof bloqueModelo?.metricas_evaluacion?.r2Modelo).toBe('number');
 
     const impacto = await controller.analizarImpacto({
       lote: parcela.id,

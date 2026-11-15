@@ -75,7 +75,7 @@ Está prohibido usar como predictor cualquier dato posterior a la siembra (hect�
 
 **Walk-forward.** Para cada campaña desde la segunda, se entrena solo con las anteriores y se prueba en ella. La codificación de variedad y la mediana de imputación también salen solo del entrenamiento.
 
-**Métricas.** Por corte y global: MAE del modelo, MAE de la línea base y su diferencia (negativa = el modelo es mejor), con intervalo de confianza al 95 % por bootstrap sobre lotes (1000 repeticiones, generador mulberry32 con semilla 12345). En el global un lote aparece en varios cortes, así que se remuestrea el lote entero.
+**Métricas.** Por corte y global: MAE del modelo, MAE de la línea base y su diferencia (negativa = el modelo es mejor), con intervalo de confianza al 95 % por bootstrap sobre lotes (1000 repeticiones, generador mulberry32 con semilla 12345), además de **RMSE** (`rmseModelo` y `rmseLineaBase`) y **R²** (`r2Modelo`, coeficiente de determinación) para evaluar ajuste y sensibilidad a errores grandes. En el global un lote aparece en varios cortes, así que se remuestrea el lote entero. `GET /prediccion/estimacion` expone `metricas_evaluacion` con estas métricas globales redondeadas a 3 decimales.
 
 **Modelo final.** Después de evaluar se entrena con todas las campañas (variante A) y se guarda como versión nueva.
 
