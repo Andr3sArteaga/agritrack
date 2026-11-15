@@ -25,12 +25,12 @@ export function RendimientoChart({ datos }: { datos: HistoricoPublicoItem[] }) {
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={datos} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-          <XAxis dataKey="temporada" tick={{ fontSize: 14 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E4EAE6" />
+          <XAxis dataKey="temporada" tick={{ fontSize: 13, fill: "#68736D" }} />
           <YAxis
-            tick={{ fontSize: 14 }}
+            tick={{ fontSize: 13, fill: "#68736D" }}
             unit=" t/ha"
-            width={80}
+            width={76}
           />
           <Tooltip
             formatter={(value) => [`${value} t/ha`, "Rendimiento"]}
@@ -38,9 +38,10 @@ export function RendimientoChart({ datos }: { datos: HistoricoPublicoItem[] }) {
           <Line
             type="monotone"
             dataKey="rendimientoTnHa"
-            stroke="#047857"
-            strokeWidth={2}
-            dot={{ r: 4 }}
+            stroke="#006B4F"
+            strokeWidth={2.5}
+            dot={{ r: 4, fill: "#00a859", stroke: "#004b36", strokeWidth: 2 }}
+            activeDot={{ r: 6 }}
           />
         </LineChart>
       </ResponsiveContainer>

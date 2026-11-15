@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Advertencia } from "@/components/estado/advertencia";
-import { EnlaceBoton } from "@/components/enlace-boton";
+import { LandingNavbar } from "@/components/publico/landing-navbar";
 import { useAuth } from "@/lib/auth-context";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -39,77 +39,90 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-stone-50 px-4 py-12 sm:px-6">
-      <div className="w-full max-w-sm">
-        <div className="text-center">
-          <Link href="/" className="text-3xl font-bold text-emerald-700">
-            AgriTrack
-          </Link>
-          <h1 className="mt-3 text-2xl font-bold text-stone-900">Ingresar</h1>
-          <p className="mt-1 text-base text-stone-700">Entra con tu cuenta de AgroAn.</p>
-        </div>
+    <div className="flex min-h-screen flex-col bg-[#f8faf9] text-[#17211D]">
+      <LandingNavbar />
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-5">
-          <div>
-            <label htmlFor="email" className="block text-base font-bold text-stone-800">
-              Correo electrónico
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base focus:border-emerald-700"
-            />
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+        <div className="w-full max-w-md rounded-3xl border border-[#E4EAE6] bg-white p-7 shadow-xs sm:p-8">
+          <div className="text-center">
+            <span className="inline-block rounded-full bg-[#006B4F]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+              Portal AgroAn
+            </span>
+            <h1 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D]">
+              Ingresar a AgriTrack
+            </h1>
+            <p className="mt-1.5 text-sm text-[#68736D]">Entra con tu cuenta de AgroAn.</p>
           </div>
-          <div>
-            <label htmlFor="password" className="block text-base font-bold text-stone-800">
-            Contraseña
-          </label>
-          <div className="relative mt-1">
-            <input
-              id="password"
-              type={mostrarPassword ? "text" : "password"}
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="min-h-11 w-full rounded-md border-2 border-stone-400 px-3 pr-20 text-base focus:border-emerald-700"
-            />
+
+          <form onSubmit={onSubmit} className="mt-7 space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-[#17211D]">
+                Correo electrónico
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1.5 min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-[#17211D]">
+                Contraseña
+              </label>
+              <div className="relative mt-1.5">
+                <input
+                  id="password"
+                  type={mostrarPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 pr-12 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarPassword(!mostrarPassword)}
+                  aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-[#68736D] transition-colors hover:text-[#17211D]"
+                >
+                  {mostrarPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <Advertencia tipo="CRITICO" titulo="No se pudo ingresar" rol="alert">
+                {error}
+              </Advertencia>
+            )}
+
             <button
-              type="button"
-              onClick={() => setMostrarPassword(!mostrarPassword)}
-              aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone-600 hover:text-stone-800"
+              type="submit"
+              disabled={cargando}
+              className="min-h-12 w-full rounded-full bg-[#004b36] px-6 text-base font-semibold text-white transition-colors hover:bg-[#00a859] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {mostrarPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              {cargando ? "Ingresando..." : "Ingresar"}
             </button>
+          </form>
+
+          <div className="mt-6 border-t border-[#E4EAE6] pt-6">
+            <Link
+              href="/parcelas"
+              className="flex min-h-11 w-full items-center justify-center rounded-full border border-[#E4EAE6] bg-[#f8faf9] px-5 text-sm font-semibold text-[#004b36] transition-colors hover:border-[#006B4F] hover:bg-white"
+            >
+              Ver parcelas disponibles
+            </Link>
+            <p className="mt-2.5 text-center text-xs text-[#68736D]">
+              No necesitas cuenta para verlas.
+            </p>
           </div>
         </div>
-          {error && (
-            <Advertencia tipo="CRITICO" titulo="No se pudo ingresar" rol="alert">
-              {error}
-            </Advertencia>
-          )}
-
-          <button
-            type="submit"
-            disabled={cargando}
-            className="min-h-12 w-full rounded-md border-2 border-emerald-700 bg-emerald-700 px-4 text-base font-bold text-white hover:bg-emerald-800 disabled:opacity-60"
-          >
-            {cargando ? "Ingresando..." : "Ingresar"}
-          </button>
-        </form>
-
-        <div className="mt-6">
-          <EnlaceBoton href="/parcelas" variante="secundario" completo>
-            Ver parcelas disponibles
-          </EnlaceBoton>
-          <p className="mt-2 text-center text-sm text-stone-600">No necesitas cuenta para verlas.</p>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
