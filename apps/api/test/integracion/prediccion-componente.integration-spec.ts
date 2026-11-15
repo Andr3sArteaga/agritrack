@@ -3,18 +3,24 @@
  * (base agritrack_test): seed de demostracion, entrenamiento por el endpoint
  * (metodo del controller) y consulta de la estimacion con etiqueta experimental.
  */
+import 'reflect-metadata';
 // @nestjs/* v12 es ESM-only y Jest corre en CJS: se mockean decoradores y guards.
 const decorador = () => () => undefined;
 jest.mock('@nestjs/common', () => ({
   Injectable: decorador,
   Inject: decorador,
+  Optional: decorador,
   Controller: decorador,
   Get: decorador,
   Post: decorador,
+  Put: decorador,
+  Body: decorador,
+  Param: decorador,
   Query: decorador,
   UseGuards: decorador,
-  ConflictException: class ConflictException extends Error {},
-  NotFoundException: class NotFoundException extends Error {},
+  BadRequestException: class BadRequestException extends Error { },
+  ConflictException: class ConflictException extends Error { },
+  NotFoundException: class NotFoundException extends Error { },
 }));
 jest.mock('@nestjs/swagger', () => ({
   ApiBearerAuth: decorador,
@@ -29,18 +35,19 @@ jest.mock('../../src/modules/auth/presentation/decorators/roles.decorator', () =
   Roles: decorador,
 }));
 jest.mock('../../src/modules/auth/presentation/guards/jwt-auth.guard', () => ({
-  JwtAuthGuard: class {},
+  JwtAuthGuard: class { },
 }));
 jest.mock('../../src/modules/auth/presentation/guards/roles.guard', () => ({
-  RolesGuard: class {},
+  RolesGuard: class { },
 }));
 jest.mock('../../src/shared/prisma/prisma.service', () => ({
-  PrismaService: class {},
+  PrismaService: class { },
 }));
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import { CULTIVO_DEMO, sembrarDemo } from '../../prisma/seeds/demo/datos-demo';
 import { PrismaClient } from '../../src/generated/prisma/client';
+import { TipoActividad } from '../../src/generated/prisma/enums';
 import { EntrenamientoService } from '../../src/modules/prediccion/application/entrenamiento.service';
 import { EstimacionService } from '../../src/modules/prediccion/application/estimacion.service';
 import type { PrediccionService } from '../../src/modules/prediccion/application/prediccion.service';
@@ -50,6 +57,7 @@ import { ModeloIaPrismaRepository } from '../../src/modules/prediccion/infrastru
 import { RandomForestAdapter } from '../../src/modules/prediccion/infrastructure/random-forest.adapter';
 import { RandomForestRegresor } from '../../src/modules/prediccion/infrastructure/random-forest.regresor';
 import { PrediccionController } from '../../src/modules/prediccion/presentation/prediccion.controller';
+import { RegistroCosechaController } from '../../src/modules/prediccion/presentation/registro-cosecha.controller';
 import type { PrismaService } from '../../src/shared/prisma/prisma.service';
 
 const URL_PRUEBAS =
@@ -65,14 +73,34 @@ if (!/\/[^/?]*_test(\?|$)/.test(URL_PRUEBAS)) {
 describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', () => {
   let prisma: PrismaClient;
   let controller: PrediccionController;
+  let registroCosechaController: RegistroCosechaController;
   let cultivoId: string;
 
   async function limpiar(): Promise<void> {
     await prisma.$executeRawUnsafe(
       'TRUNCATE modelos_ia, totales_campana, registros_cosecha RESTART IDENTITY',
     );
-    await prisma.campana.deleteMany({ where: { parcela: { nombre: { startsWith: 'Lote demo ' } } } });
-    await prisma.parcela.deleteMany({ where: { nombre: { startsWith: 'Lote demo ' } } });
+    await prisma.campana.deleteMany({
+      where: {
+        parcela: {
+          OR: [
+            { nombre: { startsWith: 'Lote demo ' } },
+            { nombre: { startsWith: 'Lote real test ' } },
+          ],
+        },
+      },
+    });
+    await prisma.parcela.deleteMany({
+      where: {
+        OR: [
+          { nombre: { startsWith: 'Lote demo ' } },
+          { nombre: { startsWith: 'Lote real test ' } },
+        ],
+      },
+    });
+    await prisma.cultivo.deleteMany({
+      where: { nombre: { in: ['Soya test real', 'Sorgo test dev'] } },
+    });
   }
 
   beforeAll(async () => {
@@ -85,16 +113,19 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
     const datos = new DatosRendimientoPrismaRepository(servicioPrisma);
     const modelos = new ModeloIaPrismaRepository(servicioPrisma);
     const regresor = new RandomForestRegresor();
+    const estimacionService = new EstimacionService(
+      new LineaBaseAdapter(datos),
+      new RandomForestAdapter(modelos, regresor),
+      datos,
+      modelos,
+      regresor,
+    );
     controller = new PrediccionController(
       {} as PrediccionService,
-      new EstimacionService(
-        new LineaBaseAdapter(datos),
-        new RandomForestAdapter(modelos, regresor),
-        datos,
-        modelos,
-      ),
+      estimacionService,
       new EntrenamientoService(datos, modelos, regresor),
     );
+    registroCosechaController = new RegistroCosechaController(estimacionService);
   });
 
   afterAll(async () => {
@@ -182,5 +213,154 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
     const version = await controller.entrenar({ cultivo: cultivoId });
     expect(version).toMatchObject({ version: 'v2', estado: 'experimental' });
     expect(await prisma.modeloIa.count({ where: { estado: 'activo' } })).toBe(0);
+  });
+
+  it('T1.1 e impacto: una campaña real con siembra obtiene estimacion e impacto en tiempo real', async () => {
+    const parcelaReal = await prisma.parcela.create({
+      data: {
+        nombre: 'Lote real test A',
+        hectareas: 30,
+        ubicacionTexto: 'Pailon Sur',
+      },
+    });
+    const campanaReal = await prisma.campana.create({
+      data: {
+        parcelaId: parcelaReal.id,
+        cultivoId,
+        temporada: '2025-2026',
+        fechaInicio: new Date('2025-10-01T00:00:00.000Z'),
+      },
+    });
+
+    const guardado = await registroCosechaController.guardar(campanaReal.id, {
+      haSembradas: 30,
+      variedad: '6410',
+      fechaSiembra: '2025-11-15',
+    });
+    expect(guardado.origen).toBe('real');
+
+    const leido = await registroCosechaController.obtener(campanaReal.id);
+    expect(leido?.haSembradas).toBe(30);
+
+    const estimacion = await controller.estimar({
+      lote: parcelaReal.id,
+      campana: campanaReal.id,
+    });
+    expect(typeof estimacion.experimental?.valor_t_ha).toBe('number');
+    expect(estimacion.etiqueta_datos).toBe('Datos iniciales (V1)');
+
+    const impactoSiembra = await controller.analizarImpacto({
+      lote: parcelaReal.id,
+      campana: campanaReal.id,
+      tipoActividad: TipoActividad.SIEMBRA,
+      haSembradas: 30,
+      variedad: '6410',
+      fechaSiembra: '2025-11-15',
+    });
+    expect(['POSITIVO', 'NEUTRO', 'NEGATIVO']).toContain(impactoSiembra.efectoGlobal);
+    expect(impactoSiembra.variedadesConocidas).toContain('6410');
+    expect(impactoSiembra.factores).toHaveLength(3);
+
+    const impactoFumigacion = await controller.analizarImpacto({
+      lote: parcelaReal.id,
+      campana: campanaReal.id,
+      tipoActividad: TipoActividad.FUMIGACION,
+    });
+    expect(impactoFumigacion.efectoGlobal).toBe('NEUTRO');
+    expect(impactoFumigacion.diferencia_t_ha).toBe(0);
+  });
+
+  it('T1.1 entrenamiento real: con 2 campañas reales cosechadas entrena con origen "real"', async () => {
+    const cultivoReal = await prisma.cultivo.create({
+      data: { nombre: 'Soya test real' },
+    });
+    const p1 = await prisma.parcela.create({
+      data: { nombre: 'Lote real test 1', hectareas: 20, ubicacionTexto: 'Pailon' },
+    });
+    const p2 = await prisma.parcela.create({
+      data: { nombre: 'Lote real test 2', hectareas: 25, ubicacionTexto: 'Pailon' },
+    });
+    const c1 = await prisma.campana.create({
+      data: {
+        parcelaId: p1.id,
+        cultivoId: cultivoReal.id,
+        temporada: '2023-2024',
+        fechaInicio: new Date('2023-10-01T00:00:00.000Z'),
+      },
+    });
+    const c2 = await prisma.campana.create({
+      data: {
+        parcelaId: p2.id,
+        cultivoId: cultivoReal.id,
+        temporada: '2024-2025',
+        fechaInicio: new Date('2024-10-01T00:00:00.000Z'),
+      },
+    });
+
+    await registroCosechaController.guardar(c1.id, {
+      haSembradas: 20,
+      variedad: '6410',
+      fechaSiembra: '2023-11-10',
+      haCosechadas: 20,
+      toneladas: 44,
+      fechaCosecha: '2024-03-10',
+    });
+    await registroCosechaController.guardar(c2.id, {
+      haSembradas: 25,
+      variedad: 'MUNASQA',
+      fechaSiembra: '2024-11-12',
+      haCosechadas: 25,
+      toneladas: 50,
+      fechaCosecha: '2025-03-12',
+    });
+
+    const modeloReal = await controller.entrenar({ cultivo: cultivoReal.id });
+    expect(modeloReal.origenDatos).toBe('real');
+    expect(modeloReal.campanasUsadas).toEqual(['2023-2024', '2024-2025']);
+  });
+
+  it('modo desarrollo: prepararDev genera historial de 6 campañas, entrena modelo real y entrega escenarios de impacto', async () => {
+    const cultivoSorgo = await prisma.cultivo.create({
+      data: { nombre: 'Sorgo test dev' },
+    });
+    const parcelaDev = await prisma.parcela.create({
+      data: {
+        nombre: 'Lote real test dev',
+        hectareas: 32,
+        ubicacionTexto: 'Montero Norte',
+      },
+    });
+
+    const prep = await controller.prepararDev({
+      parcelaId: parcelaDev.id,
+      cultivoId: cultivoSorgo.id,
+    });
+
+    expect(prep.campanasHabilitadas).toBe(6);
+    expect(prep.cultivoId).toBe(cultivoSorgo.id);
+    expect(prep.versionModelo).toBe('v1');
+
+    const estimacion = await controller.estimar({
+      lote: parcelaDev.id,
+      campana: prep.campanaActualId,
+    });
+    expect(estimacion.origen_datos).toBe('real');
+    expect(estimacion.oficial.campañas_usadas).toBe(6);
+    expect(estimacion.oficial.advertencias.join(' ')).not.toContain('RF-32');
+    const valorModelo =
+      estimacion.oficial.fuente === 'modelo'
+        ? estimacion.oficial.valor_t_ha
+        : estimacion.experimental?.valor_t_ha;
+    expect(typeof valorModelo).toBe('number');
+
+    const impacto = await controller.analizarImpacto({
+      lote: parcelaDev.id,
+      campana: prep.campanaActualId,
+      tipoActividad: TipoActividad.SIEMBRA,
+      haSembradas: 32,
+    });
+    expect(impacto.escenarios?.positivo).not.toBeNull();
+    expect(impacto.escenarios?.neutro).not.toBeNull();
+    expect(impacto.escenarios?.negativo).not.toBeNull();
   });
 });

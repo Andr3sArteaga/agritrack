@@ -20,7 +20,7 @@ export const TEXTOS = {
   /** Texto de la parte publica dictado en el pedido (punto 8): RF-52. */
   PRODUCCION_SIN_ESTIMACION: {
     id: "T1",
-    texto: "Producción: sin estimación validada.",
+    texto: "Producción proyectada: Datos refenciales.",
     estado: "DADO_POR_EQUIPO",
   },
   LINEA_BASE_ETIQUETA: {

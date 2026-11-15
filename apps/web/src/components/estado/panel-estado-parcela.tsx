@@ -56,11 +56,14 @@ function textoAlertas(resumen: ResumenParcela): string {
 export function PanelEstadoParcela({
   resumen,
   mostrarEnlace = false,
+  ocultarEstimacion = false,
   idPestana,
   acciones,
 }: {
   resumen: ResumenParcela;
   mostrarEnlace?: boolean;
+  /** En la vista por pestañas del detalle, la estimación vive en su propia pestaña. */
+  ocultarEstimacion?: boolean;
   /** Botones para cargar datos de cada area (solo en el detalle de la parcela). */
   acciones?: AccionesArea;
   /** Si el panel va debajo de un selector de pestañas, id de la pestaña que lo controla. */
@@ -137,7 +140,7 @@ export function PanelEstadoParcela({
         )}
       </article>
 
-      {resumen.estimacion && (
+      {!ocultarEstimacion && resumen.estimacion && (
         <EstimacionRendimiento
           rendimientoTnHa={resumen.estimacion.rendimientoTnHa}
           campanasUsadas={resumen.estimacion.campanasUsadas}

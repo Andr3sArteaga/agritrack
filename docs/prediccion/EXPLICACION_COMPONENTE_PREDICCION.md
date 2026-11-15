@@ -118,7 +118,7 @@ Ejemplo real de `GET /prediccion/estimacion` (lote de demostración, campaña 20
     "estado": "experimental",
     "version_modelo": "v1",
     "campañas_usadas": 5,
-    "advertencias": ["Calculada con datos iniciales (V1), no con registros propios de esta parcela."]
+    "advertencias": ["Calculada con datos iniciales (V1)."]
   },
   "referencia_linea_base": null,
   "origen_datos": "demo_enmascarado",

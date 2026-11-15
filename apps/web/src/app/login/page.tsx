@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Advertencia } from "@/components/estado/advertencia";
 import { EnlaceBoton } from "@/components/enlace-boton";
 import { useAuth } from "@/lib/auth-context";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const { login, usuario } = useAuth();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
+  const [mostrarPassword, setMostrarPassword] = useState(false);
 
   // Navegar durante el render rompe React; el efecto cubre tanto la sesion
   // ya iniciada como el login recien hecho (redirige segun el rol).
@@ -64,19 +66,28 @@ export default function LoginPage() {
           </div>
           <div>
             <label htmlFor="password" className="block text-base font-bold text-stone-800">
-              Contraseña
-            </label>
+            Contraseña
+          </label>
+          <div className="relative mt-1">
             <input
               id="password"
-              type="password"
+              type={mostrarPassword ? "text" : "password"}
               autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base focus:border-emerald-700"
+              className="min-h-11 w-full rounded-md border-2 border-stone-400 px-3 pr-20 text-base focus:border-emerald-700"
             />
+            <button
+              type="button"
+              onClick={() => setMostrarPassword(!mostrarPassword)}
+              aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone-600 hover:text-stone-800"
+            >
+              {mostrarPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
-
+        </div>
           {error && (
             <Advertencia tipo="CRITICO" titulo="No se pudo ingresar" rol="alert">
               {error}

@@ -1,6 +1,10 @@
 import type {
   ContextoEstimacion,
+  DatosCosechaInput,
+  DatosSiembraInput,
   OrigenDatos,
+  PreparacionParcelaDev,
+  RegistroCosechaCampana,
   RegistroLote,
   TemporadaCultivo,
 } from '../modelo-rendimiento';
@@ -24,4 +28,18 @@ export interface DatosRendimientoRepository {
   ): Promise<ContextoEstimacion | null>;
   /** Parcelas que solo existen como datos de demostracion. */
   parcelasDemo(): Promise<string[]>;
+  existeCampana(campanaId: string): Promise<boolean>;
+  obtenerRegistroCosecha(campanaId: string): Promise<RegistroCosechaCampana | null>;
+  guardarSiembra(
+    campanaId: string,
+    datos: DatosSiembraInput,
+  ): Promise<RegistroCosechaCampana>;
+  guardarCosecha(
+    campanaId: string,
+    datos: DatosCosechaInput,
+  ): Promise<RegistroCosechaCampana>;
+  prepararHistorialDev(
+    parcelaId: string,
+    cultivoId?: string,
+  ): Promise<PreparacionParcelaDev | null>;
 }

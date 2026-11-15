@@ -193,4 +193,70 @@ describe('ReportesService.reporteCampana (RF-42)', () => {
     expect(reporte.cosecha).toBeNull();
     expect(reporte.costos.costoPorTonelada).toBeNull();
   });
+
+  it('exporta PDF de la campana completa y con rango filtrado', async () => {
+    const { servicio, query } = crearServicio(CAMPANA, {
+      actividades: [
+        actividad({
+          id: 'a1',
+          tipo: TipoActividad.SIEMBRA,
+          fecha: dia('2025-11-05'),
+          insumo: 'Semilla 6410',
+          cantidad: 60,
+          unidad: 'kg/ha',
+        }),
+        actividad({
+          id: 'a2',
+          secuencia: 2,
+          tipo: TipoActividad.COSECHA,
+          fecha: dia('2026-03-10'),
+          rendimientoTnHa: 3.15,
+          tercerizado: true,
+        }),
+      ],
+      gastos: [{ monto: 8500, estado: EstadoGasto.PAGADO, anulado: false }],
+    });
+
+    const completo = await servicio.exportarReporteCampanaPdf('camp_1', {});
+    expect(completo.filename).toBe(
+      'reporte-campana-parcela-el-ceibo-verano-2025-campana-completa-2025-11-01-a-2026-03-15.pdf',
+    );
+    expect(completo.buffer.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+
+    const filtrado = await servicio.exportarReporteCampanaPdf('camp_1', {
+      desde: '2025-12-01',
+      hasta: '2025-12-31',
+    });
+    expect(filtrado.filename).toBe(
+      'reporte-campana-parcela-el-ceibo-verano-2025-2025-12-01-a-2025-12-31.pdf',
+    );
+    expect(filtrado.buffer.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    expect(query.movimientosDelPeriodo).toHaveBeenLastCalledWith('camp_1', {
+      desde: dia('2025-12-01'),
+      hastaExclusivo: dia('2026-01-01'),
+    });
+  });
+
+  it('exporta Excel (.xlsx) de la campana completa y con rango filtrado (aun sin actividades)', async () => {
+    const { servicio } = crearServicio(CAMPANA, {
+      actividades: [],
+      gastos: [{ monto: 4200, estado: EstadoGasto.PAGADO, anulado: false }],
+    });
+
+    const completo = await servicio.exportarReporteCampanaExcel('camp_1', {});
+    expect(completo.filename).toBe(
+      'reporte-campana-parcela-el-ceibo-verano-2025-campana-completa-2025-11-01-a-2026-03-15.xlsx',
+    );
+    // Un archivo .xlsx valido es un contenedor ZIP que comienza con 'PK'.
+    expect(completo.buffer.subarray(0, 2).toString('ascii')).toBe('PK');
+
+    const filtrado = await servicio.exportarReporteCampanaExcel('camp_1', {
+      desde: '2026-01-01',
+      hasta: '2026-02-01',
+    });
+    expect(filtrado.filename).toBe(
+      'reporte-campana-parcela-el-ceibo-verano-2025-2026-01-01-a-2026-02-01.xlsx',
+    );
+    expect(filtrado.buffer.subarray(0, 2).toString('ascii')).toBe('PK');
+  });
 });

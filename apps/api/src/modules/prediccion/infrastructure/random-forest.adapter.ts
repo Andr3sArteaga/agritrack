@@ -32,12 +32,15 @@ export class RandomForestAdapter implements EstimadorRendimientoPort {
     @Inject(MODELO_IA_REPOSITORY)
     private readonly modelos: ModeloIaRepository,
     @Inject(REGRESOR_PORT) private readonly regresor: RegresorPort,
-  ) {}
+  ) { }
 
   async estimar(
     contexto: ContextoEstimacion,
   ): Promise<EstimacionRendimiento | null> {
-    const version = await this.modelos.vigente(contexto.cultivoId, contexto.origen);
+    let version = await this.modelos.vigente(contexto.cultivoId, contexto.origen);
+    if (!version && contexto.origen === 'real') {
+      version = await this.modelos.vigente(contexto.cultivoId, 'demo_enmascarado');
+    }
     if (!version) return null;
 
     const base = {
@@ -50,7 +53,7 @@ export class RandomForestAdapter implements EstimadorRendimientoPort {
     const advertencias: string[] = [];
     if (version.origenDatos === 'demo_enmascarado') {
       advertencias.push(
-        'Calculada con datos iniciales (V1), no con registros propios de esta parcela.',
+        'Calculada con datos iniciales (V1).',
       );
     }
     if (version.campanasUsadas.length < MINIMO_CAMPANAS_RF32) {

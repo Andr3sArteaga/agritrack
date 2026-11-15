@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
+import { ES_MODO_DEV } from "@/lib/prediccion";
 import { AccionesModal, Modal } from "@/components/modal";
 import type { Cultivo } from "@/lib/types";
 
@@ -43,9 +44,30 @@ export function CampanaForm({
     }
   }
 
+  function autocompletarDev() {
+    const preferido =
+      cultivos.find((c) => c.nombre.toLowerCase().includes("soya")) ?? cultivos[0];
+    if (preferido) setCultivoId(preferido.id);
+    setTemporada("Verano 2026");
+    setFechaInicio("2026-06-01");
+    setFechaFin("2026-12-01");
+  }
+
   return (
     <Modal titulo="Nueva campaña" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
+        {ES_MODO_DEV && (
+          <div className="rounded-lg border-2 border-dashed border-amber-500 bg-amber-50 p-3">
+            <button
+              type="button"
+              onClick={autocompletarDev}
+              className="min-h-11 rounded-md border-2 border-amber-700 bg-white px-3 text-xs font-bold text-amber-950 hover:bg-amber-100"
+            >
+              Modo Dev · Autocompletar datos de prueba
+            </button>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-stone-700">Cultivo</label>
           <select

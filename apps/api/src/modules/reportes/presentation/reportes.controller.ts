@@ -1,12 +1,14 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { Rol } from '../../../generated/prisma/enums';
 import { Roles } from '../../auth/presentation/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/presentation/guards/jwt-auth.guard';
@@ -54,5 +56,62 @@ export class ReportesController {
     @Query() query: ReporteCampanaQueryDto,
   ): Promise<ReporteCampanaDto> {
     return this.reportesService.reporteCampana(id, query);
+  }
+
+  @Get('campanas/:id/pdf')
+  @ApiOperation({
+    summary: 'Exportar reporte de campana en PDF (RF-44)',
+    description:
+      'Genera el reporte profesional en PDF del periodo consultado o de la campana completa si no se aplican filtros de fecha.',
+  })
+  @ApiProduces('application/pdf')
+  @ApiOkResponse({ description: 'Archivo PDF generado' })
+  @ApiBadRequestResponse({
+    description: 'Fecha con formato invalido o "desde" posterior a "hasta"',
+  })
+  @ApiNotFoundResponse({ description: 'Campana no encontrada' })
+  async exportarPdf(
+    @Param('id') id: string,
+    @Query() query: ReporteCampanaQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { buffer, filename } = await this.reportesService.exportarReporteCampanaPdf(
+      id,
+      query,
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.send(buffer);
+  }
+
+  @Get('campanas/:id/excel')
+  @ApiOperation({
+    summary: 'Exportar reporte de campana en Excel (RF-44)',
+    description:
+      'Genera el libro Excel (.xlsx) con el resumen y actividades del periodo consultado o de la campana completa si no se aplican filtros de fecha.',
+  })
+  @ApiProduces(
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @ApiOkResponse({ description: 'Archivo Excel (.xlsx) generado' })
+  @ApiBadRequestResponse({
+    description: 'Fecha con formato invalido o "desde" posterior a "hasta"',
+  })
+  @ApiNotFoundResponse({ description: 'Campana no encontrada' })
+  async exportarExcel(
+    @Param('id') id: string,
+    @Query() query: ReporteCampanaQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { buffer, filename } =
+      await this.reportesService.exportarReporteCampanaExcel(id, query);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.send(buffer);
   }
 }
