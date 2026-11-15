@@ -31,7 +31,7 @@ export function FiltroDemo({
         onChange={(e) => onCambiar(e.target.checked)}
         className="h-5 w-5 accent-emerald-700"
       />
-      Mostrar datos de demostración
+      Mostrar datos iniciales (V1)
       <span className="text-sm text-stone-600">({cantidad} parcelas)</span>
     </label>
   );

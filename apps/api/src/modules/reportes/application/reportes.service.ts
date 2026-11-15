@@ -11,7 +11,10 @@ import {
   REPORTES_QUERY_PORT,
   type ReportesQueryPort,
 } from '../domain/ports/reportes-query.port';
+import { construirNombreArchivoReporte } from '../domain/rules/formatear-reporte-exportacion';
 import { resolverPeriodo } from '../domain/rules/periodo-reporte';
+import { generarExcelReporteCampana } from '../infrastructure/exportar-reporte-excel';
+import { generarPdfReporteCampana } from '../infrastructure/exportar-reporte-pdf';
 import { HistoricoItemDto } from './dto/historico-item.dto';
 import { ReporteCampanaQueryDto } from './dto/reporte-campana-query.dto';
 import { ReporteCampanaDto } from './dto/reporte-campana.dto';
@@ -144,6 +147,30 @@ export class ReportesService {
         ? { rendimientoTnHa: cosecha.rendimientoTnHa as number, fecha: cosecha.fecha }
         : null,
       costos,
+    };
+  }
+
+  async exportarReporteCampanaPdf(
+    campanaId: string,
+    pedido: ReporteCampanaQueryDto,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const reporte = await this.reporteCampana(campanaId, pedido);
+    const buffer = await generarPdfReporteCampana(reporte);
+    return {
+      buffer,
+      filename: construirNombreArchivoReporte(reporte, 'pdf'),
+    };
+  }
+
+  async exportarReporteCampanaExcel(
+    campanaId: string,
+    pedido: ReporteCampanaQueryDto,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const reporte = await this.reporteCampana(campanaId, pedido);
+    const buffer = await generarExcelReporteCampana(reporte);
+    return {
+      buffer,
+      filename: construirNombreArchivoReporte(reporte, 'xlsx'),
     };
   }
 }

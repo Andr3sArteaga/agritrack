@@ -5,7 +5,13 @@ import { formatearFecha } from "@/lib/format";
 import type { ResumenParcela } from "@/lib/resumen-parcela";
 import { TEXTOS } from "@/lib/textos";
 import { ESTADO_CAMPANA_LABEL } from "@/lib/types";
-import { DesgloseAreas, ICONO_AREA } from "./desglose-areas";
+import {
+  ChipRegistrado,
+  DesgloseAreas,
+  ICONO_AREA,
+  areaSoloRegistrada,
+  type AccionesArea,
+} from "./desglose-areas";
 import { ESTILO_ESTADO, EstadoBadge } from "./estado-badge";
 import { EstimacionRendimiento } from "./estimacion-rendimiento";
 import { MarcadorPendiente } from "./marcadores";
@@ -50,10 +56,16 @@ function textoAlertas(resumen: ResumenParcela): string {
 export function PanelEstadoParcela({
   resumen,
   mostrarEnlace = false,
+  ocultarEstimacion = false,
   idPestana,
+  acciones,
 }: {
   resumen: ResumenParcela;
   mostrarEnlace?: boolean;
+  /** En la vista por pestañas del detalle, la estimación vive en su propia pestaña. */
+  ocultarEstimacion?: boolean;
+  /** Botones para cargar datos de cada area (solo en el detalle de la parcela). */
+  acciones?: AccionesArea;
   /** Si el panel va debajo de un selector de pestañas, id de la pestaña que lo controla. */
   idPestana?: string;
 }) {
@@ -102,15 +114,19 @@ export function PanelEstadoParcela({
                   <Icono size={18} className={estilo.claseIcono} aria-hidden />
                   {area.nombre}
                 </p>
-                <EstadoBadge estado={area.estado} tamano="sm" />
+                {areaSoloRegistrada(area) ? (
+                  <ChipRegistrado texto="Datos registrados" />
+                ) : (
+                  <EstadoBadge estado={area.estado} tamano="sm" />
+                )}
                 <p className="mt-1.5">
                   {area.alertas > 0
                     ? `${area.alertas} ${area.alertas === 1 ? "alerta" : "alertas"}`
                     : area.estado === "BIEN"
                       ? "0 alertas"
                       : sinDato > 0
-                        ? `${sinDato} sin dato`
-                        : "Falta una regla validada"}
+                        ? `Faltan ${sinDato} de ${area.indicadores.length} datos`
+                        : "Todos los datos cargados"}
                 </p>
               </div>
             );
@@ -124,7 +140,7 @@ export function PanelEstadoParcela({
         )}
       </article>
 
-      {resumen.estimacion && (
+      {!ocultarEstimacion && resumen.estimacion && (
         <EstimacionRendimiento
           rendimientoTnHa={resumen.estimacion.rendimientoTnHa}
           campanasUsadas={resumen.estimacion.campanasUsadas}
@@ -132,7 +148,12 @@ export function PanelEstadoParcela({
         />
       )}
 
-      <DesgloseAreas areas={resumen.areas} />
+      {!acciones && (
+        <p className="text-base text-stone-700">
+          Los datos de suelo y clima se cargan en el detalle de la parcela.
+        </p>
+      )}
+      <DesgloseAreas areas={resumen.areas} acciones={acciones} />
     </div>
   );
 }

@@ -39,6 +39,6 @@ export class EstimacionResponseDto {
   @ApiProperty({ enum: ['demo_enmascarado', 'real'] })
   origen_datos!: OrigenDatos;
 
-  @ApiProperty({ nullable: true, example: 'Datos de demostración (enmascarados)' })
+  @ApiProperty({ nullable: true, example: 'Datos iniciales (V1)' })
   etiqueta_datos!: string | null;
 }

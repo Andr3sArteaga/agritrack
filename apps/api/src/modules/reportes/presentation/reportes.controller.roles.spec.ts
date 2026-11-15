@@ -13,6 +13,7 @@ jest.mock('@nestjs/common', () => {
     Get: noop,
     Param: noop,
     Query: noop,
+    Res: noop,
     UseGuards: noop,
     BadRequestException: class BadRequestException extends Error {},
     NotFoundException: class NotFoundException extends Error {},
@@ -49,6 +50,7 @@ jest.mock('@nestjs/swagger', () => {
     ApiBearerAuth: noop,
     ApiOperation: noop,
     ApiOkResponse: noop,
+    ApiProduces: noop,
     ApiBadRequestResponse: noop,
     ApiNotFoundResponse: noop,
     ApiProperty: noop,
@@ -65,26 +67,62 @@ import { Rol } from '../../../generated/prisma/enums';
 import { RolesGuard } from '../../auth/presentation/guards/roles.guard';
 import { ReportesController } from './reportes.controller';
 
-function contextoPara(rol: Rol): ExecutionContext {
+function contextoPara(
+  rol: Rol,
+  handler: (...args: any[]) => unknown = ReportesController.prototype.reporteCampana,
+): ExecutionContext {
   return {
-    getHandler: () => ReportesController.prototype.reporteCampana,
+    getHandler: () => handler,
     getClass: () => ReportesController,
     switchToHttp: () => ({ getRequest: () => ({ user: { rol } }) }),
   } as unknown as ExecutionContext;
 }
 
-describe('GET /reportes/campanas/:id: acceso por rol', () => {
+describe('GET /reportes/campanas/:id y exportaciones: acceso por rol', () => {
   const guard = new RolesGuard(new Reflector());
 
-  it('CONTABILIDAD puede ver el detalle del reporte', () => {
+  it('CONTABILIDAD puede ver y exportar el reporte', () => {
     expect(guard.canActivate(contextoPara(Rol.CONTABILIDAD))).toBe(true);
+    expect(
+      guard.canActivate(
+        contextoPara(Rol.CONTABILIDAD, ReportesController.prototype.exportarPdf),
+      ),
+    ).toBe(true);
+    expect(
+      guard.canActivate(
+        contextoPara(
+          Rol.CONTABILIDAD,
+          ReportesController.prototype.exportarExcel,
+        ),
+      ),
+    ).toBe(true);
   });
 
-  it('JEFE puede ver el detalle del reporte', () => {
+  it('JEFE puede ver y exportar el reporte', () => {
     expect(guard.canActivate(contextoPara(Rol.JEFE))).toBe(true);
+    expect(
+      guard.canActivate(
+        contextoPara(Rol.JEFE, ReportesController.prototype.exportarPdf),
+      ),
+    ).toBe(true);
+    expect(
+      guard.canActivate(
+        contextoPara(Rol.JEFE, ReportesController.prototype.exportarExcel),
+      ),
+    ).toBe(true);
   });
 
-  it('OPERATIVO no puede (403)', () => {
+  it('OPERATIVO no puede ver ni exportar (403)', () => {
     expect(guard.canActivate(contextoPara(Rol.OPERATIVO))).toBe(false);
+    expect(
+      guard.canActivate(
+        contextoPara(Rol.OPERATIVO, ReportesController.prototype.exportarPdf),
+      ),
+    ).toBe(false);
+    expect(
+      guard.canActivate(
+        contextoPara(Rol.OPERATIVO, ReportesController.prototype.exportarExcel),
+      ),
+    ).toBe(false);
   });
 });

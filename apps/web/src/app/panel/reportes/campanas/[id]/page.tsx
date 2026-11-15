@@ -8,7 +8,10 @@ import {
   CalendarRange,
   CircleCheck,
   Clock,
+  Download,
   FileBarChart,
+  FileSpreadsheet,
+  FileText,
   ListChecks,
   PiggyBank,
   RotateCcw,
@@ -19,6 +22,7 @@ import {
   Wallet,
   Wheat,
 } from "lucide-react";
+import axios from "axios";
 import { Ayuda } from "@/components/ayuda";
 import { Badge, BadgeEstadoCampana } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
@@ -45,6 +49,32 @@ function pedirReporte(campanaId: string, periodo: PeriodoPedido) {
     .then((res) => res.data);
 }
 
+function nombreDesdeHeader(
+  disposition: string | undefined,
+  respaldo: string,
+): string {
+  if (!disposition) return respaldo;
+  const match = /filename="?([^";]+)"?/i.exec(disposition);
+  return match?.[1]?.trim() || respaldo;
+}
+
+async function extraerMensajeErrorDescarga(
+  err: unknown,
+  respaldo: string,
+): Promise<string> {
+  if (axios.isAxiosError(err) && err.response?.data instanceof Blob) {
+    try {
+      const texto = await err.response.data.text();
+      const json = JSON.parse(texto) as { message?: string | string[] };
+      if (Array.isArray(json.message)) return json.message.join(", ");
+      if (typeof json.message === "string") return json.message;
+    } catch {
+      return respaldo;
+    }
+  }
+  return apiErrorMessage(err, respaldo);
+}
+
 export default function ReporteCampanaPage() {
   const { id } = useParams<{ id: string }>();
   const { usuario } = useAuth();
@@ -54,7 +84,9 @@ export default function ReporteCampanaPage() {
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
   const [cargando, setCargando] = useState(true);
+  const [exportando, setExportando] = useState<"pdf" | "excel" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorExportacion, setErrorExportacion] = useState<string | null>(null);
 
   useEffect(() => {
     if (usuario?.rol === "OPERATIVO") {
@@ -79,6 +111,7 @@ export default function ReporteCampanaPage() {
   async function consultar(periodo: PeriodoPedido) {
     setCargando(true);
     setError(null);
+    setErrorExportacion(null);
     try {
       mostrar(await pedirReporte(id, periodo));
     } catch (err) {
@@ -94,10 +127,80 @@ export default function ReporteCampanaPage() {
       setError('La fecha "desde" no puede ser posterior a la fecha "hasta".');
       return;
     }
+    setErrorExportacion(null);
     void consultar({ desde: desde || undefined, hasta: hasta || undefined });
   }
 
+  async function exportarArchivo(formato: "pdf" | "excel") {
+    if (!reporte) return;
+    setErrorExportacion(null);
+    setError(null);
+
+    const desdeActual = aFechaInput(reporte.periodo.desde);
+    const hastaActual = aFechaInput(reporte.periodo.hasta);
+    const inputsEditados = desde !== desdeActual || hasta !== hastaActual;
+
+    if (desde && hasta && desde > hasta) {
+      setError('La fecha "desde" no puede ser posterior a la fecha "hasta".');
+      return;
+    }
+
+    const periodoExportar: PeriodoPedido = inputsEditados
+      ? { desde: desde || undefined, hasta: hasta || undefined }
+      : reporte.periodo.porDefecto
+        ? {}
+        : { desde: desdeActual, hasta: hastaActual };
+
+    setExportando(formato);
+    let urlObjeto: string | null = null;
+    try {
+      // Si el usuario edito fechas sin pulsar "Aplicar", actualizamos primero el reporte en pantalla
+      // para que coincida exactamente con el archivo descargado.
+      if (inputsEditados) {
+        const actualizado = await pedirReporte(id, periodoExportar);
+        mostrar(actualizado);
+      }
+
+      const respuesta = await api.get<Blob>(`/reportes/campanas/${id}/${formato}`, {
+        params: periodoExportar,
+        responseType: "blob",
+      });
+
+      const extension = formato === "pdf" ? "pdf" : "xlsx";
+      const nombreArchivo = nombreDesdeHeader(
+        respuesta.headers["content-disposition"],
+        `reporte-campana-${id}.${extension}`,
+      );
+
+      urlObjeto = window.URL.createObjectURL(respuesta.data);
+      const enlace = document.createElement("a");
+      enlace.href = urlObjeto;
+      enlace.download = nombreArchivo;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+    } catch (err) {
+      setErrorExportacion(
+        await extraerMensajeErrorDescarga(
+          err,
+          `No se pudo exportar el reporte en ${formato === "pdf" ? "PDF" : "Excel"}.`,
+        ),
+      );
+    } finally {
+      if (urlObjeto) {
+        window.URL.revokeObjectURL(urlObjeto);
+      }
+      setExportando(null);
+    }
+  }
+
   if (usuario?.rol === "OPERATIVO") return null;
+
+  const desdeCargado = reporte ? aFechaInput(reporte.periodo.desde) : "";
+  const hastaCargado = reporte ? aFechaInput(reporte.periodo.hasta) : "";
+  const hayFiltroPendiente = Boolean(
+    reporte && (desde !== desdeCargado || hasta !== hastaCargado),
+  );
 
   return (
     <div className="space-y-6">
@@ -123,7 +226,51 @@ export default function ReporteCampanaPage() {
               titulo="Reporte de campaña"
               descripcion={`${reporte.parcela.nombre} · ${reporte.campana.temporada} · ${reporte.cultivo.nombre}`}
             />
-            <BadgeEstadoCampana estado={reporte.campana.estado} />
+            <div className="flex flex-wrap items-center gap-2">
+              <BadgeEstadoCampana estado={reporte.campana.estado} />
+              <button
+                type="button"
+                disabled={cargando || exportando !== null}
+                onClick={() => void exportarArchivo("pdf")}
+                className="inline-flex min-h-11 items-center gap-2 rounded-md border-2 border-stone-800 bg-stone-900 px-3.5 text-sm font-bold text-white hover:bg-stone-800 disabled:opacity-50"
+              >
+                {exportando === "pdf" ? (
+                  <Download className="h-4 w-4 animate-bounce" aria-hidden />
+                ) : (
+                  <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                )}
+                {exportando === "pdf" ? "Generando PDF..." : "Exportar PDF"}
+              </button>
+              <button
+                type="button"
+                disabled={cargando || exportando !== null}
+                onClick={() => void exportarArchivo("excel")}
+                className="inline-flex min-h-11 items-center gap-2 rounded-md border-2 border-emerald-800 bg-emerald-700 px-3.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+              >
+                {exportando === "excel" ? (
+                  <Download className="h-4 w-4 animate-bounce" aria-hidden />
+                ) : (
+                  <FileSpreadsheet className="h-4 w-4 shrink-0" aria-hidden />
+                )}
+                {exportando === "excel" ? "Generando Excel..." : "Exportar Excel"}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-700">
+            <span>
+              <strong className="text-stone-900">Alcance de exportación actual:</strong>{" "}
+              {hayFiltroPendiente
+                ? `Fechas seleccionadas (${desde || "inicio"} – ${hasta || "fin"})`
+                : reporte.periodo.porDefecto
+                  ? `Campaña completa (${formatearFecha(reporte.periodo.desde)} – ${formatearFecha(reporte.periodo.hasta)})`
+                  : `Período filtrado (${formatearFecha(reporte.periodo.desde)} – ${formatearFecha(reporte.periodo.hasta)})`}
+            </span>
+            {errorExportacion && (
+              <span role="alert" className="font-semibold text-red-700">
+                {errorExportacion}
+              </span>
+            )}
           </div>
 
           <section className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5">
@@ -163,10 +310,10 @@ export default function ReporteCampanaPage() {
               </button>
               <button
                 type="button"
-                disabled={cargando || reporte.periodo.porDefecto}
+                disabled={cargando || (reporte.periodo.porDefecto && !hayFiltroPendiente)}
                 onClick={() => void consultar({})}
                 title="Usar las fechas completas de la campaña"
-                className="inline-flex items-center gap-1.5 rounded-md border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-100 disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-100 disabled:opacity-50"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden />
                 Campaña completa

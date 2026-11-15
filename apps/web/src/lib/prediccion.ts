@@ -21,7 +21,85 @@ export interface EstimacionRespuesta {
   etiqueta_datos: string | null;
 }
 
-export const ETIQUETA_DEMO = "Datos de demostración (enmascarados)";
+export const ETIQUETA_DEMO = "Datos iniciales (V1)";
+
+export interface RegistroCosechaCampana {
+  id: string;
+  campanaId: string;
+  variedad: string | null;
+  fechaSiembra: string | null;
+  haSembradas: number;
+  fechaCosecha: string | null;
+  haCosechadas: number | null;
+  toneladas: number | null;
+  origen: "demo_enmascarado" | "real";
+  updatedAt: string;
+}
+
+export type EfectoImpacto = "POSITIVO" | "NEUTRO" | "NEGATIVO";
+
+export interface FactorImpacto {
+  variable: "fecha_siembra" | "variedad" | "ha_sembradas";
+  etiqueta: string;
+  valorIngresado: string;
+  efecto: EfectoImpacto;
+  delta_t_ha: number;
+  detalle: string;
+}
+
+export const ES_MODO_DEV = process.env.NODE_ENV !== "production";
+
+export interface EscenarioSiembraImpacto {
+  haSembradas: number;
+  fechaSiembra: string;
+  variedad: string;
+  estimado_t_ha: number;
+  diferencia_t_ha: number;
+}
+
+export interface EscenariosImpacto {
+  positivo: EscenarioSiembraImpacto | null;
+  neutro: EscenarioSiembraImpacto | null;
+  negativo: EscenarioSiembraImpacto | null;
+}
+
+export interface ResultadoImpacto {
+  efectoGlobal: EfectoImpacto;
+  resumen: string;
+  estimado_t_ha: number | null;
+  referencia_t_ha: number | null;
+  diferencia_t_ha: number | null;
+  produccion_estimada_tn: number | null;
+  fuenteReferencia: "linea_base" | "mediana_modelo" | "sin_referencia";
+  version_modelo: string | null;
+  origen_datos: "demo_enmascarado" | "real";
+  etiqueta_datos: string | null;
+  variedadesConocidas: string[];
+  advertencias: string[];
+  factores: FactorImpacto[];
+  escenarios?: EscenariosImpacto;
+}
+
+export interface PrepararParcelaDevRespuesta {
+  parcelaId: string;
+  cultivoId: string;
+  cultivoNombre: string;
+  campanaActualId: string;
+  temporadaActual: string;
+  campanasHabilitadas: number;
+  campanasSinActividadCosecha: {
+    campanaId: string;
+    fechaSiembra: string;
+    fechaCosecha: string;
+    rendimientoTnHa: number;
+  }[];
+  campanaActualNecesitaSiembra: {
+    campanaId: string;
+    fechaSiembra: string;
+  } | null;
+  versionModelo: string;
+  estadoModelo: string;
+}
 
 /** Ids de las parcelas de demostracion. Si no se puede saber, se asume que no hay. */
 export async function cargarIdsDemo(): Promise<Set<string>> {

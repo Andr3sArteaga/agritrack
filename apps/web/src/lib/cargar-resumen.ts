@@ -18,6 +18,8 @@ import {
 } from "./resumen-parcela";
 import type {
   Actividad,
+  AnalisisSuelo,
+  RegistroClima,
   Campana,
   Cultivo,
   HistoricoItem,
@@ -35,6 +37,10 @@ interface ContextoResumen {
 }
 
 const veRegistrosYReportes = (rol: Rol) => rol === "JEFE" || rol === "CONTABILIDAD";
+
+/** Fecha de hace 30 dias, como "AAAA-MM-DD". */
+const hace30Dias = (): string =>
+  new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 async function pedirActividades(campanaId: string, rol: Rol): Promise<ActividadResumen[]> {
   if (rol === "CONTABILIDAD") {
@@ -55,7 +61,7 @@ export async function cargarResumenParcela(
   const campanas = contexto.campanas.filter((c) => c.parcelaId === parcela.id);
   const actual = elegirCampanaActual(campanas);
 
-  const [actividades, integridad, prediccion] = await Promise.all([
+  const [actividades, integridad, prediccion, analisis, clima] = await Promise.all([
     actual ? pedirActividades(actual.id, rol) : Promise.resolve(null),
     veRegistrosYReportes(rol)
       ? api.get<ResultadoVerificacion>(`/integridad/parcela/${parcela.id}`).then((res) => res.data)
@@ -67,9 +73,15 @@ export async function cargarResumenParcela(
           })
           .then((res) => res.data)
       : Promise.resolve(null),
+    api.get<AnalisisSuelo[]>("/monitoreo/suelo", { params: { parcelaId: parcela.id } }).then((res) => res.data),
+    api
+      .get<RegistroClima[]>("/monitoreo/clima", { params: { parcelaId: parcela.id, desde: hace30Dias() } })
+      .then((res) => res.data),
   ]);
 
   return construirResumenParcela({
+    suelo: analisis,
+    clima,
     parcela,
     campanas,
     cultivos: contexto.cultivos,
@@ -135,6 +147,8 @@ export function useResumenParcela(
   parcela: Parcela | null,
   campanas: Campana[],
   cultivos: Cultivo[],
+  /** Al cambiarla se vuelve a cargar (ej. tras agregar un analisis de suelo). */
+  version = 0,
 ): EstadoCarga<ResumenParcela> {
   const rol = useAuth().usuario?.rol;
   const [estado, setEstado] = useState<EstadoCarga<ResumenParcela>>({ datos: null, error: null });
@@ -150,7 +164,7 @@ export function useResumenParcela(
     return () => {
       cancelado = true;
     };
-  }, [rol, parcela, campanas, cultivos]);
+  }, [rol, parcela, campanas, cultivos, version]);
 
   return estado;
 }

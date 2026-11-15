@@ -17,9 +17,10 @@ import { PromedioHistoricoPredictor } from './infrastructure/promedio-historico.
 import { RandomForestAdapter } from './infrastructure/random-forest.adapter';
 import { RandomForestRegresor } from './infrastructure/random-forest.regresor';
 import { PrediccionController } from './presentation/prediccion.controller';
+import { RegistroCosechaController } from './presentation/registro-cosecha.controller';
 
 @Module({
-  controllers: [PrediccionController],
+  controllers: [PrediccionController, RegistroCosechaController],
   providers: [
     PrediccionService,
     EstimacionService,

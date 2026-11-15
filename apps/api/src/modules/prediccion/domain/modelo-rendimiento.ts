@@ -3,7 +3,7 @@
 export type OrigenDatos = 'demo_enmascarado' | 'real';
 export type EstadoModelo = 'experimental' | 'activo' | 'archivado';
 
-export const ETIQUETA_DEMO = 'Datos de demostración (enmascarados)';
+export const ETIQUETA_DEMO = 'Datos iniciales (V1)';
 
 /** Datos de siembra y cosecha de un lote (parcela) en una campaña, tal como estan guardados. */
 export interface RegistroLote {
@@ -148,10 +148,98 @@ export interface ContextoEstimacion {
   temporada: string;
   inicioCampana: Date;
   origen: OrigenDatos;
+  hectareasParcela?: number;
   /** Datos de siembra, si ya se registraron. */
   siembra: {
     variedad: string | null;
     fechaSiembra: Date | null;
     haSembradas: number;
+  } | null;
+}
+
+/** Registro persistido de siembra y cosecha de una campaña (tabla registros_cosecha). */
+export interface RegistroCosechaCampana {
+  id: string;
+  campanaId: string;
+  variedad: string | null;
+  fechaSiembra: Date | null;
+  haSembradas: number;
+  fechaCosecha: Date | null;
+  haCosechadas: number | null;
+  toneladas: number | null;
+  origen: OrigenDatos;
+  updatedAt: Date;
+}
+
+export interface DatosSiembraInput {
+  haSembradas: number;
+  variedad: string | null;
+  fechaSiembra: Date | null;
+}
+
+export interface DatosCosechaInput {
+  haCosechadas: number;
+  toneladas: number;
+  fechaCosecha: Date;
+}
+
+export type EfectoImpacto = 'POSITIVO' | 'NEUTRO' | 'NEGATIVO';
+
+export interface FactorImpacto {
+  variable: 'fecha_siembra' | 'variedad' | 'ha_sembradas';
+  etiqueta: string;
+  valorIngresado: string;
+  efecto: EfectoImpacto;
+  delta_t_ha: number;
+  detalle: string;
+}
+
+export interface EscenarioSiembraImpacto {
+  haSembradas: number;
+  fechaSiembra: string;
+  variedad: string;
+  estimado_t_ha: number;
+  diferencia_t_ha: number;
+}
+
+export interface EscenariosImpacto {
+  positivo: EscenarioSiembraImpacto | null;
+  neutro: EscenarioSiembraImpacto | null;
+  negativo: EscenarioSiembraImpacto | null;
+}
+
+export interface ResultadoImpacto {
+  efectoGlobal: EfectoImpacto;
+  resumen: string;
+  estimado_t_ha: number | null;
+  referencia_t_ha: number | null;
+  diferencia_t_ha: number | null;
+  produccion_estimada_tn: number | null;
+  fuenteReferencia: 'linea_base' | 'mediana_modelo' | 'sin_referencia';
+  version_modelo: string | null;
+  origen_datos: OrigenDatos;
+  etiqueta_datos: string | null;
+  variedadesConocidas: string[];
+  advertencias: string[];
+  factores: FactorImpacto[];
+  escenarios?: EscenariosImpacto;
+}
+
+export interface PreparacionParcelaDev {
+  parcelaId: string;
+  cultivoId: string;
+  cultivoNombre: string;
+  campanaActualId: string;
+  temporadaActual: string;
+  campanasHabilitadas: number;
+  campanasSinActividadCosecha: {
+    campanaId: string;
+    fechaSiembra: string;
+    fechaCosecha: string;
+    rendimientoTnHa: number;
+  }[];
+  campanaActualNecesitaSiembra: {
+    campanaId: string;
+    fechaSiembra: string;
   } | null;
 }

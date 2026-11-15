@@ -8,10 +8,13 @@
 jest.mock('@nestjs/common', () => ({
   Injectable: () => () => undefined,
   Inject: () => () => undefined,
+  Optional: () => () => undefined,
+  BadRequestException: class BadRequestException extends Error {},
   ConflictException: class ConflictException extends Error {},
   NotFoundException: class NotFoundException extends Error {},
 }));
 
+import { TipoActividad } from '../../../generated/prisma/enums';
 import {
   inicioDeCampana,
   leerLotesDemo,
@@ -19,10 +22,14 @@ import {
 } from '../../../../prisma/seeds/demo/datos-demo';
 import type {
   ContextoEstimacion,
+  DatosCosechaInput,
+  DatosSiembraInput,
   ModeloIa,
   ModeloIaConPesos,
   NuevoModeloIa,
   OrigenDatos,
+  PreparacionParcelaDev,
+  RegistroCosechaCampana,
   RegistroLote,
   TemporadaCultivo,
 } from '../domain/modelo-rendimiento';
@@ -37,6 +44,8 @@ import { EstimacionService } from './estimacion.service';
 const CULTIVO = 'soya';
 
 class DatosEnMemoria implements DatosRendimientoRepository {
+  private registrosCosecha = new Map<string, RegistroCosechaCampana>();
+
   constructor(
     private readonly filas: RegistroLote[],
     private readonly campanas: TemporadaCultivo[],
@@ -51,6 +60,83 @@ class DatosEnMemoria implements DatosRendimientoRepository {
     this.origen === 'demo_enmascarado'
       ? [...new Set(this.filas.map((f) => f.parcelaId))]
       : [];
+  existeCampana = async (campanaId: string) =>
+    this.registrosCosecha.has(campanaId) ||
+    this.filas.some((f) => f.campanaId === campanaId);
+  obtenerRegistroCosecha = async (
+    campanaId: string,
+  ): Promise<RegistroCosechaCampana | null> => {
+    const guardado = this.registrosCosecha.get(campanaId);
+    if (guardado) return guardado;
+    const fila = this.filas.find((f) => f.campanaId === campanaId);
+    if (!fila) return null;
+    return {
+      id: `rc-${campanaId}`,
+      campanaId,
+      variedad: fila.variedad,
+      fechaSiembra: fila.fechaSiembra,
+      haSembradas: fila.haSembradas,
+      fechaCosecha: null,
+      haCosechadas: fila.haCosechadas,
+      toneladas: fila.toneladas,
+      origen: this.origen,
+      updatedAt: new Date(),
+    };
+  };
+  guardarSiembra = async (
+    campanaId: string,
+    datos: DatosSiembraInput,
+  ): Promise<RegistroCosechaCampana> => {
+    const previo = await this.obtenerRegistroCosecha(campanaId);
+    const nuevo: RegistroCosechaCampana = {
+      id: previo?.id ?? `rc-${campanaId}`,
+      campanaId,
+      variedad: datos.variedad,
+      fechaSiembra: datos.fechaSiembra,
+      haSembradas: datos.haSembradas,
+      fechaCosecha: previo?.fechaCosecha ?? null,
+      haCosechadas: previo?.haCosechadas ?? null,
+      toneladas: previo?.toneladas ?? null,
+      origen: 'real',
+      updatedAt: new Date(),
+    };
+    this.registrosCosecha.set(campanaId, nuevo);
+    return nuevo;
+  };
+  guardarCosecha = async (
+    campanaId: string,
+    datos: DatosCosechaInput,
+  ): Promise<RegistroCosechaCampana> => {
+    const previo = await this.obtenerRegistroCosecha(campanaId);
+    if (!previo) throw new Error('Sin siembra previa');
+    const nuevo: RegistroCosechaCampana = {
+      ...previo,
+      haCosechadas: datos.haCosechadas,
+      toneladas: datos.toneladas,
+      fechaCosecha: datos.fechaCosecha,
+      origen: 'real',
+      updatedAt: new Date(),
+    };
+    this.registrosCosecha.set(campanaId, nuevo);
+    return nuevo;
+  };
+  prepararHistorialDev = async (
+    parcelaId: string,
+    cultivoId?: string,
+  ): Promise<PreparacionParcelaDev | null> => {
+    const fila = this.filas.find((f) => f.parcelaId === parcelaId);
+    if (!fila) return null;
+    return {
+      parcelaId,
+      cultivoId: cultivoId ?? CULTIVO,
+      cultivoNombre: 'Soya',
+      campanaActualId: fila.campanaId,
+      temporadaActual: fila.temporada,
+      campanasHabilitadas: 6,
+      campanasSinActividadCosecha: [],
+      campanaActualNecesitaSiembra: null,
+    };
+  };
   async contextoEstimacion(parcelaId: string, campanaId: string): Promise<ContextoEstimacion | null> {
     const fila = this.filas.find((f) => f.parcelaId === parcelaId && f.campanaId === campanaId);
     if (!fila) return null;
@@ -126,6 +212,7 @@ function armar(origen: OrigenDatos, datos = datosDemo()) {
     new RandomForestAdapter(modelos, regresor),
     repositorioDatos,
     modelos,
+    regresor,
   );
   return { entrenamiento, estimacion, modelos, regresor };
 }
@@ -215,8 +302,8 @@ describe('Componente de estimacion con datos de demostracion (enmascarados)', ()
     expect(typeof respuesta.experimental?.valor_t_ha).toBe('number');
     expect(respuesta.referencia_linea_base).toBeNull();
     expect(respuesta.origen_datos).toBe('demo_enmascarado');
-    expect(respuesta.etiqueta_datos).toBe('Datos de demostración (enmascarados)');
-    expect(respuesta.experimental?.advertencias.join(' ')).toContain('demostración');
+    expect(respuesta.etiqueta_datos).toBe('Datos iniciales (V1)');
+    expect(respuesta.experimental?.advertencias.join(' ')).toContain('datos iniciales');
   });
 
   it('sin campañas anteriores con total, la linea base responde "sin datos"', async () => {
@@ -273,5 +360,105 @@ describe('Componente de estimacion con datos de demostracion (enmascarados)', ()
     const vacio = armar('real', { filas: [], campanas: [] });
     await expect(vacio.entrenamiento.entrenar(CULTIVO)).rejects.toThrow('No hay datos');
     await expect(vacio.entrenamiento.entrenarAlCerrarCampana(CULTIVO)).resolves.toBeNull();
+  });
+
+  it('analizarImpacto evalua variables de siembra con el modelo entrenado y marca labores post-siembra como neutras', async () => {
+    const impactoSiembra = await sistema.estimacion.analizarImpacto({
+      lote: 'L02',
+      campana: 'L02-2025-2026',
+      tipoActividad: TipoActividad.SIEMBRA,
+      haSembradas: 40,
+      fechaSiembra: '2025-11-15',
+      variedad: '6410',
+    });
+
+    expect(['POSITIVO', 'NEUTRO', 'NEGATIVO']).toContain(impactoSiembra.efectoGlobal);
+    expect(typeof impactoSiembra.estimado_t_ha).toBe('number');
+    expect(impactoSiembra.referencia_t_ha).toBe(1.68);
+    expect(impactoSiembra.produccion_estimada_tn).toBeCloseTo(
+      (impactoSiembra.estimado_t_ha as number) * 40,
+      1,
+    );
+    expect(impactoSiembra.variedadesConocidas).toEqual(['6410', 'MUNASQA', 'MUNASQA Y 6410']);
+    expect(impactoSiembra.factores).toHaveLength(3);
+
+    const impactoPost = await sistema.estimacion.analizarImpacto({
+      lote: 'L02',
+      campana: 'L02-2025-2026',
+      tipoActividad: TipoActividad.FUMIGACION,
+    });
+    expect(impactoPost.efectoGlobal).toBe('NEUTRO');
+    expect(impactoPost.diferencia_t_ha).toBe(0);
+    expect(impactoPost.factores).toEqual([]);
+    expect(impactoPost.resumen).toContain('se mantiene igual');
+  });
+
+  it('guardarRegistroCosecha valida y guarda siembra y cosecha en el repositorio', async () => {
+    const limpio = armar('real', {
+      filas: [
+        {
+          parcelaId: 'P-REAL',
+          campanaId: 'C-REAL-2026',
+          temporada: '2025-2026',
+          variedad: null,
+          fechaSiembra: null,
+          haSembradas: 45,
+          haCosechadas: null,
+          toneladas: null,
+        },
+      ],
+      campanas: [
+        {
+          temporada: '2025-2026',
+          inicio: new Date('2025-10-01T00:00:00.000Z'),
+          rendimientoTotal: null,
+        },
+      ],
+    });
+
+    const guardado = await limpio.estimacion.guardarRegistroCosecha('C-REAL-2026', {
+      haSembradas: 45,
+      variedad: 'MUNASQA',
+      fechaSiembra: '2025-11-20',
+    });
+    expect(guardado.haSembradas).toBe(45);
+    expect(guardado.variedad).toBe('MUNASQA');
+    expect(guardado.origen).toBe('real');
+
+    await expect(
+      limpio.estimacion.guardarRegistroCosecha('C-REAL-2026', {
+        haCosechadas: 50,
+        toneladas: 100,
+        fechaCosecha: '2026-03-10',
+      }),
+    ).rejects.toThrow('superar a las hectáreas sembradas');
+
+    const cosechado = await limpio.estimacion.guardarRegistroCosecha('C-REAL-2026', {
+      haCosechadas: 45,
+      toneladas: 90,
+      fechaCosecha: '2026-03-10',
+    });
+    expect(cosechado.haCosechadas).toBe(45);
+    expect(cosechado.toneladas).toBe(90);
+  });
+
+  it('prepararParcelaDev delega al repositorio en desarrollo y se bloquea en produccion', async () => {
+    const prep = await sistema.estimacion.prepararParcelaDev('L02');
+    expect(prep.parcelaId).toBe('L02');
+    expect(prep.campanasHabilitadas).toBe(6);
+
+    await expect(sistema.estimacion.prepararParcelaDev('NO-EXISTE')).rejects.toThrow(
+      'Parcela no encontrada',
+    );
+
+    const envOriginal = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      await expect(sistema.estimacion.prepararParcelaDev('L02')).rejects.toThrow(
+        'producción',
+      );
+    } finally {
+      process.env.NODE_ENV = envOriginal;
+    }
   });
 });

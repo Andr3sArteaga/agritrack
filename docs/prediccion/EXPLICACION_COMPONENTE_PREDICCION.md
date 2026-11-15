@@ -118,11 +118,11 @@ Ejemplo real de `GET /prediccion/estimacion` (lote de demostración, campaña 20
     "estado": "experimental",
     "version_modelo": "v1",
     "campañas_usadas": 5,
-    "advertencias": ["Modelo entrenado con datos de demostración (enmascarados): no es una estimación real."]
+    "advertencias": ["Calculada con datos iniciales (V1)."]
   },
   "referencia_linea_base": null,
   "origen_datos": "demo_enmascarado",
-  "etiqueta_datos": "Datos de demostración (enmascarados)"
+  "etiqueta_datos": "Datos iniciales (V1)"
 }
 ```
 
