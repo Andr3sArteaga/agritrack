@@ -14,6 +14,7 @@ import { IntegridadModule } from './modules/integridad/integridad.module';
 import { ReportesModule } from './modules/reportes/reportes.module';
 import { PublicModule } from './modules/public/public.module';
 import { CostosModule } from './modules/costos/costos.module';
+import { MonitoreoModule } from './modules/monitoreo/monitoreo.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CostosModule } from './modules/costos/costos.module';
     ReportesModule,
     PublicModule,
     CostosModule,
+    MonitoreoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -38,6 +38,16 @@ enum TipoActividad {
   COSECHA
 }
 
+enum CondicionClima {
+  SOLEADO
+  NUBLADO
+  LLUVIA_LIGERA
+  LLUVIA_FUERTE
+  HELADA
+  GRANIZO
+  VIENTO_FUERTE
+}
+
 enum TipoContacto {
   COMPRADOR
   TRANSPORTISTA
@@ -80,8 +90,10 @@ model Usuario {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  actividadesRegistradas Actividad[] @relation("ResponsableActividad")
-  gastosRegistrados      Gasto[]     @relation("RegistradoPorGasto")
+  actividadesRegistradas Actividad[]     @relation("ResponsableActividad")
+  gastosRegistrados      Gasto[]         @relation("RegistradoPorGasto")
+  analisisSuelo          AnalisisSuelo[]
+  registrosClima         RegistroClima[]
 
   @@map("usuarios")
 }
@@ -101,7 +113,9 @@ model Parcela {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  campanas Campana[]
+  campanas       Campana[]
+  analisisSuelo  AnalisisSuelo[]
+  registrosClima RegistroClima[]
 
   @@index([disponibleParaPreventa])
   @@index([activa])
@@ -349,4 +363,49 @@ model ModeloIa {
   @@unique([cultivoId, version])
   @@index([cultivoId, estado])
   @@map("modelos_ia")
+}
+
+// =========================================
+// Monitoreo de la parcela: suelo y clima (carga manual)
+// =========================================
+
+// Resultado de un analisis de suelo. Todos los valores son opcionales, pero
+// el service exige al menos uno. Unidades: pH (0-14); N, P y K en ppm
+// (mg/kg); materia organica y humedad en %.
+model AnalisisSuelo {
+  id              String   @id @default(cuid())
+  parcelaId       String
+  parcela         Parcela  @relation(fields: [parcelaId], references: [id], onDelete: Restrict)
+  fecha           DateTime
+  ph              Float?
+  nitrogeno       Float?
+  fosforo         Float?
+  potasio         Float?
+  materiaOrganica Float?
+  // Humedad del suelo en %, medida en campo (no viene del laboratorio).
+  humedad         Float?
+  notas           String?
+  registradoPorId String
+  registradoPor   Usuario  @relation(fields: [registradoPorId], references: [id])
+  createdAt       DateTime @default(now())
+
+  @@index([parcelaId, fecha])
+  @@map("analisis_suelo")
+}
+
+// Clima anotado a mano para un dia. Un registro por parcela y dia.
+model RegistroClima {
+  id              String         @id @default(cuid())
+  parcelaId       String
+  parcela         Parcela        @relation(fields: [parcelaId], references: [id], onDelete: Restrict)
+  fecha           DateTime
+  condicion       CondicionClima
+  lluviaMm        Float?
+  notas           String?
+  registradoPorId String
+  registradoPor   Usuario        @relation(fields: [registradoPorId], references: [id])
+  createdAt       DateTime       @default(now())
+
+  @@unique([parcelaId, fecha])
+  @@map("registros_clima")
 }
