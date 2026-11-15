@@ -1,0 +1,43 @@
+Comando: cd apps/web && npm run build
+Fecha: 2026-10-18 11:30:08
+Node: v22.18.0
+Rama: feat/costos | Commit base: 6d54ae6 (con cambios sin commitear: pruebas de costos)
+------------------------------------------------------------
+
+> web@0.1.0 build
+> next build
+
+▲ Next.js 16.3.6 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 185ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.8s
+  Running TypeScript ...
+  Finished TypeScript in 5.6s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/11) ...
+  Generating static pages using 11 workers (2/11) 
+  Generating static pages using 11 workers (5/11) 
+  Generating static pages using 11 workers (8/11) 
+✓ Generating static pages using 11 workers (11/11) in 558ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /login
+├ ○ /panel/contactos
+├ ○ /panel/costos
+├ ○ /panel/dashboard
+├ ○ /panel/parcelas
+├ ƒ /panel/parcelas/[id]
+├ ○ /panel/reportes
+├ ƒ /parcelas
+└ ƒ /parcelas/[id]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+exit: 0

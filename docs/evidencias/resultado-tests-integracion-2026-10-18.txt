@@ -1,0 +1,30 @@
+Comando: cd apps/api && npm run test:integration -- --verbose --reporters=default
+Fecha: 2026-10-18 11:28:12
+Node: v22.18.0
+Rama: feat/costos | Commit base: 6d54ae6 (con cambios sin commitear: pruebas de costos)
+------------------------------------------------------------
+(node:2336) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/integracion/precios-insumo.integration-spec.ts
+  Precio vigente de un insumo segun la fecha (PostgreSQL real)
+    √ devuelve el ultimo precio cuya vigencia ya comenzo en esa fecha (488 ms)
+    √ el dia exacto del cambio ya rige el precio nuevo; el dia anterior, el viejo (142 ms)
+    √ antes del primer precio no hay precio vigente (null) (139 ms)
+    √ el precio futuro no cuenta como vigente hoy (149 ms)
+    √ el historial conserva todos los precios, el mas reciente primero (172 ms)
+
+PASS test/integracion/cadena-integridad.integration-spec.ts
+  Cadena de integridad con PostgreSQL real
+    √ inserciones simultaneas mantienen la cadena consistente (1545 ms)
+    √ un insert fallido (rollback) no deja hueco en la secuencia (462 ms)
+    √ inserciones simultaneas con fallos intercalados siguen sin dejar huecos (739 ms)
+    √ una correccion crea un registro nuevo y deja el original intacto (377 ms)
+    √ detecta un UPDATE directo en la base y senala el registro alterado (363 ms)
+    √ detecta un DELETE directo en la base (hueco en la secuencia) (400 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       11 passed, 11 total
+Snapshots:   0 total
+Time:        7.867 s
+Ran all test suites.
+exit: 0

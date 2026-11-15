@@ -47,6 +47,26 @@ enum TipoContacto {
   OTRO
 }
 
+enum TipoInsumo {
+  SEMILLA
+  FERTILIZANTE
+  AGROQUIMICO
+  COMBUSTIBLE
+}
+
+enum CategoriaGasto {
+  INSUMOS
+  SERVICIO_TERCERIZADO
+  MAQUINARIA
+  MANO_DE_OBRA
+  OTROS
+}
+
+enum EstadoGasto {
+  PAGADO
+  COMPROMETIDO
+}
+
 // =========================================
 // Modelos
 // =========================================
@@ -61,6 +81,7 @@ model Usuario {
   updatedAt    DateTime @updatedAt
 
   actividadesRegistradas Actividad[] @relation("ResponsableActividad")
+  gastosRegistrados      Gasto[]     @relation("RegistradoPorGasto")
 
   @@map("usuarios")
 }
@@ -112,6 +133,8 @@ model Campana {
   updatedAt   DateTime      @updatedAt
 
   actividades Actividad[]
+  gastos      Gasto[]
+  presupuesto Presupuesto?
 
   // Regla de negocio "solo una EN_CURSO por parcela" se valida en el
   // service (CampanasService) antes de crear/actualizar el estado.
@@ -179,4 +202,81 @@ model Contacto {
 
   @@index([tipo])
   @@map("contactos")
+}
+
+// ---------- Costos (RF-26 a RF-30). Montos en Bs. ----------
+
+// Catalogo de insumos (RF-26). El precio NO vive aqui: el precio vigente es
+// el ultimo PrecioInsumo con vigenteDesde <= fecha consultada.
+model Insumo {
+  id        String     @id @default(cuid())
+  nombre    String     @unique
+  tipo      TipoInsumo
+  unidad    String
+  activo    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  precios PrecioInsumo[]
+  gastos  Gasto[]
+
+  @@index([tipo])
+  @@map("insumos")
+}
+
+// Historial de precios unitarios (RF-26): una fila por cambio de precio.
+model PrecioInsumo {
+  id           String   @id @default(cuid())
+  insumoId     String
+  insumo       Insumo   @relation(fields: [insumoId], references: [id], onDelete: Restrict)
+  precio       Float
+  vigenteDesde DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([insumoId, vigenteDesde])
+  @@map("precios_insumo")
+}
+
+// Gasto de una campana (RF-27). Nunca se borra: se anula con motivo (RF-56)
+// y los anulados no cuentan en los totales. Fuera de la cadena de integridad.
+model Gasto {
+  id              String         @id @default(cuid())
+  campanaId       String
+  campana         Campana        @relation(fields: [campanaId], references: [id], onDelete: Restrict)
+  categoria       CategoriaGasto
+  descripcion     String
+  monto           Float
+  fecha           DateTime
+  estado          EstadoGasto
+  // Solo cuando el gasto es de un insumo del catalogo: cantidad y precio
+  // unitario (copia del vigente al registrar) con los que se calculo el monto.
+  insumoId        String?
+  insumo          Insumo?        @relation(fields: [insumoId], references: [id], onDelete: Restrict)
+  cantidad        Float?
+  precioUnitario  Float?
+  registradoPorId String
+  registradoPor   Usuario        @relation("RegistradoPorGasto", fields: [registradoPorId], references: [id])
+  anulado         Boolean        @default(false)
+  motivoAnulacion String?
+  anuladoEn       DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([campanaId, anulado])
+  @@index([estado])
+  @@index([insumoId])
+  @@map("gastos")
+}
+
+// Presupuesto total de una campana (RF-29): uno por campana.
+model Presupuesto {
+  id         String   @id @default(cuid())
+  campanaId  String   @unique
+  campana    Campana  @relation(fields: [campanaId], references: [id], onDelete: Restrict)
+  montoTotal Float
+  notas      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("presupuestos")
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
@@ -13,9 +13,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
-  if (usuario) {
-    router.replace(usuario.rol === "OPERATIVO" ? "/panel/parcelas" : "/panel/dashboard");
-  }
+  // Navegar durante el render rompe React; el efecto cubre tanto la sesion
+  // ya iniciada como el login recien hecho (redirige segun el rol).
+  useEffect(() => {
+    if (usuario) {
+      router.replace(usuario.rol === "OPERATIVO" ? "/panel/parcelas" : "/panel/dashboard");
+    }
+  }, [usuario, router]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -23,7 +27,6 @@ export default function LoginPage() {
     setCargando(true);
     try {
       await login(email, password);
-      router.push("/panel/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo iniciar sesion");
     } finally {
