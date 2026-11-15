@@ -8,13 +8,22 @@ import { useEffect, useId } from "react";
  * scroll interno. Los botones de accion van en <AccionesModal> al final del
  * formulario para quedar fijos abajo mientras el cuerpo se desplaza.
  */
+const ANCHO_MODAL = {
+  md: "max-w-md",
+  lg: "max-w-lg",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+} as const;
+
 export function Modal({
   titulo,
   onClose,
+  ancho = "lg",
   children,
 }: {
   titulo: string;
   onClose: () => void;
+  ancho?: keyof typeof ANCHO_MODAL;
   children: React.ReactNode;
 }) {
   const tituloId = useId();
@@ -33,7 +42,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={tituloId}
-        className="flex max-h-[90dvh] w-full max-w-lg flex-col rounded-lg bg-white shadow-lg"
+        className={`flex max-h-[90dvh] w-full ${ANCHO_MODAL[ancho]} flex-col rounded-xl border border-[#E4EAE6] bg-white shadow-xl`}
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-stone-200 px-4 py-3 sm:px-6 sm:py-4">
           <h2 id={tituloId} className="text-lg font-semibold text-stone-900">

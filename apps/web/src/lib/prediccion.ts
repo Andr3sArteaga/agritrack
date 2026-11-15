@@ -47,8 +47,6 @@ export interface FactorImpacto {
   detalle: string;
 }
 
-export const ES_MODO_DEV = process.env.NODE_ENV !== "production";
-
 export interface EscenarioSiembraImpacto {
   haSembradas: number;
   fechaSiembra: string;
@@ -78,27 +76,6 @@ export interface ResultadoImpacto {
   advertencias: string[];
   factores: FactorImpacto[];
   escenarios?: EscenariosImpacto;
-}
-
-export interface PrepararParcelaDevRespuesta {
-  parcelaId: string;
-  cultivoId: string;
-  cultivoNombre: string;
-  campanaActualId: string;
-  temporadaActual: string;
-  campanasHabilitadas: number;
-  campanasSinActividadCosecha: {
-    campanaId: string;
-    fechaSiembra: string;
-    fechaCosecha: string;
-    rendimientoTnHa: number;
-  }[];
-  campanaActualNecesitaSiembra: {
-    campanaId: string;
-    fechaSiembra: string;
-  } | null;
-  versionModelo: string;
-  estadoModelo: string;
 }
 
 /** Ids de las parcelas de demostracion. Si no se puede saber, se asume que no hay. */

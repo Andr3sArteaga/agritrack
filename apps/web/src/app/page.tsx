@@ -1,74 +1,577 @@
-import { Handshake, LineChart, ShieldCheck, type LucideIcon } from "lucide-react";
-import { EnlaceBoton } from "@/components/enlace-boton";
-import { EncabezadoPublico } from "@/components/publico/encabezado-publico";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Award,
+  BarChart3,
+  BrainCircuit,
+  Camera,
+  CheckCircle2,
+  ClipboardCheck,
+  DatabaseZap,
+  Handshake,
+  Lock,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Search,
+  ShieldAlert,
+  ShieldCheck,
+  Sprout,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
+import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { LandingPreventaSeccion } from "@/components/publico/landing-preventa-seccion";
+import type { CatalogoParcela } from "@/lib/types";
 
-const BENEFICIOS: { icono: LucideIcon; titulo: string; descripcion: string }[] = [
+const TELEFONO_CONTACTO =
+  process.env.NEXT_PUBLIC_CONTACTO_TELEFONO ?? "+591 70000000";
+const EMAIL_CONTACTO =
+  process.env.NEXT_PUBLIC_CONTACTO_EMAIL ?? "contacto@agroan.com";
+
+async function obtenerParcelasPublicas(): Promise<CatalogoParcela[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) return [];
+
+  try {
+    const res = await fetch(`${apiUrl}/public/parcelas`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as unknown;
+    return Array.isArray(data) ? (data as CatalogoParcela[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+const HERO_BENEFICIOS = [
+  "Registros auditables con huella SHA-256",
+  "Estimación de rendimiento con IA",
+  "Ubicación geográfica exacta por polígono",
+];
+
+const CARACTERISTICAS_FUNCIONA: {
+  icono: LucideIcon;
+  titulo: string;
+  descripcion: string;
+}[] = [
   {
-    icono: ShieldCheck,
-    titulo: "Registros protegidos",
+    icono: ClipboardCheck,
+    titulo: "Registro completo",
     descripcion:
-      "Cada labor queda anotada con su fecha, quién la hizo y qué insumos se usaron. Si alguien cambia un registro, se nota.",
+      "Cada siembra, aplicación, monitoreo de suelo y lluvia diaria queda anotada con fecha y responsable.",
   },
   {
-    icono: LineChart,
-    titulo: "Datos claros",
+    icono: BrainCircuit,
+    titulo: "Inteligencia artificial",
     descripcion:
-      "Mira los rendimientos de cosechas anteriores y las campañas en curso en un solo lugar.",
+      "El modelo Random Forest compara las variables de campaña frente al histórico real del cultivo.",
   },
   {
-    icono: Handshake,
-    titulo: "Preventa transparente",
+    icono: Camera,
+    titulo: "Validado con evidencias",
     descripcion:
-      "Compradores e inversionistas pueden ver el estado y el historial de cada parcela disponible antes de negociar.",
+      "Bitácora fotográfica de campo, análisis de laboratorio y verificación criptográfica de integridad.",
+  },
+  {
+    icono: ShieldAlert,
+    titulo: "Prevención de riesgos",
+    descripcion:
+      "Alertas tempranas por eventos climáticos adversos y seguimiento continuo de cada lote activo.",
   },
 ];
 
-export default function WelcomePage() {
+const PASOS_TIMELINE: {
+  numero: string;
+  paso: string;
+  titulo: string;
+  descripcion: string;
+  icono: LucideIcon;
+}[] = [
+  {
+    numero: "01",
+    paso: "PASO 1",
+    titulo: "Ve las parcelas disponibles",
+    descripcion: "Compara ubicación, hectáreas y cultivo.",
+    icono: Search,
+  },
+  {
+    numero: "02",
+    paso: "PASO 2",
+    titulo: "Revisa sus detalles",
+    descripcion: "Consulta el historial y la producción estimada.",
+    icono: TrendingUp,
+  },
+  {
+    numero: "03",
+    paso: "PASO 3",
+    titulo: "Contáctate con AgroAn",
+    descripcion: "Resuelve tus dudas y acuerda la compra directamente.",
+    icono: Handshake,
+  },
+];
+
+const PILARES_CONFIANZA: {
+  icono: LucideIcon;
+  titulo: string;
+  descripcion: string;
+}[] = [
+  {
+    icono: ShieldCheck,
+    titulo: "Trazabilidad inmutable",
+    descripcion:
+      "Cada labor agrícola forma parte de una cadena SHA-256 que detecta al instante cualquier modificación posterior.",
+  },
+  {
+    icono: BarChart3,
+    titulo: "Modelo predictivo transparente",
+    descripcion:
+      "Proyecciones en t/ha basadas únicamente en variables previas a la siembra y validadas frente a la línea base histórica.",
+  },
+  {
+    icono: Lock,
+    titulo: "Seguridad e integridad de datos",
+    descripcion:
+      "Control estricto por roles operativos y publicación selectiva de lotes y fotografías autorizadas para preventa.",
+  },
+];
+
+export default async function LandingPage() {
+  const parcelas = await obtenerParcelasPublicas();
+  const whatsappNumero = TELEFONO_CONTACTO.replace(/[^0-9]/g, "");
+  const whatsappHref = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(
+    "Hola AgroAn, me interesa recibir información sobre las parcelas disponibles en AgriTrack.",
+  )}`;
+
   return (
-    <div className="flex flex-1 flex-col">
-      <EncabezadoPublico>
-        <EnlaceBoton href="/parcelas" variante="secundario">
-          Ver parcelas disponibles
-        </EnlaceBoton>
-        <EnlaceBoton href="/login">Ingresar</EnlaceBoton>
-      </EncabezadoPublico>
+    <div className="flex min-h-screen flex-col bg-[#f8faf9] text-[#17211D]">
+      {/* A. NAVBAR STICKY */}
+      <LandingNavbar />
 
       <main className="flex-1">
-        <section className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 sm:py-20">
-          <h1 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight text-stone-900 sm:text-5xl">
-            Encuentra tu próxima producción de forma rápida y sencilla
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-700">
-            AgriTrack es la plataforma de AgroAn. Anota cada labor de campo, mira el
-            rendimiento de cada parcela y comparte información clara con compradores e
-            inversionistas.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <EnlaceBoton href="/parcelas">Ver parcelas disponibles</EnlaceBoton>
-            <EnlaceBoton href="/login" variante="secundario">
-              Ingresar
-            </EnlaceBoton>
+        {/* B. HERO SECTION */}
+        <section
+          id="inicio"
+          className="relative overflow-hidden bg-[#004b36] pb-28 pt-12 text-white sm:pb-36 sm:pt-16 lg:pt-20"
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#00a859]/20 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-[#00a859]/15 blur-3xl"
+          />
+
+          <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-12">
+            {/* Hero Izquierda */}
+            <div className="lg:col-span-6">
+              <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
+                Encuentra tu próxima{" "}
+                <span className="text-[#00a859]">producción</span> de forma
+                rápida y sencilla
+              </h1>
+
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-emerald-100/90 sm:text-lg">
+                Supervisa campañas reales en Santa Cruz con trazabilidad de
+                labores, monitoreo en campo y estimación de rendimiento
+                respaldada por datos antes de cerrar cada negociación.
+              </p>
+
+              <div className="mt-8 flex flex-wrap items-center gap-3.5">
+                <a
+                  href="#parcelas-preventa"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#00a859] px-6 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-all hover:bg-[#00bf65] sm:text-base"
+                >
+                  Ver parcelas disponibles
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </a>
+                <a
+                  href="#como-funciona"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/35 px-6 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white/10 sm:text-base"
+                >
+                  Conocer más
+                </a>
+              </div>
+
+              <ul className="mt-8 grid gap-2.5 sm:grid-cols-3">
+                {HERO_BENEFICIOS.map((beneficio) => (
+                  <li
+                    key={beneficio}
+                    className="flex items-start gap-2 text-xs font-medium text-emerald-50/90 sm:text-sm"
+                  >
+                    <CheckCircle2
+                      className="mt-0.5 h-4 w-4 shrink-0 text-[#00a859]"
+                      aria-hidden
+                    />
+                    <span>{beneficio}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Hero Derecha: Dos semicírculos opuestos alineados en la base */}
+            <div className="lg:col-span-6">
+              <div className="mx-auto flex max-w-lg items-end justify-center gap-3 sm:gap-4">
+                <div className="h-72 w-36 overflow-hidden rounded-l-full rounded-r-none bg-[#003b2a] shadow-2xl sm:h-[420px] sm:w-[210px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/hero-1.jpg"
+                    alt="Vista aérea de cultivos agrícolas en desarrollo"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div className="h-64 w-36 overflow-hidden rounded-l-none rounded-r-full border border-white/15 bg-[#003b2a] shadow-2xl sm:h-[375px] sm:w-[205px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/hero-2.jpg"
+                    alt="Detalle de cultivos saludables bajo luz natural"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-          <div className="grid gap-6 sm:grid-cols-3">
-            {BENEFICIOS.map(({ icono: Icono, titulo, descripcion }) => (
-              <div
-                key={titulo}
-                className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm"
-              >
-                <Icono className="h-8 w-8 text-emerald-700" aria-hidden />
-                <h2 className="mt-3 text-xl font-bold text-emerald-800">{titulo}</h2>
-                <p className="mt-2 text-base text-stone-700">{descripcion}</p>
+        {/* C. BANNER "TRANSPARENCIA TOTAL" SUPERPUESTO */}
+        <section
+          aria-label="Transparencia total"
+          className="relative z-10 -mt-16 mx-auto max-w-7xl px-4 sm:-mt-20 sm:px-6"
+        >
+          <div className="grid items-center gap-6 overflow-hidden rounded-3xl border border-[#00a859]/30 bg-[#003828] p-5 text-white shadow-2xl sm:p-8 lg:grid-cols-12">
+            <div className="overflow-hidden rounded-2xl border border-white/10 lg:col-span-5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/banner-field.jpg"
+                alt="Surcos de siembra agrícola monitoreados en Pailón Sur"
+                className="h-48 w-full object-cover sm:h-56"
+              />
+            </div>
+
+            <div className="lg:col-span-7 lg:pl-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00a859]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#00a859]">
+                <Award className="h-3.5 w-3.5" aria-hidden />
+                Respaldo técnico real
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+                Transparencia total en cada hectárea sembrada
+              </h2>
+              <p className="mt-2.5 text-sm leading-relaxed text-emerald-100/85 sm:text-base">
+                Consulta con claridad qué se sembró, cuándo se aplicaron insumos,
+                cómo evolucionó el clima y qué cosechas históricas respaldan la
+                proyección de cada lote disponible para preventa.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-2.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
+                  <ShieldCheck className="h-4 w-4 text-[#00a859]" aria-hidden />
+                  Cadena SHA-256 verificable
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
+                  <DatabaseZap className="h-4 w-4 text-[#00a859]" aria-hidden />
+                  Histórico multi-campaña
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
+                  <MapPin className="h-4 w-4 text-[#00a859]" aria-hidden />
+                  Polígonos georreferenciados
+                </span>
               </div>
-            ))}
+            </div>
+          </div>
+        </section>
+
+        {/* D. SECCIÓN "QUIÉNES SOMOS" */}
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="lg:col-span-6">
+              <div className="relative overflow-hidden rounded-[2rem] border border-[#E4EAE6] bg-white shadow-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/team.jpg"
+                  alt="Equipo técnico y productores agrícolas de AgroAn en campo"
+                  className="h-72 w-full object-cover sm:h-[410px]"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#00a859]/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+                Sobre AgroAn
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+                Quiénes somos
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-[#17211D]/90">
+                Somos una empresa agrícola ubicada en{" "}
+                <strong>Pailón Sur, Santa Cruz</strong>, dedicada a la producción
+                extensiva de granos estratégicos con enfoque en eficiencia
+                operativa y trazabilidad digital.
+              </p>
+              <p className="mt-3 text-base leading-relaxed text-[#68736D]">
+                A través de <strong>AgriTrack</strong> ordenamos cada labor de
+                campo, protegemos la autenticidad de nuestros registros y
+                brindamos información confiable a compradores e inversionistas
+                desde la siembra hasta la cosecha.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* E. SECCIÓN "CÓMO FUNCIONA AGRITRACK" */}
+        <section id="como-funciona" className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="inline-flex rounded-full bg-[#00a859]/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+                Metodología verificable
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+                Cómo funciona AgriTrack
+              </h2>
+              <p className="mt-3 text-base text-[#68736D]">
+                Del monitoreo diario en campo a una preventa transparente con
+                respaldo técnico en tres pasos simples.
+              </p>
+            </div>
+
+            {/* Fila 1: 4 Tarjetas de Características */}
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {CARACTERISTICAS_FUNCIONA.map(({ icono: Icono, titulo, descripcion }) => (
+                <article
+                  key={titulo}
+                  className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#00a859]/50 hover:shadow-md"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00a859]/12 text-[#00a859]">
+                    <Icono className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-[#17211D]">
+                    {titulo}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#68736D]">
+                    {descripcion}
+                  </p>
+                </article>
+              ))}
+            </div>
+
+            {/* Fila 2: Línea de Tiempo Horizontal con puntos circulares (estilo referencia) */}
+            <div className="mt-12 rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs sm:p-8">
+              <div className="relative grid gap-6 md:grid-cols-3">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute left-[16.66%] right-[16.66%] top-16 z-10 hidden border-t-2 border-dashed border-[#006B4F]/25 md:block"
+                />
+
+                {PASOS_TIMELINE.map(
+                  ({ numero, paso, titulo, descripcion, icono: Icono }) => (
+                    <div
+                      key={numero}
+                      className="relative z-0 flex flex-col items-center rounded-2xl bg-[#F8FAF9] px-6 py-8 text-center"
+                    >
+                      <div className="relative z-20 flex h-16 w-16 items-center justify-center rounded-full bg-[#006B4F] text-xl font-bold text-white ring-4 ring-white shadow-xs">
+                        <span>{numero}</span>
+                        <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#D1FAE5] text-[#006B4F] ring-2 ring-white">
+                          <Icono className="h-3.5 w-3.5" aria-hidden />
+                        </span>
+                      </div>
+
+                      <span className="mt-4 inline-flex rounded-full bg-[#DCFCE7] px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#006B4F]">
+                        {paso}
+                      </span>
+
+                      <h3 className="mt-3 text-base font-bold text-[#17211D]">
+                        {titulo}
+                      </h3>
+                      <p className="mt-1.5 max-w-xs text-sm text-[#68736D]">
+                        {descripcion}
+                      </p>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* F. SECCIÓN "PARCELAS DISPONIBLES PARA PREVENTA" + MAPA OSCURO */}
+        <LandingPreventaSeccion parcelasReales={parcelas} />
+
+        {/* G. SECCIÓN "POR QUÉ CONFIAR" */}
+        <section className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="max-w-2xl">
+              <span className="inline-flex rounded-full bg-[#00a859]/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+                Garantía operativa
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+                Por qué confiar en AgriTrack
+              </h2>
+              <p className="mt-2 text-base text-[#68736D]">
+                Diseñado junto al equipo de campo para evitar información
+                fragmentada y ofrecer evidencia concreta en cada campaña.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {PILARES_CONFIANZA.map(({ icono: Icono, titulo, descripcion }) => (
+                <article
+                  key={titulo}
+                  className="rounded-3xl border border-[#E4EAE6] bg-[#f8faf9] p-7"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004b36] text-[#00a859]">
+                    <Icono className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h3 className="mt-5 text-lg font-bold text-[#17211D]">
+                    {titulo}
+                  </h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-[#68736D]">
+                    {descripcion}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* H. CTA INFERIOR */}
+        <section className="bg-white pb-16 sm:pb-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-[#004b36] p-7 text-white shadow-xl sm:p-10 lg:flex-row lg:items-center">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#00a859] text-white shadow-md">
+                  <MessageCircle className="h-7 w-7" aria-hidden />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                    ¿Te interesa una parcela? Hablemos
+                  </h2>
+                  <p className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-emerald-100/90 sm:text-base">
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-white">
+                      <Phone className="h-4 w-4 text-[#00a859]" aria-hidden />
+                      {TELEFONO_CONTACTO}
+                    </span>
+                    <span className="hidden text-emerald-200/50 sm:inline">
+                      ·
+                    </span>
+                    <span>
+                      Atención directa con AgroAn en Santa Cruz, Bolivia
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-[#004b36] shadow-md transition-transform hover:-translate-y-0.5 hover:bg-[#E8F5EF] sm:w-auto sm:text-base"
+              >
+                <MessageCircle className="h-5 w-5 text-[#00a859]" aria-hidden />
+                Contactar por WhatsApp
+              </a>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-stone-200 bg-white py-6 text-center text-base text-stone-600">
-        AgroAn © {new Date().getFullYear()}
+      {/* FOOTER MINIMALISTA */}
+      <footer className="border-t border-[#E4EAE6] bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <div className="grid gap-8 md:grid-cols-3 md:items-start">
+            {/* Izquierda: Logo */}
+            <div>
+              <Link href="#inicio" className="inline-flex items-center gap-2.5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#004b36] text-[#00a859]">
+                  <Sprout className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="text-lg font-bold text-[#17211D]">
+                  AgriTrack
+                </span>
+              </Link>
+              <p className="mt-3 max-w-xs text-sm text-[#68736D]">
+                Gestión agrícola inteligente, trazabilidad verificable y preventa
+                transparente para AgroAn.
+              </p>
+            </div>
+
+            {/* Centro: Enlaces útiles */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#68736D]">
+                Enlaces útiles
+              </p>
+              <ul className="mt-3 space-y-2 text-sm font-medium text-[#17211D]">
+                <li>
+                  <a href="#inicio" className="hover:text-[#00a859]">
+                    Inicio
+                  </a>
+                </li>
+                <li>
+                  <a href="#parcelas-preventa" className="hover:text-[#00a859]">
+                    Parcelas de preventa
+                  </a>
+                </li>
+                <li>
+                  <Link href="/parcelas" className="hover:text-[#00a859]">
+                    Catálogo público completo
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="hover:text-[#00a859]">
+                    Acceder al panel
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Derecha: Contacto */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#68736D]">
+                Contacto directo
+              </p>
+              <ul className="mt-3 space-y-2.5 text-sm text-[#17211D]">
+                <li className="flex items-center gap-2">
+                  <MapPin
+                    className="h-4 w-4 shrink-0 text-[#00a859]"
+                    aria-hidden
+                  />
+                  Pailón Sur, Santa Cruz, Bolivia
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone
+                    className="h-4 w-4 shrink-0 text-[#00a859]"
+                    aria-hidden
+                  />
+                  <a
+                    href={`tel:${TELEFONO_CONTACTO.replace(/\s+/g, "")}`}
+                    className="hover:text-[#00a859]"
+                  >
+                    {TELEFONO_CONTACTO}
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Mail
+                    className="h-4 w-4 shrink-0 text-[#00a859]"
+                    aria-hidden
+                  />
+                  <a
+                    href={`mailto:${EMAIL_CONTACTO}`}
+                    className="hover:text-[#00a859]"
+                  >
+                    {EMAIL_CONTACTO}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-stone-100 pt-6 text-center text-xs text-[#68736D]">
+            AgroAn © {new Date().getFullYear()} · AgriTrack. Todos los derechos
+            reservados.
+          </div>
+        </div>
       </footer>
     </div>
   );

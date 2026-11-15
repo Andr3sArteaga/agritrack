@@ -4,7 +4,7 @@
  *
  * Funciones puras (sin red): reciben los datos ya cargados y devuelven lo que se dibuja.
  */
-import { contarAlertas, estadoGeneral, type EstadoIndicador } from "./estado";
+import { contarAlertas, type EstadoIndicador } from "./estado";
 import { formatearFecha } from "./format";
 import { elegirCampanaActual } from "./parcelas";
 import { TEXTOS, type TextoControlado } from "./textos";
@@ -279,20 +279,77 @@ export function indicadoresClima(clima: RegistroClima[]): Indicador[] {
           : eventos
               .map((r) => `${CONDICION_CLIMA_LABEL[r.condicion]} (${formatearFecha(r.fecha)})`)
               .join(", "),
+      estado: eventos.length === 0 ? "BIEN" : "ATENCION",
       ultimaMedicion: eventos[0]?.fecha ?? null,
+      regla:
+        eventos.length === 0
+          ? "Es Bien cuando se anotó el clima y no hubo heladas, granizo ni viento fuerte en los últimos 30 días."
+          : "Pasa a Atención si se anotó helada, granizo o viento fuerte en los últimos 30 días.",
     }),
   ];
 }
 
-function armarArea(id: AreaId, nombre: string, indicadores: Indicador[]): AreaResumen {
+interface ContextoArea {
+  hayCampana: boolean;
+  ultimoRegistroLabor: string | null;
+  integridadValida: boolean;
+}
+
+function calcularEstadoArea(
+  id: AreaId,
+  indicadores: Indicador[],
+  conDato: number,
+  contexto: ContextoArea,
+): EstadoIndicador {
+  if (id === "SUELO") {
+    if (conDato === 0) return "SIN_DATOS";
+    return conDato < indicadores.length ? "ATENCION" : "BIEN";
+  }
+
+  if (id === "CLIMA") {
+    if (conDato === 0) return "SIN_DATOS";
+    return indicadores.some((i) => i.estado === "ATENCION") ? "ATENCION" : "BIEN";
+  }
+
+  if (indicadores.some((i) => i.estado === "CRITICO")) return "CRITICO";
+  if (contexto.hayCampana && contexto.ultimoRegistroLabor !== null && contexto.integridadValida) {
+    return "BIEN";
+  }
+  return conDato > 0 ? "ATENCION" : "SIN_DATOS";
+}
+
+function estadoParcelaOperativa(
+  areas: readonly AreaResumen[],
+  hayCampana: boolean,
+  tieneMonitoreoActual: boolean,
+): EstadoIndicador {
+  if (areas.some((a) => a.estado === "CRITICO")) return "CRITICO";
+  if (!hayCampana || !tieneMonitoreoActual) return "SIN_DATOS";
+  if (areas.every((a) => a.estado === "BIEN")) return "BIEN";
+  return "ATENCION";
+}
+
+function armarArea(
+  id: AreaId,
+  nombre: string,
+  indicadores: Indicador[],
+  contexto: ContextoArea,
+): AreaResumen {
   const estados = indicadores.map((i) => i.estado);
+  const conDato = indicadores.filter((i) => i.valor !== null).length;
+  const estado = calcularEstadoArea(id, indicadores, conDato, contexto);
+  const alertas = Math.max(
+    contarAlertas(estados),
+    estado === "ATENCION" || estado === "CRITICO" ? 1 : 0,
+  );
+
   return {
     id,
     nombre,
     indicadores,
-    estado: estadoGeneral(estados),
-    alertas: contarAlertas(estados),
-    conDato: indicadores.filter((i) => i.valor !== null).length,
+    estado,
+    alertas,
+    conDato,
   };
 }
 
@@ -306,11 +363,22 @@ export function construirResumenParcela(entrada: EntradaResumen): ResumenParcela
   const ultimoRegistroLabor =
     (entrada.actividades ?? []).map((a) => a.fecha).sort((a, b) => b.localeCompare(a))[0] ?? null;
 
+  const hayCampana = campana !== null;
+  const integridadValida = entrada.integridad === null || entrada.integridad.valido;
+  const contextoArea: ContextoArea = { hayCampana, ultimoRegistroLabor, integridadValida };
+  const tieneMonitoreoActual =
+    entrada.suelo.length > 0 || entrada.clima.length > 0 || (entrada.actividades ?? []).length > 0;
+
   const areas = [
-    armarArea("SUELO", "Suelo", indicadoresSuelo(entrada.suelo, entrada.actividades)),
+    armarArea("SUELO", "Suelo", indicadoresSuelo(entrada.suelo, entrada.actividades), contextoArea),
     // Se llama "Labores y cosecha": el cultivo ya se eligio al crear la campaña.
-    armarArea("CULTIVO", "Labores y cosecha", indicadoresCultivo(entrada, ultimoRegistroLabor, campana !== null)),
-    armarArea("CLIMA", "Clima", indicadoresClima(entrada.clima)),
+    armarArea(
+      "CULTIVO",
+      "Labores y cosecha",
+      indicadoresCultivo(entrada, ultimoRegistroLabor, hayCampana),
+      contextoArea,
+    ),
+    armarArea("CLIMA", "Clima", indicadoresClima(entrada.clima), contextoArea),
   ];
 
   return {
@@ -324,7 +392,7 @@ export function construirResumenParcela(entrada: EntradaResumen): ResumenParcela
     cultivoActual,
     ultimoRegistroLabor,
     areas,
-    estado: estadoGeneral(areas.map((a) => a.estado)),
+    estado: estadoParcelaOperativa(areas, hayCampana, tieneMonitoreoActual),
     alertas: areas.reduce((total, a) => total + a.alertas, 0),
     areasSinDatos: areas.filter((a) => a.estado === "SIN_DATOS").length,
     sinDatosBasicos: campana === null || entrada.prediccion?.rendimientoEstimadoTnHa == null,

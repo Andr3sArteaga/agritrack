@@ -104,9 +104,10 @@ export class PublicService {
         fecha: item.fecha,
       }));
 
-    const verificacion = await this.integridadService.verificarPorParcela(
-      parcelaId,
-    );
+    const [verificacion, fotosPublicas] = await Promise.all([
+      this.integridadService.verificarPorParcela(parcelaId),
+      this.parcelaRepository.listarFotos(parcelaId, true),
+    ]);
 
     return {
       id: parcela.id,
@@ -121,6 +122,12 @@ export class PublicService {
       historialCuidado,
       historicoRendimiento: historicoAnterior,
       registrosVerificados: verificacion.valido,
+      fotos: fotosPublicas.map((f) => ({
+        id: f.id,
+        imagenData: f.imagenData,
+        descripcion: f.descripcion,
+        createdAt: f.createdAt,
+      })),
       contacto: {
         nombre: this.config.get<string>('AGROAN_CONTACTO_NOMBRE') ?? null,
         telefono: this.config.get<string>('AGROAN_CONTACTO_TELEFONO') ?? null,
@@ -135,6 +142,8 @@ export class PublicService {
     const campanaActual = await this.obtenerCampanaActual(parcela.id);
 
     let cultivoActual: string | null = null;
+    let temporadaActual: string | null = null;
+    let rendimientoEstimadoTnHa: number | null = null;
     let produccionEstimadaTn: number | null = null;
 
     if (campanaActual) {
@@ -142,11 +151,13 @@ export class PublicService {
         campanaActual.cultivoId,
       );
       cultivoActual = cultivo?.nombre ?? null;
+      temporadaActual = campanaActual.temporada;
 
       const prediccion = await this.prediccionService.predecir(
         parcela.id,
         campanaActual.cultivoId,
       );
+      rendimientoEstimadoTnHa = prediccion.rendimientoEstimadoTnHa;
       produccionEstimadaTn =
         prediccion.rendimientoEstimadoTnHa !== null
           ? this.redondear(
@@ -155,12 +166,23 @@ export class PublicService {
           : null;
     }
 
+    const fotosPublicas = await this.parcelaRepository.listarFotos(
+      parcela.id,
+      true,
+    );
+
     return {
       id: parcela.id,
       nombre: parcela.nombre,
       hectareas: parcela.hectareas,
       cultivoActual,
       produccionEstimadaTn,
+      fotoPortada: fotosPublicas[0]?.imagenData ?? null,
+      totalFotosPublicadas: fotosPublicas.length,
+      ubicacionTexto: parcela.ubicacionTexto,
+      temporadaActual,
+      rendimientoEstimadoTnHa,
+      poligono: parcela.poligono,
     };
   }
 

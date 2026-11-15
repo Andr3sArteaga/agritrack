@@ -94,6 +94,7 @@ model Usuario {
   gastosRegistrados      Gasto[]         @relation("RegistradoPorGasto")
   analisisSuelo          AnalisisSuelo[]
   registrosClima         RegistroClima[]
+  fotosParcela           FotoParcela[]
 
   @@map("usuarios")
 }
@@ -116,6 +117,7 @@ model Parcela {
   campanas       Campana[]
   analisisSuelo  AnalisisSuelo[]
   registrosClima RegistroClima[]
+  fotos          FotoParcela[]
 
   @@index([disponibleParaPreventa])
   @@index([activa])
@@ -408,4 +410,24 @@ model RegistroClima {
 
   @@unique([parcelaId, fecha])
   @@map("registros_clima")
+}
+
+// =========================================
+// Fotos de parcela (comprimidas en Base64 Data URL; visibilidad en preventa)
+// =========================================
+
+model FotoParcela {
+  id                String   @id @default(cuid())
+  parcelaId         String
+  parcela           Parcela  @relation(fields: [parcelaId], references: [id], onDelete: Cascade)
+  imagenData        String
+  descripcion       String?
+  visibleEnPreventa Boolean  @default(true)
+  subidaPorId       String
+  subidaPor         Usuario  @relation(fields: [subidaPorId], references: [id])
+  createdAt         DateTime @default(now())
+
+  @@index([parcelaId, createdAt])
+  @@index([parcelaId, visibleEnPreventa])
+  @@map("fotos_parcela")
 }

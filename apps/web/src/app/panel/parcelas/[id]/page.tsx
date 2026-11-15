@@ -1,236 +1,434 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Activity as IconoEstado,
   ArrowLeft,
   CalendarRange,
   ClipboardList,
-  CloudSun,
-  Layers,
+  CloudRain,
+  Eye,
   LineChart,
-  PackageCheck,
+  MapPin,
   Pencil,
   Plus,
+  ShieldCheck,
+  ShieldAlert,
   SlidersHorizontal,
   Sprout,
+  TestTubes,
   Trash2,
 } from "lucide-react";
-import { Ayuda } from "@/components/ayuda";
 import { BadgeEstadoCampana } from "@/components/badge";
-import { EstadoBadge } from "@/components/estado/estado-badge";
-import { EstimacionComponente } from "@/components/estado/estimacion-componente";
-import { PanelEstadoParcela } from "@/components/estado/panel-estado-parcela";
+import {
+  EstimacionComponente,
+  type PuntoHistoricoRendimiento,
+} from "@/components/estado/estimacion-componente";
 import { IconoActividad } from "@/components/icono-actividad";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { useResumenParcela } from "@/lib/cargar-resumen";
 import { formatearFecha } from "@/lib/format";
 import { elegirCampanaActual } from "@/lib/parcelas";
 import type { RegistroCosechaCampana } from "@/lib/prediccion";
-import type { AreaResumen } from "@/lib/resumen-parcela";
 import {
   ESTADO_CAMPANA_LABEL,
   TIPO_ACTIVIDAD_LABEL,
   type Actividad,
+  type AnalisisSuelo,
   type Campana,
   type Cultivo,
   type EstadoCampana,
+  type HistoricoItem,
   type Parcela,
+  type RegistroClima,
+  type ReporteCampana,
+  type ResultadoVerificacion,
+  type TipoActividad,
 } from "@/lib/types";
+import { ParcelaForm } from "../parcela-form";
+import { ActividadForm } from "./actividad-form";
 import { CampanaForm } from "./campana-form";
 import { ClimaForm } from "./clima-form";
+import {
+  evaluarRegistroParcela,
+  type DimensionEstadoRegistro,
+  type EstadoRegistroItem,
+} from "./estado-registro-parcela";
+import { FotosParcelaSeccion } from "./fotos-parcela-seccion";
+import {
+  BadgeEstadoRegistro,
+  ModalDetalleCompletitud,
+  ModalHistorialClima,
+  ModalHistorialSuelo,
+  ModalManejoCultivo,
+  ModalMapaParcela,
+  ModalObservaciones,
+} from "./modales-variables";
 import { RegistroCosechaForm } from "./registro-cosecha-form";
 import { SueloForm } from "./suelo-form";
-import { ActividadForm } from "./actividad-form";
-import { BarraModoDesarrollo } from "./barra-modo-desarrollo";
 
-const ESTADOS: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"];
+const ESTADOS_CAMPANA: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"];
 type PestanaParcela = "registro" | "estimacion";
+type ModalCategoria = "suelo" | "clima" | "manejo" | "observaciones" | null;
 
-/** Boton grande para cargar un dato, dentro del area a la que pertenece. */
-function BotonCargar({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex min-h-11 items-center gap-2 rounded-md border-2 border-emerald-700 bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-800 sm:text-base"
-    >
-      <Plus className="h-5 w-5 shrink-0" aria-hidden />
-      {children}
-    </button>
-  );
-}
-
-function TarjetaDominioMonitoreo({
+function TarjetaCategoriaAmbiente({
   titulo,
   descripcion,
+  contador,
+  estado,
   icono: Icono,
-  area,
-  botonLabel,
-  onAccion,
+  puedeEditar,
+  etiquetaConsultar,
+  etiquetaRegistrar,
+  onConsultar,
+  onRegistrar,
 }: {
   titulo: string;
   descripcion: string;
-  icono: typeof Layers;
-  area: AreaResumen | undefined;
-  botonLabel: string;
-  onAccion?: () => void;
+  contador: string;
+  estado: EstadoRegistroItem;
+  icono: typeof TestTubes;
+  puedeEditar: boolean;
+  etiquetaConsultar: string;
+  etiquetaRegistrar?: string;
+  onConsultar: () => void;
+  onRegistrar?: () => void;
 }) {
-  const faltantes = area ? area.indicadores.length - area.conDato : 0;
+  const sinDatos = estado === "SIN_DATOS";
   return (
-    <article className="flex flex-col justify-between gap-4 rounded-xl border-2 border-stone-200 bg-white p-4">
-      <div>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-stone-900">
-            <Icono className="h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
-            {titulo}
-          </h3>
-          {area && <EstadoBadge estado={area.estado} tamano="sm" />}
+    <article
+      className={`flex flex-col justify-between gap-4 rounded-xl bg-white p-5 transition-colors ${
+        sinDatos
+          ? "border-2 border-dashed border-stone-300"
+          : "border border-[#E4EAE6]"
+      }`}
+    >
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E8F5EF] text-[#006B4F]">
+              <Icono className="h-5 w-5" aria-hidden />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#17211D]">{titulo}</h3>
+              <p className="text-xs font-medium text-[#006B4F]">{contador}</p>
+            </div>
+          </div>
+          <BadgeEstadoRegistro estado={estado} tamano="sm" />
         </div>
-        <p className="mt-1 text-sm text-stone-600">{descripcion}</p>
-        {area && (
-          <p className="mt-2 text-xs font-medium text-stone-700">
-            {area.conDato} de {area.indicadores.length} indicadores cargados
-            {area.alertas > 0
-              ? ` · ${area.alertas} ${area.alertas === 1 ? "alerta activa" : "alertas activas"}`
-              : faltantes > 0
-                ? ` · Faltan ${faltantes}`
-                : " · Completo"}
-          </p>
-        )}
+
+        <p className="text-sm leading-relaxed text-[#68736D]">{descripcion}</p>
       </div>
 
-      {onAccion && (
-        <div>
-          <BotonCargar onClick={onAccion}>{botonLabel}</BotonCargar>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-2 border-t border-[#E4EAE6] pt-3">
+        <button
+          type="button"
+          onClick={onConsultar}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3 text-xs font-semibold text-[#17211D] hover:bg-[#E8F5EF] hover:text-[#006B4F]"
+        >
+          <Eye className="h-4 w-4 shrink-0" aria-hidden />
+          {etiquetaConsultar}
+        </button>
+
+        {puedeEditar && onRegistrar && etiquetaRegistrar && (
+          <button
+            type="button"
+            onClick={onRegistrar}
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-[#006B4F] px-3.5 text-xs font-semibold text-white hover:bg-[#00553E]"
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden />
+            {etiquetaRegistrar}
+          </button>
+        )}
+      </div>
     </article>
   );
 }
 
-export default function ParcelaPrivadaDetallePage() {
+function ParcelaPrivadaDetalleContenido() {
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const parcelaId = params.id;
   const { usuario } = useAuth();
-  const esJefe = usuario?.rol === "JEFE";
-  const puedeRegistrarActividad = usuario?.rol === "JEFE" || usuario?.rol === "OPERATIVO";
+  const rol = usuario?.rol;
+  const esJefe = rol === "JEFE";
+  const puedeRegistrarActividad = rol === "JEFE" || rol === "OPERATIVO";
+  const puedeVerReportesIntegridad = rol === "JEFE" || rol === "CONTABILIDAD";
 
-  const [pestanaActiva, setPestanaActiva] = useState<PestanaParcela>("registro");
+  const [pestanaActiva, setPestanaActiva] = useState<PestanaParcela>(
+    searchParams.get("tab") === "estimacion" ? "estimacion" : "registro",
+  );
 
+  // Datos principales de la parcela
   const [parcela, setParcela] = useState<Parcela | null>(null);
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
   const [campanas, setCampanas] = useState<Campana[]>([]);
+  const [suelo, setSuelo] = useState<AnalisisSuelo[]>([]);
+  const [clima, setClima] = useState<RegistroClima[]>([]);
+  const [integridad, setIntegridad] = useState<ResultadoVerificacion | null>(null);
+  const [historicoReportes, setHistoricoReportes] = useState<HistoricoItem[]>([]);
+  const [registrosPorCampana, setRegistrosPorCampana] = useState<
+    Record<string, RegistroCosechaCampana | null>
+  >({});
+
+  // Selección de campaña y actividades de esa campaña
+  const [campanaManualId, setCampanaManualId] = useState<string | null>(null);
+  const [actividadesState, setActividadesState] = useState<{
+    campanaId: string;
+    version: number;
+    items: Actividad[];
+  } | null>(null);
+
+  // Versiones para recarga reactiva
+  const [versionDatos, setVersionDatos] = useState(0);
+  const [versionEstimacion, setVersionEstimacion] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const [campanaAbierta, setCampanaAbierta] = useState<string | null>(null);
-  const [actividades, setActividades] = useState<Actividad[]>([]);
-  const [registroCosecha, setRegistroCosecha] = useState<RegistroCosechaCampana | null>(null);
-  const [registroActivo, setRegistroActivo] = useState<RegistroCosechaCampana | null>(null);
-
+  // Estado de modales (ningún formulario abierto en pantalla principal)
+  const [modalEditarParcela, setModalEditarParcela] = useState(false);
+  const [modalMapa, setModalMapa] = useState(false);
+  const [modalCategoria, setModalCategoria] = useState<ModalCategoria>(null);
+  const [modalCompletitud, setModalCompletitud] = useState(false);
+  const [formMonitoreo, setFormMonitoreo] = useState<"suelo" | "clima" | null>(null);
   const [mostrarFormCampana, setMostrarFormCampana] = useState(false);
-  const [mostrarFormActividad, setMostrarFormActividad] = useState(false);
-  const [corrigiendo, setCorrigiendo] = useState<Actividad | null>(null);
+  const [modalActividad, setModalActividad] = useState<{
+    corrigiendo: Actividad | null;
+    tipoInicial?: TipoActividad;
+  } | null>(null);
   const [modalRegistroCosecha, setModalRegistroCosecha] = useState<{
     campana: Campana;
     modo: "siembra" | "cosecha";
   } | null>(null);
-  const [versionEstimacion, setVersionEstimacion] = useState(0);
-  // Suelo y clima: que formulario esta abierto, y contador para recargar el estado al guardar.
-  const [formMonitoreo, setFormMonitoreo] = useState<"suelo" | "clima" | null>(null);
-  const [versionEstado, setVersionEstado] = useState(0);
-  const { datos: resumenEstado, error: errorEstado } = useResumenParcela(
-    parcela,
-    campanas,
-    cultivos,
-    versionEstado,
-  );
-  const alGuardarMonitoreo = () => {
-    setFormMonitoreo(null);
-    setVersionEstado((v) => v + 1);
-  };
 
-  const cargarParcela = useCallback(() => {
-    api
-      .get<Parcela>(`/parcelas/${parcelaId}`)
-      .then((res) => setParcela(res.data))
-      .catch((err) => setError(apiErrorMessage(err, "No se pudo cargar la parcela")));
-  }, [parcelaId]);
-
-  const cargarCampanas = useCallback(() => {
-    api
-      .get<Campana[]>("/campanas", { params: { parcelaId } })
-      .then((res) => setCampanas(res.data))
-      .catch((err) => setError(apiErrorMessage(err, "No se pudieron cargar las campañas")));
-  }, [parcelaId]);
-
-  useEffect(() => {
-    cargarParcela();
-    cargarCampanas();
-    api.get<Cultivo[]>("/cultivos").then((res) => setCultivos(res.data));
-  }, [cargarParcela, cargarCampanas]);
-
-  const cargarActividades = useCallback((campanaId: string) => {
-    api
-      .get<Actividad[]>("/actividades", { params: { campanaId } })
-      .then((res) => setActividades(res.data));
-  }, []);
-
-  const cargarRegistroCosecha = useCallback((campanaId: string) => {
-    api
-      .get<RegistroCosechaCampana | null | "">(`/campanas/${campanaId}/registro-cosecha`)
-      .then((res) =>
-        setRegistroCosecha(res.data && typeof res.data === "object" ? res.data : null),
-      )
-      .catch(() => setRegistroCosecha(null));
-  }, []);
-
-  // Se estima la campaña actual; si no hay, la mas reciente.
-  const campanaParaEstimar =
-    elegirCampanaActual(campanas) ??
-    [...campanas].sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio))[0] ??
-    null;
-  const campanaParaEstimarId = campanaParaEstimar?.id ?? null;
-
-  useEffect(() => {
-    if (!campanaParaEstimarId) return;
-    let cancelado = false;
-    api
-      .get<RegistroCosechaCampana | null | "">(`/campanas/${campanaParaEstimarId}/registro-cosecha`)
-      .then((res) => {
-        if (!cancelado) {
-          setRegistroActivo(res.data && typeof res.data === "object" ? res.data : null);
-        }
+  const cargarBase = useCallback(() => {
+    Promise.all([
+      api.get<Parcela>(`/parcelas/${parcelaId}`).then((res) => res.data),
+      api.get<Campana[]>("/campanas", { params: { parcelaId } }).then((res) => res.data),
+      api.get<Cultivo[]>("/cultivos").then((res) => res.data),
+      api.get<AnalisisSuelo[]>("/monitoreo/suelo", { params: { parcelaId } }).then((res) => res.data),
+      api.get<RegistroClima[]>("/monitoreo/clima", { params: { parcelaId } }).then((res) => res.data),
+    ])
+      .then(([p, cs, cults, s, c]) => {
+        setParcela(p);
+        setCampanas(cs);
+        setCultivos(cults);
+        setSuelo(s);
+        setClima(c);
+        setError(null);
       })
-      .catch(() => {
-        if (!cancelado) setRegistroActivo(null);
+      .catch((err) => {
+        setError(apiErrorMessage(err, "No se pudo cargar el detalle de la parcela"));
       });
+  }, [parcelaId]);
+
+  useEffect(() => {
+    cargarBase();
+  }, [cargarBase, versionDatos]);
+
+  // Cargar integridad y reportes históricos si el rol lo permite
+  useEffect(() => {
+    if (!puedeVerReportesIntegridad) return;
+    let cancelado = false;
+    Promise.all([
+      api
+        .get<ResultadoVerificacion>(`/integridad/parcela/${parcelaId}`)
+        .then((res) => res.data)
+        .catch(() => null),
+      api
+        .get<HistoricoItem[]>("/reportes/historico", { params: { parcelaId } })
+        .then((res) => res.data)
+        .catch(() => []),
+    ]).then(([resInt, resHist]) => {
+      if (cancelado) return;
+      if (resInt) setIntegridad(resInt);
+      setHistoricoReportes(resHist);
+    });
     return () => {
       cancelado = true;
     };
-  }, [campanaParaEstimarId, versionEstimacion]);
+  }, [parcelaId, puedeVerReportesIntegridad, versionDatos]);
 
-  function toggleCampana(campanaId: string) {
-    if (campanaAbierta === campanaId) {
-      setCampanaAbierta(null);
-      setActividades([]);
-      setRegistroCosecha(null);
-    } else {
-      setCampanaAbierta(campanaId);
-      cargarActividades(campanaId);
-      cargarRegistroCosecha(campanaId);
+  // Cargar registros de manejo/cosecha para las campañas de esta parcela
+  useEffect(() => {
+    if (campanas.length === 0) return;
+    let cancelado = false;
+    Promise.all(
+      campanas.map((c) =>
+        api
+          .get<RegistroCosechaCampana | null | "">(`/campanas/${c.id}/registro-cosecha`)
+          .then((res) => [
+            c.id,
+            res.data && typeof res.data === "object" ? res.data : null,
+          ] as const)
+          .catch(() => [c.id, null] as const),
+      ),
+    ).then((pares) => {
+      if (cancelado) return;
+      const mapa: Record<string, RegistroCosechaCampana | null> = {};
+      for (const [id, reg] of pares) mapa[id] = reg;
+      setRegistrosPorCampana(mapa);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [campanas, versionDatos, versionEstimacion]);
+
+  const campanaSeleccionada = useMemo(() => {
+    if (campanas.length === 0) return null;
+    if (campanaManualId) {
+      const encontrada = campanas.find((c) => c.id === campanaManualId);
+      if (encontrada) return encontrada;
     }
-  }
+    return (
+      elegirCampanaActual(campanas) ??
+      [...campanas].sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio))[0] ??
+      null
+    );
+  }, [campanas, campanaManualId]);
 
-  async function cambiarEstado(campana: Campana, estado: EstadoCampana) {
+  const campanaActivaId = campanaSeleccionada?.id ?? null;
+
+  // Cargar actividades de la campaña seleccionada de forma asíncrona segura
+  useEffect(() => {
+    if (!campanaActivaId || !rol) return;
+    let cancelado = false;
+
+    const solicitud =
+      rol === "CONTABILIDAD"
+        ? api.get<ReporteCampana>(`/reportes/campanas/${campanaActivaId}`).then(({ data }) =>
+            data.actividades.map((a) => ({
+              id: a.id,
+              secuencia: a.secuencia,
+              campanaId: campanaActivaId,
+              tipo: a.tipo,
+              fecha: a.fecha,
+              descripcion: a.descripcion,
+              insumo: a.insumo,
+              cantidad: a.cantidad,
+              unidad: a.unidad,
+              responsableId: "",
+              tercerizado: a.tercerizado,
+              maquinariaUtilizada: null,
+              rendimientoTnHa: a.rendimientoTnHa,
+              correccionDeId: a.correccionDeId,
+              motivoCorreccion: null,
+              hash: "",
+              hashAnterior: null,
+              createdAt: a.fecha,
+              vigente: true,
+            })),
+          )
+        : api
+            .get<Actividad[]>("/actividades", { params: { campanaId: campanaActivaId } })
+            .then((res) => res.data);
+
+    solicitud
+      .then((items) => {
+        if (!cancelado) {
+          setActividadesState({
+            campanaId: campanaActivaId,
+            version: versionDatos,
+            items,
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelado) {
+          setActividadesState({
+            campanaId: campanaActivaId,
+            version: versionDatos,
+            items: [],
+          });
+        }
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [campanaActivaId, rol, versionDatos]);
+
+  const actividades = useMemo(
+    () =>
+      campanaActivaId && actividadesState?.campanaId === campanaActivaId
+        ? actividadesState.items
+        : [],
+    [campanaActivaId, actividadesState],
+  );
+  const cargandoActividades = Boolean(
+    campanaActivaId &&
+      rol &&
+      (!actividadesState ||
+        actividadesState.campanaId !== campanaActivaId ||
+        actividadesState.version !== versionDatos),
+  );
+
+  const cultivoNombre = useCallback(
+    (cultivoId: string): string => cultivos.find((c) => c.id === cultivoId)?.nombre ?? "—",
+    [cultivos],
+  );
+
+  const registroActivo = campanaActivaId ? registrosPorCampana[campanaActivaId] ?? null : null;
+
+  const evaluacion = useMemo(() => {
+    if (!parcela) return null;
+    return evaluarRegistroParcela({
+      parcela,
+      campanaActiva: campanaSeleccionada,
+      cultivoNombre: campanaSeleccionada ? cultivoNombre(campanaSeleccionada.cultivoId) : null,
+      actividadesCampana: actividades,
+      suelo,
+      clima,
+      registroActivo,
+    });
+  }, [parcela, campanaSeleccionada, cultivoNombre, actividades, suelo, clima, registroActivo]);
+
+  // Historial real combinado para el Tab 2 (funciona para todos los roles)
+  const campanasHistoricas = useMemo<PuntoHistoricoRendimiento[]>(() => {
+    const mapa = new Map<string, PuntoHistoricoRendimiento>();
+
+    for (const h of historicoReportes) {
+      const reg = registrosPorCampana[h.campanaId];
+      mapa.set(h.campanaId, {
+        campanaId: h.campanaId,
+        temporada: h.temporada,
+        fecha: h.fecha,
+        rendimientoTnHa: h.rendimientoTnHa,
+        produccionTn: reg?.toneladas ?? null,
+        cultivoNombre: h.cultivoNombre,
+      });
+    }
+
+    for (const c of campanas) {
+      if (mapa.has(c.id)) continue;
+      const reg = registrosPorCampana[c.id];
+      if (
+        reg &&
+        reg.toneladas !== null &&
+        reg.haCosechadas !== null &&
+        reg.haCosechadas > 0
+      ) {
+        mapa.set(c.id, {
+          campanaId: c.id,
+          temporada: c.temporada,
+          fecha: reg.fechaCosecha ?? c.fechaFin ?? c.fechaInicio,
+          rendimientoTnHa: Math.round((reg.toneladas / reg.haCosechadas) * 100) / 100,
+          produccionTn: reg.toneladas,
+          cultivoNombre: cultivoNombre(c.cultivoId),
+        });
+      }
+    }
+
+    return Array.from(mapa.values());
+  }, [historicoReportes, campanas, registrosPorCampana, cultivoNombre]);
+
+  async function cambiarEstadoCampana(campana: Campana, nuevoEstado: EstadoCampana) {
     try {
-      await api.patch(`/campanas/${campana.id}`, { estado });
-      cargarCampanas();
+      await api.patch(`/campanas/${campana.id}`, { estado: nuevoEstado });
+      setVersionDatos((v) => v + 1);
+      setVersionEstimacion((v) => v + 1);
     } catch (err) {
-      alert(apiErrorMessage(err, "No se pudo cambiar el estado"));
+      alert(apiErrorMessage(err, "No se pudo cambiar el estado de la campaña"));
     }
   }
 
@@ -238,612 +436,788 @@ export default function ParcelaPrivadaDetallePage() {
     if (!confirm(`¿Eliminar la campaña "${campana.temporada}"?`)) return;
     try {
       await api.delete(`/campanas/${campana.id}`);
-      cargarCampanas();
+      if (campanaManualId === campana.id) setCampanaManualId(null);
+      setVersionDatos((v) => v + 1);
+      setVersionEstimacion((v) => v + 1);
     } catch (err) {
       alert(apiErrorMessage(err, "No se pudo eliminar la campaña"));
     }
   }
 
-  function cultivoNombre(id: string): string {
-    return cultivos.find((c) => c.id === id)?.nombre ?? "—";
+  function ejecutarAccionFaltante(id: DimensionEstadoRegistro["id"]) {
+    setModalCompletitud(false);
+    if (id === "general") {
+      if (!campanaSeleccionada) {
+        setMostrarFormCampana(true);
+      } else {
+        setModalEditarParcela(true);
+      }
+      return;
+    }
+    if (id === "actividades") {
+      setModalActividad({ corrigiendo: null, tipoInicial: "SIEMBRA" });
+      return;
+    }
+    if (id === "suelo") {
+      setFormMonitoreo("suelo");
+      return;
+    }
+    if (id === "clima") {
+      setFormMonitoreo("clima");
+      return;
+    }
+    if (id === "manejo" && campanaSeleccionada) {
+      setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "siembra" });
+    }
   }
 
   if (error) return <p className="text-red-600">{error}</p>;
-  if (!parcela) return <p className="text-stone-500">Cargando...</p>;
+  if (!parcela || !evaluacion) {
+    return (
+      <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+        Cargando detalle de la parcela...
+      </div>
+    );
+  }
 
-  const areaSuelo = resumenEstado?.areas.find((a) => a.id === "SUELO");
-  const areaClima = resumenEstado?.areas.find((a) => a.id === "CLIMA");
-  const registroVisibleActivo =
-    registroActivo && campanaParaEstimar && registroActivo.campanaId === campanaParaEstimar.id
-      ? registroActivo
-      : registroCosecha && campanaParaEstimar && registroCosecha.campanaId === campanaParaEstimar.id
-        ? registroCosecha
-        : null;
+  const actividadesOrdenadas = [...actividades].sort(
+    (a, b) => b.fecha.localeCompare(a.fecha) || b.secuencia - a.secuencia,
+  );
+  const actividadesVigentesCount = actividades.filter((a) => a.vigente).length;
+  const estadoProgresoPct = Math.round((evaluacion.completadas / 5) * 100);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link
-          href="/panel/parcelas"
-          className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Volver a parcelas
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-stone-900">{parcela.nombre}</h1>
-        <p className="mt-1 text-stone-600">
-          {parcela.hectareas} ha · {parcela.ubicacionTexto}
-        </p>
-      </div>
+    <div className="-mx-4 -my-6 min-h-full bg-[#F8FAF9] px-4 py-6 text-[#17211D] md:-mx-8 md:-my-8 md:px-8 md:py-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        {/* A. ENCABEZADO ÚNICO DE LA PARCELA (Toda la identidad va solo aquí) */}
+        <header className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              href="/panel/parcelas"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-[#68736D] hover:text-[#006B4F]"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              Volver a parcelas
+            </Link>
 
-      {puedeRegistrarActividad && (
-        <BarraModoDesarrollo
-          parcelaId={parcela.id}
-          cultivos={cultivos}
-          campanaActual={campanaParaEstimar}
-          onRecargarTodo={(campanaFocusId) => {
-            cargarParcela();
-            cargarCampanas();
-            setVersionEstado((v) => v + 1);
-            setVersionEstimacion((v) => v + 1);
-            const objetivoId = campanaFocusId ?? campanaAbierta;
-            if (objetivoId) {
-              setCampanaAbierta(objetivoId);
-              cargarActividades(objetivoId);
-              cargarRegistroCosecha(objetivoId);
-            }
-          }}
-          onAbrirImpacto={(campana) => {
-            setCampanaAbierta(campana.id);
-            cargarActividades(campana.id);
-            cargarRegistroCosecha(campana.id);
-            setModalRegistroCosecha({ campana, modo: "siembra" });
-          }}
-          onVerEstimacion={() => setPestanaActiva("estimacion")}
-        />
-      )}
-
-      {/* Navegación estricta de 2 pestañas */}
-      <div
-        role="tablist"
-        aria-label="Secciones de la parcela"
-        className="grid grid-cols-1 gap-2 rounded-xl border-2 border-stone-200 bg-stone-100 p-1.5 sm:grid-cols-2"
-      >
-        <button
-          id="tab-registro"
-          type="button"
-          role="tab"
-          aria-selected={pestanaActiva === "registro"}
-          aria-controls="panel-registro"
-          onClick={() => setPestanaActiva("registro")}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors sm:text-base ${
-            pestanaActiva === "registro"
-              ? "bg-emerald-800 text-white shadow-sm"
-              : "bg-white text-stone-800 hover:bg-stone-50"
-          }`}
-        >
-          <ClipboardList className="h-5 w-5 shrink-0" aria-hidden />
-          1. Estado de la Parcela / Registro
-        </button>
-
-        <button
-          id="tab-estimacion"
-          type="button"
-          role="tab"
-          aria-selected={pestanaActiva === "estimacion"}
-          aria-controls="panel-estimacion"
-          onClick={() => setPestanaActiva("estimacion")}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors sm:text-base ${
-            pestanaActiva === "estimacion"
-              ? "bg-emerald-800 text-white shadow-sm"
-              : "bg-white text-stone-800 hover:bg-stone-50"
-          }`}
-        >
-          <LineChart className="h-5 w-5 shrink-0" aria-hidden />
-          2. Estimación de Rendimiento
-        </button>
-      </div>
-
-      {/* TAB 1: ESTADO DE LA PARCELA / REGISTRO */}
-      {pestanaActiva === "registro" && (
-        <div
-          id="panel-registro"
-          role="tabpanel"
-          aria-labelledby="tab-registro"
-          className="space-y-8"
-        >
-          {/* BLOQUE 1: VARIABLES DE MANEJO / SIEMBRA QUE AFECTAN AL MODELO */}
-          <section
-            aria-labelledby="bloque-agronomico"
-            className="space-y-4 rounded-xl border-2 border-emerald-800/25 bg-emerald-50/35 p-5"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2
-                  id="bloque-agronomico"
-                  className="flex items-center gap-2 text-xl font-bold text-stone-900"
-                >
-                  <Sprout className="h-6 w-6 shrink-0 text-emerald-700" aria-hidden />
-                  1. Variables agronómicas de manejo (afectan al modelo IA)
-                </h2>
-                <p className="mt-1 text-sm text-stone-700">
-                  Superficie sembrada, fecha de siembra y variedad de la campaña activa. Estos datos
-                  determinan el resultado de rendimiento que verás en el Tab 2.
-                </p>
-              </div>
-
-              {campanaParaEstimar && <BadgeEstadoCampana estado={campanaParaEstimar.estado} />}
-            </div>
-
-            {campanaParaEstimar ? (
-              <>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-lg border border-stone-200 bg-white p-3.5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-stone-600">
-                      Superficie sembrada
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-stone-900">
-                      {registroVisibleActivo
-                        ? `${registroVisibleActivo.haSembradas} ha`
-                        : `${parcela.hectareas} ha (lote)`}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-stone-200 bg-white p-3.5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-stone-600">
-                      Fecha de siembra
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-stone-900">
-                      {registroVisibleActivo?.fechaSiembra
-                        ? formatearFecha(registroVisibleActivo.fechaSiembra)
-                        : "Sin fecha"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-stone-200 bg-white p-3.5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-stone-600">
-                      Variedad / semilla
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-stone-900">
-                      {registroVisibleActivo?.variedad ?? "Sin especificar"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-emerald-800/15 pt-3">
-                  <p className="text-sm font-medium text-stone-700">
-                    Campaña activa:{" "}
-                    <strong className="text-stone-900">
-                      {campanaParaEstimar.temporada} · {cultivoNombre(campanaParaEstimar.cultivoId)}
-                    </strong>
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {puedeRegistrarActividad && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setModalRegistroCosecha({
-                              campana: campanaParaEstimar,
-                              modo: "siembra",
-                            })
-                          }
-                          className="inline-flex min-h-11 items-center gap-1.5 rounded-md border-2 border-emerald-800 bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-800"
-                        >
-                          <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
-                          Editar variables de siembra
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setModalRegistroCosecha({
-                              campana: campanaParaEstimar,
-                              modo: "cosecha",
-                            })
-                          }
-                          className="inline-flex min-h-11 items-center gap-1.5 rounded-md border-2 border-stone-400 bg-white px-3.5 text-sm font-bold text-stone-800 hover:bg-stone-50"
-                        >
-                          <PackageCheck className="h-4 w-4 shrink-0" aria-hidden />
-                          Registrar cosecha real
-                        </button>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setPestanaActiva("estimacion")}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border-2 border-emerald-700 bg-white px-3.5 text-sm font-bold text-emerald-900 hover:bg-emerald-50"
-                    >
-                      <LineChart className="h-4 w-4 shrink-0" aria-hidden />
-                      Ver resultado en Tab 2 →
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-stone-200 bg-white p-4">
-                <p className="text-sm text-stone-700">
-                  Esta parcela aún no tiene una campaña activa para registrar variables de siembra.
-                </p>
-                {esJefe && (
-                  <button
-                    type="button"
-                    onClick={() => setMostrarFormCampana(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-800"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                    Crear primera campaña
-                  </button>
-                )}
-              </div>
-            )}
-          </section>
-
-          {/* BLOQUE 2: MONITOREO AMBIENTAL (SUELO Y CLIMA SEPARADOS) */}
-          <section className="space-y-4" aria-labelledby="estado-parcela">
-            <div>
-              <h2
-                id="estado-parcela"
-                className="flex items-center gap-2 text-xl font-bold text-stone-900"
-              >
-                <IconoEstado className="h-6 w-6 shrink-0 text-emerald-700" aria-hidden />
-                2. Monitoreo de suelo y clima (registro por dominio)
-              </h2>
-              <p className="mt-1 text-sm text-stone-600">
-                Registra las mediciones físicas y ambientales de la parcela sin mezclarlas con las
-                variables de manejo de campaña.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <TarjetaDominioMonitoreo
-                titulo="Suelo (Acidez y nutrientes N-P-K)"
-                descripcion="Análisis de laboratorio o humedad medida en campo: pH, materia orgánica, humedad, nitrógeno, fósforo y potasio."
-                icono={Layers}
-                area={areaSuelo}
-                botonLabel="Agregar datos de suelo"
-                onAccion={puedeRegistrarActividad ? () => setFormMonitoreo("suelo") : undefined}
-              />
-              <TarjetaDominioMonitoreo
-                titulo="Clima (Condición diaria y lluvia)"
-                descripcion="Registro climático diario y acumulación de precipitaciones en pluviómetro (últimos 30 días)."
-                icono={CloudSun}
-                area={areaClima}
-                botonLabel="Anotar clima"
-                onAccion={puedeRegistrarActividad ? () => setFormMonitoreo("clima") : undefined}
-              />
-            </div>
-
-            {errorEstado ? (
-              <p className="text-red-700">{errorEstado}</p>
-            ) : resumenEstado ? (
-              <PanelEstadoParcela
-                resumen={resumenEstado}
-                ocultarEstimacion
-                acciones={
-                  puedeRegistrarActividad
-                    ? {
-                        SUELO: (
-                          <BotonCargar onClick={() => setFormMonitoreo("suelo")}>
-                            Agregar datos de suelo
-                          </BotonCargar>
-                        ),
-                        CLIMA: (
-                          <BotonCargar onClick={() => setFormMonitoreo("clima")}>
-                            Anotar clima
-                          </BotonCargar>
-                        ),
-                      }
-                    : undefined
-                }
-              />
-            ) : (
-              <p className="text-stone-600">Cargando el estado detallado de la parcela...</p>
-            )}
-          </section>
-
-          {/* BLOQUE 3: CAMPAÑAS Y BITÁCORA DE ACTIVIDADES */}
-          <section className="space-y-3" aria-labelledby="bloque-campanas">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2
-                id="bloque-campanas"
-                className="flex items-center gap-2 text-xl font-bold text-stone-900"
-              >
-                <CalendarRange className="h-6 w-6 shrink-0 text-emerald-700" aria-hidden />
-                3. Historial de campañas y bitácora de actividades
-                <Ayuda texto="Una campaña es un ciclo de cultivo en esta parcela: desde la siembra hasta la cosecha." />
-              </h2>
-              {esJefe && (
-                <button
-                  onClick={() => setMostrarFormCampana(true)}
-                  title="Crear una campaña nueva en esta parcela"
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Nueva campaña
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              {campanas.length === 0 && (
-                <p className="text-sm text-stone-500">Todavía no hay campañas registradas.</p>
-              )}
-              {campanas.map((campana) => (
-                <div key={campana.id} className="rounded-lg border border-stone-200 bg-white">
-                  <button
-                    onClick={() => toggleCampana(campana.id)}
-                    className="flex min-h-11 w-full items-center justify-between px-5 py-4 text-left"
-                  >
-                    <div>
-                      <p className="font-medium text-stone-900">
-                        {campana.temporada} · {cultivoNombre(campana.cultivoId)}
-                      </p>
-                      <p className="text-sm text-stone-500">
-                        {formatearFecha(campana.fechaInicio)} – {formatearFecha(campana.fechaFin)}
-                      </p>
-                    </div>
-                    <BadgeEstadoCampana estado={campana.estado} />
-                  </button>
-
-                  {campanaAbierta === campana.id && (
-                    <div className="border-t border-stone-100 px-5 py-4">
-                      {esJefe && (
-                        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-                          <span className="inline-flex items-center gap-1 text-stone-500">
-                            Cambiar estado:
-                            <Ayuda texto="Pasa la campaña a otra etapa: planificada, en curso o cosechada." />
-                          </span>
-                          {ESTADOS.map((estado) => (
-                            <button
-                              key={estado}
-                              disabled={estado === campana.estado}
-                              onClick={() => cambiarEstado(campana, estado)}
-                              className="min-h-11 rounded-md border border-stone-300 px-2.5 py-1 text-xs text-stone-700 hover:bg-stone-100 disabled:opacity-40"
-                            >
-                              {ESTADO_CAMPANA_LABEL[estado]}
-                            </button>
-                          ))}
-                          <button
-                            onClick={() => eliminarCampana(campana)}
-                            title="Eliminar la campaña (pide confirmación)"
-                            className="ml-auto inline-flex min-h-11 items-center gap-1 text-xs text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                            Eliminar campaña
-                          </button>
-                        </div>
-                      )}
-
-                      <div className="mb-4 rounded-lg border border-stone-200 bg-stone-50 p-3 sm:p-4">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div>
-                            <h3 className="text-sm font-semibold text-stone-900">
-                              Variables del modelo (siembra) y cosecha
-                            </h3>
-                            <p className="text-xs text-stone-600">
-                              Superficie, variedad y fecha de siembra alimentan la estimación en
-                              tiempo real.
-                            </p>
-                          </div>
-                          {puedeRegistrarActividad && (
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setModalRegistroCosecha({ campana, modo: "siembra" })
-                                }
-                                className="inline-flex min-h-11 items-center gap-1.5 rounded-md border-2 border-emerald-700 bg-white px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
-                              >
-                                <SlidersHorizontal className="h-4 w-4" aria-hidden />
-                                Variables de siembra / Impacto
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setModalRegistroCosecha({ campana, modo: "cosecha" })
-                                }
-                                className="inline-flex min-h-11 items-center gap-1.5 rounded-md border-2 border-stone-400 bg-white px-3 text-xs font-bold text-stone-800 hover:bg-stone-100"
-                              >
-                                <PackageCheck className="h-4 w-4" aria-hidden />
-                                Registrar cosecha
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {registroCosecha && registroCosecha.campanaId === campana.id ? (
-                          <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-stone-700 sm:grid-cols-2">
-                            <div className="rounded-md border border-stone-200 bg-white px-3 py-2">
-                              <p className="font-semibold text-stone-900">Siembra</p>
-                              <p>
-                                {registroCosecha.haSembradas} ha ·{" "}
-                                {registroCosecha.variedad ?? "Sin variedad"} ·{" "}
-                                {formatearFecha(registroCosecha.fechaSiembra)}
-                              </p>
-                            </div>
-                            <div className="rounded-md border border-stone-200 bg-white px-3 py-2">
-                              <p className="font-semibold text-stone-900">Cosecha real</p>
-                              {registroCosecha.toneladas !== null &&
-                              registroCosecha.haCosechadas !== null &&
-                              registroCosecha.haCosechadas > 0 ? (
-                                <p>
-                                  {registroCosecha.toneladas} t en {registroCosecha.haCosechadas} ha
-                                  (
-                                  {(
-                                    registroCosecha.toneladas / registroCosecha.haCosechadas
-                                  ).toFixed(2)}{" "}
-                                  t/ha) · {formatearFecha(registroCosecha.fechaCosecha)}
-                                </p>
-                              ) : (
-                                <p className="text-stone-500">Pendiente de cosecha.</p>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="mt-2 text-xs text-stone-600">
-                            Sin variables de siembra cargadas todavía para esta campaña.
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <h3 className="flex items-center gap-1.5 text-sm font-semibold text-stone-900">
-                          Actividades
-                          <Ayuda texto="Labores de campo de esta campaña. Los registros no se editan: si hubo un error, se corrige con un registro nuevo." />
-                        </h3>
-                        {puedeRegistrarActividad && (
-                          <button
-                            onClick={() => {
-                              setCorrigiendo(null);
-                              setMostrarFormActividad(true);
-                            }}
-                            title="Registrar una labor de campo en esta campaña"
-                            className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
-                          >
-                            <Plus className="h-4 w-4" aria-hidden />
-                            Registrar actividad
-                          </button>
-                        )}
-                      </div>
-
-                      <ul className="mt-3 space-y-2">
-                        {actividades.length === 0 && (
-                          <p className="text-sm text-stone-500">Sin actividades registradas.</p>
-                        )}
-                        {actividades.map((actividad) => (
-                          <li
-                            key={actividad.id}
-                            className={`rounded-md border px-3 py-2 text-sm ${
-                              actividad.vigente
-                                ? "border-stone-200"
-                                : "border-stone-100 bg-stone-50 text-stone-400 line-through"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="inline-flex flex-wrap items-center gap-1.5 font-medium">
-                                <IconoActividad tipo={actividad.tipo} />
-                                #{actividad.secuencia} {TIPO_ACTIVIDAD_LABEL[actividad.tipo]} ·{" "}
-                                {formatearFecha(actividad.fecha)}
-                                {actividad.tipo === "COSECHA" &&
-                                  actividad.rendimientoTnHa !== null && (
-                                    <> · {actividad.rendimientoTnHa} t/ha</>
-                                  )}
-                              </span>
-                              {actividad.vigente && puedeRegistrarActividad && (
-                                <button
-                                  onClick={() => {
-                                    setCorrigiendo(actividad);
-                                    setMostrarFormActividad(true);
-                                  }}
-                                  title="Registrar una corrección: el registro original se conserva"
-                                  className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900 no-underline"
-                                >
-                                  <Pencil className="h-3.5 w-3.5" aria-hidden />
-                                  Corregir
-                                </button>
-                              )}
-                            </div>
-                            <p className={actividad.vigente ? "text-stone-600" : ""}>
-                              {actividad.descripcion}
-                            </p>
-                            {!actividad.vigente && (
-                              <p className="text-xs italic text-stone-400">
-                                Reemplazada por una corrección
-                              </p>
-                            )}
-                            {actividad.correccionDeId && (
-                              <p className="text-xs text-amber-700 no-underline">
-                                Corrige a #
-                                {actividades.find((a) => a.id === actividad.correccionDeId)
-                                  ?.secuencia ?? "?"}
-                                {actividad.motivoCorreccion && `: ${actividad.motivoCorreccion}`}
-                              </p>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      )}
-
-      {/* TAB 2: ESTIMACIÓN DE RENDIMIENTO */}
-      {pestanaActiva === "estimacion" && (
-        <div
-          id="panel-estimacion"
-          role="tabpanel"
-          aria-labelledby="tab-estimacion"
-          className="space-y-4"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="flex items-center gap-2 text-xl font-bold text-stone-900">
-              <LineChart className="h-6 w-6 shrink-0 text-emerald-700" aria-hidden />
-              Estimación de rendimiento e impacto en campaña
-            </h2>
-          </div>
-
-          {campanaParaEstimar ? (
-            <EstimacionComponente
-              parcelaId={parcela.id}
-              campanaId={campanaParaEstimar.id}
-              temporada={campanaParaEstimar.temporada}
-              cultivoNombre={cultivoNombre(campanaParaEstimar.cultivoId)}
-              hectareasParcela={parcela.hectareas}
-              versionRecarga={versionEstimacion}
-              onEditarVariablesSiembra={
-                puedeRegistrarActividad
-                  ? () => setModalRegistroCosecha({ campana: campanaParaEstimar, modo: "siembra" })
-                  : undefined
-              }
-              onIrATabRegistro={() => setPestanaActiva("registro")}
-            />
-          ) : (
-            <div className="space-y-3 rounded-xl border-2 border-dashed border-sindatos-borde bg-sindatos-fondo p-6 text-sindatos-texto">
-              <p className="text-lg font-bold">Todavía no hay una campaña para estimar</p>
-              <p className="text-sm">
-                Crea una campaña agrícola y registra las variables de siembra en el Tab 1 (o usa el
-                botón de Modo Desarrollo) para visualizar el rendimiento estimado y su impacto.
-              </p>
-              <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2">
+              {parcela.poligono && (
                 <button
                   type="button"
-                  onClick={() => setPestanaActiva("registro")}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border-2 border-stone-400 bg-white px-4 text-sm font-bold text-stone-800 hover:bg-stone-50"
+                  onClick={() => setModalMapa(true)}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-white px-3.5 text-xs font-semibold text-[#17211D] hover:bg-[#F8FAF9]"
                 >
-                  ← Ir a Estado de la Parcela / Registro
+                  <MapPin className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                  Ver mapa
                 </button>
-                {esJefe && (
+              )}
+              {esJefe && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setModalEditarParcela(true)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-white px-3.5 text-xs font-semibold text-[#17211D] hover:bg-[#F8FAF9]"
+                  >
+                    <Pencil className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                    Editar parcela
+                  </button>
                   <button
                     type="button"
                     onClick={() => setMostrarFormCampana(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-800"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-3.5 text-xs font-semibold text-white hover:bg-[#00553E]"
                   >
                     <Plus className="h-4 w-4" aria-hidden />
                     Nueva campaña
                   </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+              {parcela.nombre}
+            </h1>
+            {parcela.disponibleParaPreventa && (
+              <span className="rounded-full border border-[#006B4F]/30 bg-[#E8F5EF] px-3 py-0.5 text-xs font-semibold text-[#006B4F]">
+                Disponible para preventa
+              </span>
+            )}
+            {integridad && integridad.totalVerificadas > 0 && (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                  integridad.valido
+                    ? "border-[#006B4F]/30 bg-[#E8F5EF] text-[#006B4F]"
+                    : "border-red-300 bg-red-50 text-red-700"
+                }`}
+              >
+                {integridad.valido ? (
+                  <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+                ) : (
+                  <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
                 )}
+                {integridad.valido
+                  ? `${integridad.totalVerificadas} registros íntegros`
+                  : "Alerta de integridad SHA-256"}
+              </span>
+            )}
+          </div>
+
+          {/* Grilla única de metadatos: nunca repetida en bloques inferiores */}
+          <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-[#E4EAE6] pt-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div>
+              <dt className="text-xs font-medium text-[#68736D]">Ubicación</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+                {parcela.ubicacionTexto || "Sin registrar"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-[#68736D]">Superficie total</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+                {parcela.hectareas} ha
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-[#68736D]">Campaña activa</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+                {campanaSeleccionada ? (
+                  <div className="flex flex-col gap-1">
+                    {campanas.length > 1 ? (
+                      <select
+                        aria-label="Seleccionar campaña de la parcela"
+                        value={campanaSeleccionada.id}
+                        onChange={(e) => setCampanaManualId(e.target.value)}
+                        className="min-h-9 rounded-md border border-[#E4EAE6] bg-[#F8FAF9] px-2 py-1 text-xs font-semibold text-[#17211D]"
+                      >
+                        {campanas.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.temporada} ({ESTADO_CAMPANA_LABEL[c.estado]})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span>{campanaSeleccionada.temporada}</span>
+                    )}
+                  </div>
+                ) : (
+                  "Sin campaña"
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-[#68736D]">Cultivo actual</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+                {campanaSeleccionada ? cultivoNombre(campanaSeleccionada.cultivoId) : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-[#68736D]">Variedad / semilla</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+                {registroActivo?.variedad?.trim() || "Sin registrar"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-[#68736D]">Fecha de siembra</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+                {registroActivo?.fechaSiembra
+                  ? formatearFecha(registroActivo.fechaSiembra)
+                  : "Sin registrar"}
+              </dd>
+            </div>
+          </dl>
+
+          {/* Barra compacta de gestión de estado de campaña (solo JEFE) */}
+          {esJefe && campanaSeleccionada && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E4EAE6] pt-3 text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-[#68736D]">Etapa de la campaña:</span>
+                <BadgeEstadoCampana estado={campanaSeleccionada.estado} />
+                <span className="text-[#68736D]">· Cambiar a:</span>
+                {ESTADOS_CAMPANA.map((estado) => (
+                  <button
+                    key={estado}
+                    type="button"
+                    disabled={estado === campanaSeleccionada.estado}
+                    onClick={() => cambiarEstadoCampana(campanaSeleccionada, estado)}
+                    className="min-h-9 rounded-md border border-[#E4EAE6] bg-[#F8FAF9] px-2.5 text-xs font-medium text-[#17211D] hover:bg-[#E8F5EF] disabled:opacity-40"
+                  >
+                    {ESTADO_CAMPANA_LABEL[estado]}
+                  </button>
+                ))}
               </div>
+              <button
+                type="button"
+                onClick={() => eliminarCampana(campanaSeleccionada)}
+                className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-medium text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                Eliminar campaña
+              </button>
             </div>
           )}
+        </header>
+
+        {/* NAVEGACIÓN PRINCIPAL EN 2 PESTAÑAS */}
+        <div
+          role="tablist"
+          aria-label="Vistas principales de la parcela"
+          className="grid grid-cols-1 gap-2 rounded-xl border border-[#E4EAE6] bg-white p-1.5 sm:grid-cols-2"
+        >
+          <button
+            id="tab-registro"
+            type="button"
+            role="tab"
+            aria-selected={pestanaActiva === "registro"}
+            aria-controls="panel-registro"
+            onClick={() => setPestanaActiva("registro")}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold transition-colors sm:text-base ${
+              pestanaActiva === "registro"
+                ? "bg-[#006B4F] text-white"
+                : "text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D]"
+            }`}
+          >
+            <ClipboardList className="h-5 w-5 shrink-0" aria-hidden />
+            Registro
+          </button>
+
+          <button
+            id="tab-estimacion"
+            type="button"
+            role="tab"
+            aria-selected={pestanaActiva === "estimacion"}
+            aria-controls="panel-estimacion"
+            onClick={() => setPestanaActiva("estimacion")}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold transition-colors sm:text-base ${
+              pestanaActiva === "estimacion"
+                ? "bg-[#006B4F] text-white"
+                : "text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D]"
+            }`}
+          >
+            <LineChart className="h-5 w-5 shrink-0" aria-hidden />
+            Rendimiento estimado
+          </button>
         </div>
+
+        {/* PESTAÑA 1: REGISTRO */}
+        {pestanaActiva === "registro" && (
+          <div
+            id="panel-registro"
+            role="tabpanel"
+            aria-labelledby="tab-registro"
+            className="space-y-6"
+          >
+            {/* D. ESTADO DEL REGISTRO (Resumen superior de completitud) */}
+            <section
+              aria-labelledby="heading-estado-registro"
+              className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 id="heading-estado-registro" className="text-lg font-bold text-[#17211D]">
+                    Estado del registro
+                  </h2>
+                  <p className="mt-0.5 text-sm text-[#68736D]">
+                    {evaluacion.completadas} de 5 dimensiones completas para respaldo técnico y
+                    estimación de rendimiento.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setModalCompletitud(true)}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#006B4F]/40 bg-[#E8F5EF] px-4 text-xs font-bold text-[#006B4F] hover:bg-[#006B4F] hover:text-white"
+                >
+                  <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
+                  Ver qué información falta registrar
+                  {evaluacion.totalFaltantes > 0 ? ` (${evaluacion.totalFaltantes})` : ""}
+                </button>
+              </div>
+
+              <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[#F8FAF9] ring-1 ring-[#E4EAE6]">
+                <div
+                  className="h-full rounded-full bg-[#006B4F] transition-all duration-300"
+                  style={{ width: `${Math.max(6, estadoProgresoPct)}%` }}
+                />
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
+                {evaluacion.dimensiones.map((dim) => (
+                  <button
+                    key={dim.id}
+                    type="button"
+                    onClick={() => setModalCompletitud(true)}
+                    className={`flex flex-col justify-between rounded-xl p-3 text-left transition-colors hover:border-[#006B4F]/50 ${
+                      dim.estado === "SIN_DATOS"
+                        ? "border-2 border-dashed border-stone-300 bg-[#F8FAF9]"
+                        : "border border-[#E4EAE6] bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-xs font-bold text-[#17211D]">{dim.nombre}</span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <BadgeEstadoRegistro estado={dim.estado} tamano="sm" />
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-[#68736D]">{dim.resumen}</p>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* C. VARIABLES DEL CULTIVO Y AMBIENTE (4 Tarjetas de Categorías + Modales) */}
+            <section aria-labelledby="heading-variables-ambiente" className="space-y-3">
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <h2 id="heading-variables-ambiente" className="text-lg font-bold text-[#17211D]">
+                    Variables del cultivo y ambiente
+                  </h2>
+                  <p className="text-sm text-[#68736D]">
+                    Consulta el historial o carga nuevos registros por categoría.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <TarjetaCategoriaAmbiente
+                  titulo="Suelo"
+                  descripcion="Análisis de laboratorio y mediciones de campo: acidez (pH), materia orgánica, humedad y nutrientes N-P-K."
+                  contador={`${evaluacion.sueloConDato}/6 indicadores · ${suelo.length} análisis`}
+                  estado={evaluacion.estadoSuelo}
+                  icono={TestTubes}
+                  puedeEditar={puedeRegistrarActividad}
+                  etiquetaConsultar="Consultar historial"
+                  etiquetaRegistrar="Registrar suelo"
+                  onConsultar={() => setModalCategoria("suelo")}
+                  onRegistrar={() => setFormMonitoreo("suelo")}
+                />
+
+                <TarjetaCategoriaAmbiente
+                  titulo="Clima"
+                  descripcion="Condición climática diaria, lluvias registradas en milímetros y alertas por helada, granizo o viento."
+                  contador={`${clima.length} ${
+                    clima.length === 1 ? "medición" : "mediciones"
+                  } · ${evaluacion.clima30d.length} en últimos 30 días`}
+                  estado={evaluacion.estadoClima}
+                  icono={CloudRain}
+                  puedeEditar={puedeRegistrarActividad}
+                  etiquetaConsultar="Consultar historial"
+                  etiquetaRegistrar="Registrar clima"
+                  onConsultar={() => setModalCategoria("clima")}
+                  onRegistrar={() => setFormMonitoreo("clima")}
+                />
+
+                <TarjetaCategoriaAmbiente
+                  titulo="Manejo del cultivo"
+                  descripcion="Superficie sembrada, fecha de siembra y variedad (predictores del modelo IA), además de los datos de cosecha."
+                  contador={
+                    campanaSeleccionada
+                      ? `${evaluacion.manejoConDato}/3 variables pre-siembra listas`
+                      : "Sin campaña activa"
+                  }
+                  estado={evaluacion.estadoManejo}
+                  icono={Sprout}
+                  puedeEditar={puedeRegistrarActividad && !!campanaSeleccionada}
+                  etiquetaConsultar="Ver detalle"
+                  etiquetaRegistrar="Editar siembra"
+                  onConsultar={() => setModalCategoria("manejo")}
+                  onRegistrar={() =>
+                    campanaSeleccionada &&
+                    setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "siembra" })
+                  }
+                />
+
+                <TarjetaCategoriaAmbiente
+                  titulo="Observaciones"
+                  descripcion="Notas técnicas consolidadas provenientes de análisis de suelo, registros de clima y bitácora de actividades."
+                  contador={`${evaluacion.observaciones.length} ${
+                    evaluacion.observaciones.length === 1
+                      ? "observación registrada"
+                      : "observaciones registradas"
+                  }`}
+                  estado={evaluacion.estadoObservaciones}
+                  icono={ClipboardList}
+                  puedeEditar={puedeRegistrarActividad}
+                  etiquetaConsultar="Ver observaciones"
+                  onConsultar={() => setModalCategoria("observaciones")}
+                />
+              </div>
+            </section>
+
+            {/* B. ACTIVIDADES AGRÍCOLAS (Línea de Tiempo Cronológica) */}
+            <section
+              aria-labelledby="heading-actividades"
+              className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2
+                    id="heading-actividades"
+                    className="flex items-center gap-2 text-lg font-bold text-[#17211D]"
+                  >
+                    <CalendarRange className="h-5 w-5 text-[#006B4F]" aria-hidden />
+                    Actividades agrícolas
+                  </h2>
+                  <p className="mt-0.5 text-sm text-[#68736D]">
+                    {campanaSeleccionada
+                      ? `${actividadesVigentesCount} ${
+                          actividadesVigentesCount === 1
+                            ? "labor vigente registrada"
+                            : "labores vigentes registradas"
+                        } en la campaña seleccionada.`
+                      : "Selecciona o crea una campaña para registrar labores de campo."}
+                  </p>
+                </div>
+
+                {puedeRegistrarActividad && campanaSeleccionada && (
+                  <button
+                    type="button"
+                    onClick={() => setModalActividad({ corrigiendo: null })}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden />
+                    Registrar actividad
+                  </button>
+                )}
+              </div>
+
+              {!campanaSeleccionada ? (
+                <div className="mt-5 rounded-xl border-2 border-dashed border-stone-300 bg-[#F8FAF9] p-6 text-center">
+                  <p className="text-sm font-semibold text-[#17211D]">
+                    No hay una campaña seleccionada todavía.
+                  </p>
+                  <p className="mt-1 text-xs text-[#68736D]">
+                    Crea una campaña agrícola para comenzar la bitácora de siembra, aplicaciones y
+                    cosecha.
+                  </p>
+                  {esJefe && (
+                    <button
+                      type="button"
+                      onClick={() => setMostrarFormCampana(true)}
+                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Crear primera campaña
+                    </button>
+                  )}
+                </div>
+              ) : cargandoActividades ? (
+                <p className="mt-4 text-sm text-[#68736D]">Cargando línea de tiempo...</p>
+              ) : actividadesOrdenadas.length === 0 ? (
+                <div className="mt-5 rounded-xl border-2 border-dashed border-stone-300 bg-[#F8FAF9] p-6 text-center">
+                  <p className="text-sm font-semibold text-[#17211D]">
+                    Todavía no hay actividades agrícolas registradas en esta campaña.
+                  </p>
+                  <p className="mt-1 text-xs text-[#68736D]">
+                    Registra siembra, fertilización, fumigación, mediciones de humedad o cosecha
+                    para construir la trazabilidad.
+                  </p>
+                  {puedeRegistrarActividad && (
+                    <button
+                      type="button"
+                      onClick={() => setModalActividad({ corrigiendo: null, tipoInicial: "SIEMBRA" })}
+                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Registrar primera actividad
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <ol className="relative mt-6 space-y-4 border-l-2 border-[#E4EAE6] pl-5">
+                  {actividadesOrdenadas.map((act) => (
+                    <li key={act.id} className="relative">
+                      <span
+                        className={`absolute -left-[27px] top-4 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white ${
+                          act.vigente ? "bg-[#006B4F]" : "bg-stone-300"
+                        }`}
+                        aria-hidden
+                      />
+                      <div
+                        className={`rounded-xl border p-4 ${
+                          act.vigente
+                            ? "border-[#E4EAE6] bg-[#F8FAF9]/60"
+                            : "border-stone-200 bg-stone-50 opacity-70"
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-md bg-[#E8F5EF] px-2.5 py-1 text-xs font-bold text-[#006B4F]">
+                              <IconoActividad tipo={act.tipo} />
+                              {TIPO_ACTIVIDAD_LABEL[act.tipo]}
+                            </span>
+                            <span className="text-xs font-semibold text-[#68736D]">
+                              #{act.secuencia} · {formatearFecha(act.fecha)}
+                            </span>
+                            {act.tipo === "COSECHA" && act.rendimientoTnHa !== null && (
+                              <span className="rounded-md bg-white px-2 py-0.5 text-xs font-bold text-[#006B4F] ring-1 ring-[#006B4F]/30">
+                                {act.rendimientoTnHa} t/ha
+                              </span>
+                            )}
+                            {!act.vigente && (
+                              <span className="rounded-md bg-stone-200 px-2 py-0.5 text-[11px] font-medium text-stone-700">
+                                Reemplazada por corrección
+                              </span>
+                            )}
+                          </div>
+
+                          {act.vigente && puedeRegistrarActividad && (
+                            <button
+                              type="button"
+                              onClick={() => setModalActividad({ corrigiendo: act })}
+                              title="Registrar corrección sin borrar el historial"
+                              className="inline-flex min-h-9 items-center gap-1 rounded-md border border-[#E4EAE6] bg-white px-2.5 text-xs font-semibold text-amber-800 hover:bg-amber-50"
+                            >
+                              <Pencil className="h-3.5 w-3.5" aria-hidden />
+                              Corregir
+                            </button>
+                          )}
+                        </div>
+
+                        <p
+                          className={`mt-2 text-sm ${
+                            act.vigente ? "text-[#17211D]" : "line-through text-stone-500"
+                          }`}
+                        >
+                          {act.descripcion}
+                        </p>
+
+                        {(act.insumo ||
+                          act.cantidad !== null ||
+                          act.maquinariaUtilizada ||
+                          act.tercerizado) && (
+                          <div className="mt-2.5 flex flex-wrap gap-2 text-xs text-[#68736D]">
+                            {act.insumo && (
+                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5">
+                                Insumo: <strong className="text-[#17211D]">{act.insumo}</strong>
+                              </span>
+                            )}
+                            {act.cantidad !== null && (
+                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5">
+                                Cantidad:{" "}
+                                <strong className="text-[#17211D]">
+                                  {act.cantidad} {act.unidad ?? ""}
+                                </strong>
+                              </span>
+                            )}
+                            {act.maquinariaUtilizada && (
+                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5">
+                                Equipo:{" "}
+                                <strong className="text-[#17211D]">{act.maquinariaUtilizada}</strong>
+                              </span>
+                            )}
+                            {act.tercerizado && (
+                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5 font-medium text-[#17211D]">
+                                Servicio tercerizado
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {act.correccionDeId && (
+                          <p className="mt-2 text-xs font-medium text-amber-800">
+                            Corrige a #
+                            {actividades.find((x) => x.id === act.correccionDeId)?.secuencia ?? "?"}
+                            {act.motivoCorreccion ? `: ${act.motivoCorreccion}` : ""}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+
+            {/* E. FOTOS DE LA PARCELA (Gestión y visibilidad en preventa) */}
+            <FotosParcelaSeccion
+              parcelaId={parcela.id}
+              disponibleParaPreventa={parcela.disponibleParaPreventa}
+              puedeEditar={puedeRegistrarActividad}
+            />
+          </div>
+        )}
+
+        {/* PESTAÑA 2: RENDIMIENTO ESTIMADO */}
+        {pestanaActiva === "estimacion" && (
+          <div
+            id="panel-estimacion"
+            role="tabpanel"
+            aria-labelledby="tab-estimacion"
+            className="space-y-4"
+          >
+            {campanaSeleccionada ? (
+              <EstimacionComponente
+                parcelaId={parcela.id}
+                campanaId={campanaSeleccionada.id}
+                temporada={campanaSeleccionada.temporada}
+                cultivoId={campanaSeleccionada.cultivoId}
+                cultivoNombre={cultivoNombre(campanaSeleccionada.cultivoId)}
+                hectareasParcela={parcela.hectareas}
+                campanasHistoricas={campanasHistoricas}
+                evaluacionRegistro={evaluacion}
+                versionRecarga={versionEstimacion}
+                puedeEntrenar={esJefe}
+                onEditarVariablesSiembra={
+                  puedeRegistrarActividad
+                    ? () =>
+                        setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "siembra" })
+                    : undefined
+                }
+                onIrATabRegistro={() => setPestanaActiva("registro")}
+              />
+            ) : (
+              <div className="space-y-3 rounded-xl border-2 border-dashed border-stone-300 bg-white p-6 text-center">
+                <p className="text-base font-bold text-[#17211D]">
+                  Todavía no hay una campaña para estimar
+                </p>
+                <p className="text-sm text-[#68736D]">
+                  Crea una campaña agrícola y registra las variables de siembra en la pestaña
+                  Registro para consultar el rendimiento estimado y los factores influyentes.
+                </p>
+                <div className="flex flex-wrap justify-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setPestanaActiva("registro")}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-4 text-sm font-semibold text-[#17211D] hover:bg-[#E8F5EF]"
+                  >
+                    Ir a Registro
+                  </button>
+                  {esJefe && (
+                    <button
+                      type="button"
+                      onClick={() => setMostrarFormCampana(true)}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Nueva campaña
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* MODALES DE CONSULTA DE CATEGORÍAS Y COMPLETITUD */}
+      {modalCategoria === "suelo" && (
+        <ModalHistorialSuelo
+          suelo={suelo}
+          evaluacion={evaluacion}
+          puedeEditar={puedeRegistrarActividad}
+          onRegistrarSuelo={() => {
+            setModalCategoria(null);
+            setFormMonitoreo("suelo");
+          }}
+          onClose={() => setModalCategoria(null)}
+        />
+      )}
+
+      {modalCategoria === "clima" && (
+        <ModalHistorialClima
+          clima={clima}
+          evaluacion={evaluacion}
+          puedeEditar={puedeRegistrarActividad}
+          onRegistrarClima={() => {
+            setModalCategoria(null);
+            setFormMonitoreo("clima");
+          }}
+          onClose={() => setModalCategoria(null)}
+        />
+      )}
+
+      {modalCategoria === "manejo" && (
+        <ModalManejoCultivo
+          campana={campanaSeleccionada}
+          registro={registroActivo}
+          evaluacion={evaluacion}
+          puedeEditar={puedeRegistrarActividad}
+          onEditarSiembra={() => {
+            if (!campanaSeleccionada) return;
+            setModalCategoria(null);
+            setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "siembra" });
+          }}
+          onRegistrarCosecha={() => {
+            if (!campanaSeleccionada) return;
+            setModalCategoria(null);
+            setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "cosecha" });
+          }}
+          onClose={() => setModalCategoria(null)}
+        />
+      )}
+
+      {modalCategoria === "observaciones" && (
+        <ModalObservaciones
+          evaluacion={evaluacion}
+          puedeEditar={puedeRegistrarActividad}
+          hasCampanaActiva={!!campanaSeleccionada}
+          onAgregarNotaSuelo={() => {
+            setModalCategoria(null);
+            setFormMonitoreo("suelo");
+          }}
+          onAgregarNotaClima={() => {
+            setModalCategoria(null);
+            setFormMonitoreo("clima");
+          }}
+          onAgregarActividad={() => {
+            setModalCategoria(null);
+            setModalActividad({ corrigiendo: null });
+          }}
+          onClose={() => setModalCategoria(null)}
+        />
+      )}
+
+      {modalCompletitud && (
+        <ModalDetalleCompletitud
+          evaluacion={evaluacion}
+          puedeEditar={puedeRegistrarActividad}
+          esJefe={esJefe}
+          onAccionDimension={ejecutarAccionFaltante}
+          onClose={() => setModalCompletitud(false)}
+        />
+      )}
+
+      {modalMapa && parcela.poligono && (
+        <ModalMapaParcela
+          nombre={parcela.nombre}
+          poligono={parcela.poligono}
+          onClose={() => setModalMapa(false)}
+        />
+      )}
+
+      {/* MODALES DE CREACIÓN Y EDICIÓN */}
+      {modalEditarParcela && (
+        <ParcelaForm
+          parcela={parcela}
+          onClose={() => setModalEditarParcela(false)}
+          onSaved={() => {
+            setModalEditarParcela(false);
+            setVersionDatos((v) => v + 1);
+          }}
+        />
       )}
 
       {formMonitoreo === "suelo" && (
         <SueloForm
           parcelaId={parcelaId}
           onClose={() => setFormMonitoreo(null)}
-          onSaved={alGuardarMonitoreo}
+          onSaved={() => {
+            setFormMonitoreo(null);
+            setVersionDatos((v) => v + 1);
+          }}
         />
       )}
+
       {formMonitoreo === "clima" && (
         <ClimaForm
           parcelaId={parcelaId}
           onClose={() => setFormMonitoreo(null)}
-          onSaved={alGuardarMonitoreo}
+          onSaved={() => {
+            setFormMonitoreo(null);
+            setVersionDatos((v) => v + 1);
+          }}
         />
       )}
+
       {mostrarFormCampana && (
         <CampanaForm
           parcelaId={parcelaId}
@@ -851,54 +1225,60 @@ export default function ParcelaPrivadaDetallePage() {
           onClose={() => setMostrarFormCampana(false)}
           onSaved={() => {
             setMostrarFormCampana(false);
-            cargarCampanas();
-          }}
-        />
-      )}
-      {mostrarFormActividad && campanaAbierta && (
-        <ActividadForm
-          parcelaId={parcela.id}
-          campanaId={campanaAbierta}
-          hectareasParcela={parcela.hectareas}
-          registroCosecha={
-            registroCosecha && registroCosecha.campanaId === campanaAbierta
-              ? registroCosecha
-              : null
-          }
-          corrigiendo={corrigiendo}
-          onClose={() => setMostrarFormActividad(false)}
-          onSaved={() => {
-            setMostrarFormActividad(false);
-            cargarActividades(campanaAbierta);
-            cargarRegistroCosecha(campanaAbierta);
-            cargarCampanas();
+            setVersionDatos((v) => v + 1);
             setVersionEstimacion((v) => v + 1);
           }}
         />
       )}
+
+      {modalActividad && campanaSeleccionada && (
+        <ActividadForm
+          parcelaId={parcela.id}
+          campanaId={campanaSeleccionada.id}
+          hectareasParcela={parcela.hectareas}
+          registroCosecha={registroActivo}
+          corrigiendo={modalActividad.corrigiendo}
+          tipoInicial={modalActividad.tipoInicial}
+          onClose={() => setModalActividad(null)}
+          onSaved={() => {
+            setModalActividad(null);
+            setVersionDatos((v) => v + 1);
+            setVersionEstimacion((v) => v + 1);
+          }}
+        />
+      )}
+
       {modalRegistroCosecha && (
         <RegistroCosechaForm
           parcelaId={parcela.id}
           campana={modalRegistroCosecha.campana}
           hectareasParcela={parcela.hectareas}
           registro={
-            registroCosecha && registroCosecha.campanaId === modalRegistroCosecha.campana.id
-              ? registroCosecha
-              : registroActivo && registroActivo.campanaId === modalRegistroCosecha.campana.id
-                ? registroActivo
-                : null
+            registrosPorCampana[modalRegistroCosecha.campana.id] ?? registroActivo
           }
           modo={modalRegistroCosecha.modo}
           onClose={() => setModalRegistroCosecha(null)}
           onSaved={() => {
-            const id = modalRegistroCosecha.campana.id;
             setModalRegistroCosecha(null);
-            cargarRegistroCosecha(id);
-            cargarCampanas();
+            setVersionDatos((v) => v + 1);
             setVersionEstimacion((v) => v + 1);
           }}
         />
       )}
     </div>
+  );
+}
+
+export default function ParcelaPrivadaDetallePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+          Cargando detalle de la parcela...
+        </div>
+      }
+    >
+      <ParcelaPrivadaDetalleContenido />
+    </Suspense>
   );
 }

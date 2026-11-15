@@ -14,7 +14,6 @@ import { useState, type FormEvent } from "react";
 import { Advertencia } from "@/components/estado/advertencia";
 import { AccionesModal, Modal } from "@/components/modal";
 import { api, apiErrorMessage } from "@/lib/api";
-import { ES_MODO_DEV } from "@/lib/prediccion";
 import { CONDICION_CLIMA_LABEL, type CondicionClima } from "@/lib/types";
 
 const hoy = (): string => new Date().toLocaleDateString("en-CA");
@@ -70,28 +69,9 @@ export function ClimaForm({
     }
   }
 
-  function autocompletarDev() {
-    setFecha(hoy());
-    setCondicion("LLUVIA_LIGERA");
-    setLluviaMm("22");
-    setNotas("Lluvia moderada registrada en pluviómetro (Modo Dev)");
-  }
-
   return (
     <Modal titulo="Anotar clima" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
-        {ES_MODO_DEV && (
-          <div className="rounded-lg border-2 border-dashed border-amber-500 bg-amber-50 p-3">
-            <button
-              type="button"
-              onClick={autocompletarDev}
-              className="min-h-11 rounded-md border-2 border-amber-700 bg-white px-3 text-xs font-bold text-amber-950 hover:bg-amber-100"
-            >
-              Modo Dev · Autocompletar datos de prueba
-            </button>
-          </div>
-        )}
-
         <div>
           <label htmlFor="clima-fecha" className="block text-base font-bold text-stone-800">
             Día

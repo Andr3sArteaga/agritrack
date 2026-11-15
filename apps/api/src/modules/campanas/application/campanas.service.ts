@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { EstadoCampana } from '../../../generated/prisma/enums';
 import {
@@ -13,6 +14,7 @@ import {
   PARCELA_REPOSITORY,
   type ParcelaRepository,
 } from '../../parcelas/domain/repositories/parcela.repository';
+import { EntrenamientoService } from '../../prediccion/application/entrenamiento.service';
 import {
   CAMPANA_REPOSITORY,
   type CampanaRepository,
@@ -30,6 +32,9 @@ export class CampanasService {
     private readonly parcelaRepository: ParcelaRepository,
     @Inject(CULTIVO_REPOSITORY)
     private readonly cultivoRepository: CultivoRepository,
+    @Optional()
+    @Inject(EntrenamientoService)
+    private readonly entrenamientoService?: EntrenamientoService,
   ) {}
 
   async findAll(parcelaId?: string): Promise<CampanaResponseDto[]> {
@@ -91,6 +96,15 @@ export class CampanasService {
         dto.fechaFin === undefined ? undefined : new Date(dto.fechaFin),
       estado: dto.estado,
     });
+    if (
+      dto.estado === EstadoCampana.COSECHADA &&
+      actual.estado !== EstadoCampana.COSECHADA &&
+      this.entrenamientoService
+    ) {
+      await this.entrenamientoService
+        .entrenarAlCerrarCampana(actual.cultivoId)
+        .catch(() => undefined);
+    }
     return CampanaResponseDto.fromEntity(campana);
   }
 

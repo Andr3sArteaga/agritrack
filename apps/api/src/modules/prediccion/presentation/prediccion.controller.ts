@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -19,8 +19,6 @@ import { EstimacionResponseDto } from '../application/dto/estimacion-response.dt
 import {
   ImpactoQueryDto,
   ImpactoResponseDto,
-  PrepararParcelaDevDto,
-  PrepararParcelaDevResponseDto,
 } from '../application/dto/impacto-prediccion.dto';
 import { ModeloIaResponseDto } from '../application/dto/modelo-ia-response.dto';
 import { EntrenamientoService } from '../application/entrenamiento.service';
@@ -98,29 +96,6 @@ export class PrediccionController {
     return ModeloIaResponseDto.fromDomain(
       await this.entrenamientoService.entrenar(consulta.cultivo),
     );
-  }
-
-  @Post('preparar-dev')
-  @UseGuards(RolesGuard)
-  @Roles(Rol.JEFE, Rol.OPERATIVO)
-  @ApiOperation({
-    summary:
-      'Modo desarrollo: genera historial de campañas con registros de cosecha y entrena el modelo del cultivo',
-  })
-  @ApiCreatedResponse({ type: PrepararParcelaDevResponseDto })
-  async prepararDev(
-    @Body() dto: PrepararParcelaDevDto,
-  ): Promise<PrepararParcelaDevResponseDto> {
-    const base = await this.estimacionService.prepararParcelaDev(
-      dto.parcelaId,
-      dto.cultivoId,
-    );
-    const modelo = await this.entrenamientoService.entrenar(base.cultivoId);
-    return {
-      ...base,
-      versionModelo: `v${modelo.version}`,
-      estadoModelo: modelo.estado,
-    };
   }
 
   @Get('datos-demo')

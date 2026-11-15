@@ -4,8 +4,11 @@ import type { Parcela as ParcelaModel } from '../../../generated/prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { ParcelaEntity, PoligonoGeoJson } from '../domain/entities/parcela.entity';
 import {
+  ActualizarFotoParcelaData,
   ActualizarParcelaData,
+  CrearFotoParcelaData,
   CrearParcelaData,
+  FotoParcelaItem,
   ParcelaRepository,
 } from '../domain/repositories/parcela.repository';
 
@@ -44,6 +47,61 @@ export class ParcelaPrismaRepository implements ParcelaRepository {
       return this.toEntity(parcela);
     } catch {
       throw new NotFoundException('Parcela no encontrada');
+    }
+  }
+
+  async listarFotos(
+    parcelaId: string,
+    soloPreventa?: boolean,
+  ): Promise<FotoParcelaItem[]> {
+    return this.prisma.fotoParcela.findMany({
+      where: soloPreventa ? { parcelaId, visibleEnPreventa: true } : { parcelaId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async buscarFotoPorId(fotoId: string): Promise<FotoParcelaItem | null> {
+    return this.prisma.fotoParcela.findUnique({ where: { id: fotoId } });
+  }
+
+  async crearFoto(data: CrearFotoParcelaData): Promise<FotoParcelaItem> {
+    return this.prisma.fotoParcela.create({
+      data: {
+        parcelaId: data.parcelaId,
+        imagenData: data.imagenData,
+        descripcion: data.descripcion ?? null,
+        visibleEnPreventa: data.visibleEnPreventa,
+        subidaPorId: data.subidaPorId,
+      },
+    });
+  }
+
+  async actualizarFoto(
+    fotoId: string,
+    data: ActualizarFotoParcelaData,
+  ): Promise<FotoParcelaItem> {
+    try {
+      return await this.prisma.fotoParcela.update({
+        where: { id: fotoId },
+        data: {
+          ...(data.descripcion !== undefined
+            ? { descripcion: data.descripcion }
+            : {}),
+          ...(data.visibleEnPreventa !== undefined
+            ? { visibleEnPreventa: data.visibleEnPreventa }
+            : {}),
+        },
+      });
+    } catch {
+      throw new NotFoundException('Foto no encontrada');
+    }
+  }
+
+  async eliminarFoto(fotoId: string): Promise<void> {
+    try {
+      await this.prisma.fotoParcela.delete({ where: { id: fotoId } });
+    } catch {
+      throw new NotFoundException('Foto no encontrada');
     }
   }
 

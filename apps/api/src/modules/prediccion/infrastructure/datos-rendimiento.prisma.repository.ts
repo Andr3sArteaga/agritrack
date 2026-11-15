@@ -1,27 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { EstadoCampana, TipoActividad } from '../../../generated/prisma/enums';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import type {
   ContextoEstimacion,
   DatosCosechaInput,
   DatosSiembraInput,
   OrigenDatos,
-  PreparacionParcelaDev,
   RegistroCosechaCampana,
   RegistroLote,
   TemporadaCultivo,
 } from '../domain/modelo-rendimiento';
 import type { DatosRendimientoRepository } from '../domain/repositories/datos-rendimiento.repository';
-import {
-  obtenerPerfilCultivoDev,
-  PLANTILLA_TEMPORADAS_DEV,
-} from '../domain/rules/impacto-prediccion';
 
 const ORIGEN_DEMO: OrigenDatos = 'demo_enmascarado';
 const aOrigen = (valor: string): OrigenDatos =>
   valor === ORIGEN_DEMO ? ORIGEN_DEMO : 'real';
-const redondear2 = (valor: number): number => Math.round(valor * 100) / 100;
-const aDia = (texto: string): Date => new Date(`${texto}T00:00:00.000Z`);
 
 const aRegistroCosecha = (fila: {
   id: string;
@@ -202,6 +194,14 @@ export class DatosRendimientoPrismaRepository
     return campana !== null;
   }
 
+  async cultivoDeCampana(campanaId: string): Promise<string | null> {
+    const campana = await this.prisma.campana.findUnique({
+      where: { id: campanaId },
+      select: { cultivoId: true },
+    });
+    return campana?.cultivoId ?? null;
+  }
+
   async obtenerRegistroCosecha(
     campanaId: string,
   ): Promise<RegistroCosechaCampana | null> {
@@ -248,230 +248,5 @@ export class DatosRendimientoPrismaRepository
       },
     });
     return aRegistroCosecha(fila);
-  }
-
-  async prepararHistorialDev(
-    parcelaId: string,
-    cultivoId?: string,
-  ): Promise<PreparacionParcelaDev | null> {
-    const parcela = await this.prisma.parcela.findUnique({
-      where: { id: parcelaId },
-    });
-    if (!parcela) return null;
-
-    const campanasExistentes = await this.prisma.campana.findMany({
-      where: { parcelaId },
-      include: { actividades: { select: { tipo: true } } },
-      orderBy: { fechaInicio: 'desc' },
-    });
-
-    const cultivo = await this.resolverCultivoDev(cultivoId, campanasExistentes);
-    if (!cultivo) return null;
-
-    const perfil = obtenerPerfilCultivoDev(cultivo.nombre);
-    const haBase = Math.max(1, redondear2(parcela.hectareas));
-    const porTemporada = new Map(
-      campanasExistentes.map((campana) => [campana.temporada, campana]),
-    );
-
-    const faltantesCosecha: PreparacionParcelaDev['campanasSinActividadCosecha'] =
-      [];
-
-    for (const item of PLANTILLA_TEMPORADAS_DEV) {
-      let campana = porTemporada.get(item.temporada);
-      if (campana) {
-        if (
-          campana.cultivoId !== cultivo.id ||
-          campana.estado !== EstadoCampana.COSECHADA
-        ) {
-          campana = await this.prisma.campana.update({
-            where: { id: campana.id },
-            data: { cultivoId: cultivo.id, estado: EstadoCampana.COSECHADA },
-            include: { actividades: { select: { tipo: true } } },
-          });
-        }
-      } else {
-        campana = await this.prisma.campana.create({
-          data: {
-            parcelaId,
-            cultivoId: cultivo.id,
-            temporada: item.temporada,
-            fechaInicio: aDia(item.fechaInicio),
-            fechaFin: aDia(item.fechaFin),
-            estado: EstadoCampana.COSECHADA,
-          },
-          include: { actividades: { select: { tipo: true } } },
-        });
-      }
-
-      const ha =
-        item.nivel === 'alto'
-          ? haBase
-          : item.nivel === 'medio'
-            ? Math.max(1, redondear2(haBase * 0.9))
-            : Math.max(1, redondear2(haBase * 0.75));
-      const rinde = perfil.rendimientos[item.nivel];
-      const toneladas = redondear2(ha * rinde);
-      const variedad =
-        item.nivel === 'alto'
-          ? perfil.variedades.alta
-          : item.nivel === 'medio'
-            ? perfil.variedades.media
-            : perfil.variedades.baja;
-
-      await this.prisma.registroCosecha.upsert({
-        where: { campanaId: campana.id },
-        create: {
-          campanaId: campana.id,
-          haSembradas: ha,
-          variedad,
-          fechaSiembra: aDia(item.fechaSiembra),
-          haCosechadas: ha,
-          toneladas,
-          fechaCosecha: aDia(item.fechaCosecha),
-          origen: 'real',
-        },
-        update: {
-          haSembradas: ha,
-          variedad,
-          fechaSiembra: aDia(item.fechaSiembra),
-          haCosechadas: ha,
-          toneladas,
-          fechaCosecha: aDia(item.fechaCosecha),
-          origen: 'real',
-        },
-      });
-
-      const tieneCosecha = campana.actividades.some(
-        (act) => act.tipo === TipoActividad.COSECHA,
-      );
-      if (!tieneCosecha) {
-        faltantesCosecha.push({
-          campanaId: campana.id,
-          fechaSiembra: item.fechaSiembra,
-          fechaCosecha: item.fechaCosecha,
-          rendimientoTnHa: rinde,
-        });
-      }
-    }
-
-    const temporadasHistoricas = new Set(
-      PLANTILLA_TEMPORADAS_DEV.map((t) => t.temporada),
-    );
-    const fechaCorte = aDia('2026-03-15');
-    let campanaActual = campanasExistentes.find(
-      (c) =>
-        !temporadasHistoricas.has(c.temporada) &&
-        (c.estado === EstadoCampana.EN_CURSO ||
-          c.estado === EstadoCampana.PLANIFICADA ||
-          c.temporada === 'Verano 2026' ||
-          c.fechaInicio > fechaCorte),
-    );
-
-    if (campanaActual) {
-      if (
-        campanaActual.estado === EstadoCampana.PLANIFICADA ||
-        campanaActual.cultivoId !== cultivo.id
-      ) {
-        campanaActual = await this.prisma.campana.update({
-          where: { id: campanaActual.id },
-          data: {
-            cultivoId: cultivo.id,
-            estado:
-              campanaActual.estado === EstadoCampana.PLANIFICADA
-                ? EstadoCampana.EN_CURSO
-                : campanaActual.estado,
-          },
-          include: { actividades: { select: { tipo: true } } },
-        });
-      }
-    } else {
-      campanaActual = await this.prisma.campana.create({
-        data: {
-          parcelaId,
-          cultivoId: cultivo.id,
-          temporada: 'Verano 2026',
-          fechaInicio: aDia('2026-06-01'),
-          fechaFin: aDia('2026-12-01'),
-          estado: EstadoCampana.EN_CURSO,
-        },
-        include: { actividades: { select: { tipo: true } } },
-      });
-    }
-
-    const inicioActual = campanaActual.fechaInicio;
-    const anioOct =
-      inicioActual.getUTCMonth() >= 6
-        ? inicioActual.getUTCFullYear()
-        : inicioActual.getUTCFullYear() - 1;
-    const fechaSiembraActual = `${anioOct}-10-15`;
-
-    await this.prisma.registroCosecha.upsert({
-      where: { campanaId: campanaActual.id },
-      create: {
-        campanaId: campanaActual.id,
-        haSembradas: haBase,
-        variedad: perfil.variedades.alta,
-        fechaSiembra: aDia(fechaSiembraActual),
-        origen: 'real',
-      },
-      update: {
-        haSembradas: haBase,
-        variedad: perfil.variedades.alta,
-        fechaSiembra: aDia(fechaSiembraActual),
-        origen: 'real',
-      },
-    });
-
-    const tieneSiembraActual = campanaActual.actividades.some(
-      (act) => act.tipo === TipoActividad.SIEMBRA,
-    );
-
-    return {
-      parcelaId,
-      cultivoId: cultivo.id,
-      cultivoNombre: cultivo.nombre,
-      campanaActualId: campanaActual.id,
-      temporadaActual: campanaActual.temporada,
-      campanasHabilitadas: PLANTILLA_TEMPORADAS_DEV.length,
-      campanasSinActividadCosecha: faltantesCosecha.slice(-3),
-      campanaActualNecesitaSiembra: tieneSiembraActual
-        ? null
-        : { campanaId: campanaActual.id, fechaSiembra: fechaSiembraActual },
-    };
-  }
-
-  private async resolverCultivoDev(
-    cultivoId: string | undefined,
-    campanas: readonly { cultivoId: string; estado: EstadoCampana }[],
-  ): Promise<{ id: string; nombre: string } | null> {
-    if (cultivoId) {
-      const elegido = await this.prisma.cultivo.findUnique({
-        where: { id: cultivoId },
-        select: { id: true, nombre: true },
-      });
-      if (elegido) return elegido;
-    }
-
-    const preferida =
-      campanas.find((c) => c.estado === EstadoCampana.EN_CURSO) ?? campanas[0];
-    if (preferida) {
-      const deCampana = await this.prisma.cultivo.findUnique({
-        where: { id: preferida.cultivoId },
-        select: { id: true, nombre: true },
-      });
-      if (deCampana) return deCampana;
-    }
-
-    return (
-      (await this.prisma.cultivo.findFirst({
-        where: { nombre: 'Soya' },
-        select: { id: true, nombre: true },
-      })) ??
-      this.prisma.cultivo.findFirst({
-        orderBy: { nombre: 'asc' },
-        select: { id: true, nombre: true },
-      })
-    );
   }
 }

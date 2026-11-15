@@ -224,22 +224,3 @@ export interface ResultadoImpacto {
   factores: FactorImpacto[];
   escenarios?: EscenariosImpacto;
 }
-
-export interface PreparacionParcelaDev {
-  parcelaId: string;
-  cultivoId: string;
-  cultivoNombre: string;
-  campanaActualId: string;
-  temporadaActual: string;
-  campanasHabilitadas: number;
-  campanasSinActividadCosecha: {
-    campanaId: string;
-    fechaSiembra: string;
-    fechaCosecha: string;
-    rendimientoTnHa: number;
-  }[];
-  campanaActualNecesitaSiembra: {
-    campanaId: string;
-    fechaSiembra: string;
-  } | null;
-}

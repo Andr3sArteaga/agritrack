@@ -28,7 +28,6 @@ import type {
   ModeloIaConPesos,
   NuevoModeloIa,
   OrigenDatos,
-  PreparacionParcelaDev,
   RegistroCosechaCampana,
   RegistroLote,
   TemporadaCultivo,
@@ -119,23 +118,6 @@ class DatosEnMemoria implements DatosRendimientoRepository {
     };
     this.registrosCosecha.set(campanaId, nuevo);
     return nuevo;
-  };
-  prepararHistorialDev = async (
-    parcelaId: string,
-    cultivoId?: string,
-  ): Promise<PreparacionParcelaDev | null> => {
-    const fila = this.filas.find((f) => f.parcelaId === parcelaId);
-    if (!fila) return null;
-    return {
-      parcelaId,
-      cultivoId: cultivoId ?? CULTIVO,
-      cultivoNombre: 'Soya',
-      campanaActualId: fila.campanaId,
-      temporadaActual: fila.temporada,
-      campanasHabilitadas: 6,
-      campanasSinActividadCosecha: [],
-      campanaActualNecesitaSiembra: null,
-    };
   };
   async contextoEstimacion(parcelaId: string, campanaId: string): Promise<ContextoEstimacion | null> {
     const fila = this.filas.find((f) => f.parcelaId === parcelaId && f.campanaId === campanaId);
@@ -440,25 +422,5 @@ describe('Componente de estimacion con datos de demostracion (enmascarados)', ()
     });
     expect(cosechado.haCosechadas).toBe(45);
     expect(cosechado.toneladas).toBe(90);
-  });
-
-  it('prepararParcelaDev delega al repositorio en desarrollo y se bloquea en produccion', async () => {
-    const prep = await sistema.estimacion.prepararParcelaDev('L02');
-    expect(prep.parcelaId).toBe('L02');
-    expect(prep.campanasHabilitadas).toBe(6);
-
-    await expect(sistema.estimacion.prepararParcelaDev('NO-EXISTE')).rejects.toThrow(
-      'Parcela no encontrada',
-    );
-
-    const envOriginal = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
-    try {
-      await expect(sistema.estimacion.prepararParcelaDev('L02')).rejects.toThrow(
-        'producción',
-      );
-    } finally {
-      process.env.NODE_ENV = envOriginal;
-    }
   });
 });
