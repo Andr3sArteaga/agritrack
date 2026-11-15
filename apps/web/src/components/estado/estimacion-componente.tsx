@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  BarChart3,
   CalendarClock,
   CheckCircle2,
   ClipboardCheck,
@@ -307,6 +308,14 @@ export function EstimacionComponente({
 
   const esModeloOficial = bloqueModelo?.estado === "oficial";
   const esModeloExperimental = bloqueModelo?.estado === "experimental";
+  const metricasEval = bloqueModelo?.metricas_evaluacion ?? null;
+  const reduccionMaePct =
+    metricasEval && metricasEval.maeLineaBase > 0
+      ? Math.round(
+          ((metricasEval.maeLineaBase - metricasEval.maeModelo) / metricasEval.maeLineaBase) *
+            1000,
+        ) / 10
+      : null;
 
   const advertenciasUnicas = Array.from(
     new Set([
@@ -579,6 +588,175 @@ export function EstimacionComponente({
           </div>
         </div>
       </section>
+
+      {/* METRICAS DE DESEMPENO RANDOM FOREST (MAE, RMSE Y R2) */}
+      {bloqueModelo && (
+        <section
+          aria-labelledby="metricas-rf-heading"
+          className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3
+                id="metricas-rf-heading"
+                className="flex items-center gap-2 text-lg font-bold text-[#17211D]"
+              >
+                <BarChart3 className="h-5 w-5 text-[#006B4F]" aria-hidden />
+                Métricas de desempeño del modelo Random Forest (MAE, RMSE y R²)
+              </h3>
+              <p className="mt-0.5 text-sm text-[#68736D]">
+                Evaluación estadística fuera de muestra frente al promedio histórico por cultivo
+                (línea base) mediante validación temporal <em>walk-forward</em>.
+              </p>
+            </div>
+
+            {metricasEval ? (
+              metricasEval.superaLineaBase ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#006B4F]/40 bg-[#E8F5EF] px-3 py-1 text-xs font-bold text-[#006B4F]">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  Supera en MAE al promedio histórico
+                </span>
+              ) : metricasEval.maeModelo < metricasEval.maeLineaBase ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-stone-400 bg-stone-100 px-3 py-1 text-xs font-bold text-stone-800">
+                  <Equal className="h-3.5 w-3.5 text-stone-600" aria-hidden />
+                  Menor MAE puntual (IC no concluyente)
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900">
+                  <Info className="h-3.5 w-3.5 text-amber-700" aria-hidden />
+                  No supera aún al promedio histórico en MAE
+                </span>
+              )
+            ) : null}
+          </div>
+
+          {metricasEval ? (
+            <>
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                {/* Tarjeta 1: MAE */}
+                <div className="rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wide text-[#68736D]">
+                      MAE · Error Absoluto Medio
+                    </span>
+                    <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5 text-[11px] font-bold text-[#006B4F]">
+                      Criterio principal
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl font-extrabold text-[#17211D]">
+                    {metricasEval.maeModelo.toFixed(3)}{" "}
+                    <span className="text-sm font-semibold text-[#68736D]">t/ha</span>
+                  </p>
+                  <div className="mt-2 space-y-1 border-t border-[#E4EAE6] pt-2 text-xs text-[#68736D]">
+                    <p className="flex items-center justify-between gap-2">
+                      <span>Promedio histórico (Línea base):</span>
+                      <strong className="text-[#17211D]">
+                        {metricasEval.maeLineaBase.toFixed(3)} t/ha
+                      </strong>
+                    </p>
+                    <p className="flex items-center justify-between gap-2">
+                      <span>Diferencia (Modelo − Base):</span>
+                      <strong
+                        className={
+                          metricasEval.diferenciaMae < 0 ? "text-[#006B4F]" : "text-amber-800"
+                        }
+                      >
+                        {metricasEval.diferenciaMae > 0 ? "+" : ""}
+                        {metricasEval.diferenciaMae.toFixed(3)} t/ha
+                        {reduccionMaePct !== null && reduccionMaePct > 0
+                          ? ` (−${reduccionMaePct}%)`
+                          : ""}
+                      </strong>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tarjeta 2: RMSE */}
+                <div className="rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wide text-[#68736D]">
+                      RMSE · Raíz Error Cuadrático
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl font-extrabold text-[#17211D]">
+                    {metricasEval.rmseModelo.toFixed(3)}{" "}
+                    <span className="text-sm font-semibold text-[#68736D]">t/ha</span>
+                  </p>
+                  <div className="mt-2 space-y-1 border-t border-[#E4EAE6] pt-2 text-xs text-[#68736D]">
+                    <p className="flex items-center justify-between gap-2">
+                      <span>Promedio histórico (Línea base):</span>
+                      <strong className="text-[#17211D]">
+                        {metricasEval.rmseLineaBase.toFixed(3)} t/ha
+                      </strong>
+                    </p>
+                    <p className="text-[11px] leading-snug text-[#68736D]">
+                      Penaliza con mayor peso las desviaciones grandes en t/ha.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tarjeta 3: R² */}
+                <div className="rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wide text-[#68736D]">
+                      R² · Coeficiente de Determinación
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl font-extrabold text-[#17211D]">
+                    {metricasEval.r2Modelo !== null
+                      ? metricasEval.r2Modelo.toFixed(3)
+                      : "Sin varianza"}
+                  </p>
+                  <div className="mt-2 space-y-1 border-t border-[#E4EAE6] pt-2 text-xs text-[#68736D]">
+                    {metricasEval.r2Modelo !== null ? (
+                      metricasEval.r2Modelo >= 0 ? (
+                        <p>
+                          Varianza explicada en validación:{" "}
+                          <strong className="text-[#006B4F]">
+                            {(metricasEval.r2Modelo * 100).toFixed(1)} %
+                          </strong>
+                        </p>
+                      ) : (
+                        <p>
+                          Ajuste inferior a la media global en los cortes históricos evaluados.
+                        </p>
+                      )
+                    ) : (
+                      <p>Se requieren al menos 2 observaciones con variación para calcular R².</p>
+                    )}
+                    <p className="text-[11px] leading-snug text-[#68736D]">
+                      Valores cercanos a 1.000 indican mayor capacidad explicativa.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] px-4 py-3 text-xs text-[#68736D]">
+                <strong className="text-[#17211D]">Detalle de validación:</strong>{" "}
+                validación temporal <em>walk-forward</em> sin fuga de datos en{" "}
+                <strong className="text-[#17211D]">{metricasEval.cortesEvaluados}</strong>{" "}
+                {metricasEval.cortesEvaluados === 1 ? "corte" : "cortes"} (
+                <strong className="text-[#17211D]">{metricasEval.filasEvaluadas}</strong>{" "}
+                {metricasEval.filasEvaluadas === 1 ? "registro de lote" : "registros de lote"}) ·
+                Intervalo de confianza Bootstrap 95 % para ΔMAE:{" "}
+                <strong className="text-[#17211D]">
+                  [{metricasEval.icDiferenciaMae[0].toFixed(3)},{" "}
+                  {metricasEval.icDiferenciaMae[1].toFixed(3)}] t/ha
+                </strong>{" "}
+                (el modelo supera significativamente al promedio histórico cuando el límite superior
+                es menor que 0).
+              </div>
+            </>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-stone-300 bg-[#F8FAF9] p-4 text-sm text-[#68736D]">
+              Esta versión del modelo no tiene métricas de validación actualizadas guardadas.
+              {puedeEntrenar && cultivoId
+                ? " Usa el botón “Actualizar modelo IA” arriba para recalcular MAE, RMSE y R²."
+                : ""}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* B. FACTORES DE INFLUENCIA CON BARRAS VISUALES */}
       <section

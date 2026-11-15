@@ -1,5 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ContextoEstimacion } from '../domain/modelo-rendimiento';
+import type {
+  ContextoEstimacion,
+  MetricasDesempenoResumen,
+  ModeloIaConPesos,
+} from '../domain/modelo-rendimiento';
 import type {
   EstimacionRendimiento,
   EstimadorRendimientoPort,
@@ -18,10 +22,45 @@ import { codificar, diasDesdePrimeroDeOctubre } from '../domain/rules/variables'
 import { redondear2 } from './linea-base.adapter';
 
 export const etiquetaVersion = (version: number): string => `v${version}`;
+const redondear3 = (valor: number): number => Math.round(valor * 1000) / 1000;
+
+function resumirMetricasEvaluacion(
+  version: ModeloIaConPesos,
+): MetricasDesempenoResumen | null {
+  const global = version.metricas?.varianteA?.global;
+  if (
+    !global ||
+    typeof global.maeModelo !== 'number' ||
+    typeof global.maeLineaBase !== 'number' ||
+    typeof global.rmseModelo !== 'number' ||
+    typeof global.rmseLineaBase !== 'number'
+  ) {
+    return null;
+  }
+  return {
+    maeModelo: redondear3(global.maeModelo),
+    maeLineaBase: redondear3(global.maeLineaBase),
+    diferenciaMae: redondear3(global.diferencia),
+    icDiferenciaMae: [
+      redondear3(global.icDiferencia[0]),
+      redondear3(global.icDiferencia[1]),
+    ],
+    rmseModelo: redondear3(global.rmseModelo),
+    rmseLineaBase: redondear3(global.rmseLineaBase),
+    r2Modelo:
+      typeof global.r2Modelo === 'number' && Number.isFinite(global.r2Modelo)
+        ? redondear3(global.r2Modelo)
+        : null,
+    superaLineaBase: global.conclusion === 'supera',
+    conclusion: global.conclusion,
+    filasEvaluadas: global.filas,
+    cortesEvaluados: global.cortes.length,
+  };
+}
 
 /**
  * Estimacion del modelo Random Forest. Es "experimental" salvo que la version
- * vigente este "activa" (solo entonces pasa a ser la oficial).
+ * vigente este "activo" / "activa" (solo entonces pasa a ser la oficial).
  */
 @Injectable()
 export class RandomForestAdapter implements EstimadorRendimientoPort {
@@ -49,6 +88,7 @@ export class RandomForestAdapter implements EstimadorRendimientoPort {
         version.estado === 'activo' ? ('oficial' as const) : ('experimental' as const),
       version_modelo: etiquetaVersion(version.version),
       campañas_usadas: version.campanasUsadas.length,
+      metricas_evaluacion: resumirMetricasEvaluacion(version),
     };
     const advertencias: string[] = [];
     if (version.origenDatos === 'demo_enmascarado') {

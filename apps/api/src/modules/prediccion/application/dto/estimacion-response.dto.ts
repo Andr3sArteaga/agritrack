@@ -1,5 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
-import type { OrigenDatos } from '../../domain/modelo-rendimiento';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type {
+  MetricasDesempenoResumen,
+  OrigenDatos,
+} from '../../domain/modelo-rendimiento';
 import type { EstimacionRendimiento } from '../../domain/ports/estimador-rendimiento.port';
 
 export class EstimacionDto implements EstimacionRendimiento {
@@ -20,6 +23,9 @@ export class EstimacionDto implements EstimacionRendimiento {
 
   @ApiProperty({ type: [String] })
   advertencias!: string[];
+
+  @ApiPropertyOptional({ nullable: true })
+  metricas_evaluacion?: MetricasDesempenoResumen | null;
 }
 
 export class EstimacionResponseDto {

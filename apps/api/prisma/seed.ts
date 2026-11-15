@@ -19,6 +19,10 @@ import { ActividadPrismaRepository } from '../src/modules/actividades/infrastruc
 import { ActividadesService } from '../src/modules/actividades/application/actividades.service';
 import { ContactoPrismaRepository } from '../src/modules/contactos/infrastructure/contacto.prisma.repository';
 import { ContactosService } from '../src/modules/contactos/application/contactos.service';
+import { DatosRendimientoPrismaRepository } from '../src/modules/prediccion/infrastructure/datos-rendimiento.prisma.repository';
+import { ModeloIaPrismaRepository } from '../src/modules/prediccion/infrastructure/modelo-ia.prisma.repository';
+import { RandomForestRegresor } from '../src/modules/prediccion/infrastructure/random-forest.regresor';
+import { EntrenamientoService } from '../src/modules/prediccion/application/entrenamiento.service';
 import { sembrarCostos } from './seed-costos';
 import type { PoligonoGeoJson } from '../src/modules/parcelas/domain/entities/parcela.entity';
 
@@ -52,26 +56,51 @@ interface CampanaPasadaConfig {
   temporada: string;
   fechaInicio: string;
   fechaFin: string;
+  fechaSiembra: string;
   fechaCosecha: string;
 }
 
 const campanasPasadas: CampanaPasadaConfig[] = [
   {
+    temporada: 'Invierno 2023',
+    fechaInicio: '2023-05-01',
+    fechaFin: '2023-09-15',
+    fechaSiembra: '2023-05-05',
+    fechaCosecha: '2023-09-10',
+  },
+  {
+    temporada: 'Verano 2023',
+    fechaInicio: '2023-11-01',
+    fechaFin: '2024-03-15',
+    fechaSiembra: '2023-11-10',
+    fechaCosecha: '2024-03-10',
+  },
+  {
+    temporada: 'Invierno 2024',
+    fechaInicio: '2024-05-01',
+    fechaFin: '2024-09-15',
+    fechaSiembra: '2024-06-02',
+    fechaCosecha: '2024-09-10',
+  },
+  {
     temporada: 'Verano 2024',
     fechaInicio: '2024-11-01',
     fechaFin: '2025-03-15',
+    fechaSiembra: '2024-11-25',
     fechaCosecha: '2025-03-10',
   },
   {
     temporada: 'Invierno 2025',
     fechaInicio: '2025-05-01',
     fechaFin: '2025-09-15',
+    fechaSiembra: '2025-05-05',
     fechaCosecha: '2025-09-10',
   },
   {
     temporada: 'Verano 2025',
     fechaInicio: '2025-11-01',
     fechaFin: '2026-03-15',
+    fechaSiembra: '2025-10-18',
     fechaCosecha: '2026-03-10',
   },
 ];
@@ -148,17 +177,34 @@ async function main(): Promise<void> {
     disponibleParaPreventa: false,
     poligono: rectanguloGeoJson(-62.592, -17.746, 0.003775, 0.004042),
   });
+  const sanLorenzo = await parcelasService.create({
+    nombre: 'Parcela San Lorenzo',
+    hectareas: 25,
+    ubicacionTexto: 'Zona Pailon Sur, Santa Cruz',
+    disponibleParaPreventa: false,
+    poligono: rectanguloGeoJson(-62.576, -17.746, 0.004, 0.0052),
+  });
+  const monteVerde = await parcelasService.create({
+    nombre: 'Parcela Monte Verde',
+    hectareas: 20,
+    ubicacionTexto: 'Zona Pailon Norte, Santa Cruz',
+    disponibleParaPreventa: false,
+    poligono: rectanguloGeoJson(-62.5845, -17.746, 0.0036, 0.0048),
+  });
 
   async function crearHistorialParcela(
     parcelaId: string,
     hectareas: number,
     cultivoId: string,
-    rendimientos: [number, number, number],
-    variedades: [string, string, string],
+    rendimientos: number[],
+    variedades: string[],
+    fechasSiembra?: string[],
+    hectareasPorTemporada?: number[],
   ): Promise<void> {
-    const ha = Math.round(hectareas * 100) / 100;
     for (let i = 0; i < campanasPasadas.length; i++) {
       const config = campanasPasadas[i];
+      const ha = Math.round((hectareasPorTemporada?.[i] ?? hectareas) * 100) / 100;
+      const fechaSiembraIso = fechasSiembra?.[i] ?? config.fechaSiembra;
       const campana = await campanasService.create({
         parcelaId,
         cultivoId,
@@ -166,10 +212,6 @@ async function main(): Promise<void> {
         fechaInicio: config.fechaInicio,
         fechaFin: config.fechaFin,
       });
-
-      const fechaSiembra = new Date(config.fechaInicio);
-      fechaSiembra.setDate(fechaSiembra.getDate() + 4);
-      const fechaSiembraIso = fechaSiembra.toISOString().slice(0, 10);
 
       await actividadesService.crear(
         {
@@ -223,31 +265,62 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log('Creando historial de campanas (El Ceibo / Soya)...');
+  console.log('Creando historial de campanas (Soya)...');
   await crearHistorialParcela(
     elCeibo.id,
     elCeibo.hectareas,
     soya.id,
-    [2.8, 3.1, 3.4],
-    ['MUNASQA', 'DON MARIO', '6410'],
+    [3.5, 3.2, 2.5, 2.8, 3.1, 3.4],
+    ['6410', 'DON MARIO', 'MUNASQA', 'MUNASQA', 'DON MARIO', '6410'],
+    ['2023-05-05', '2023-11-10', '2024-06-02', '2024-11-25', '2025-05-05', '2025-10-18'],
+  );
+  await crearHistorialParcela(
+    sanLorenzo.id,
+    sanLorenzo.hectareas,
+    soya.id,
+    [2.4, 3.6, 3.1, 3.6, 2.4, 2.4],
+    ['MUNASQA', '6410', 'DON MARIO', '6410', 'MUNASQA', 'MUNASQA'],
+    ['2023-06-05', '2023-10-15', '2024-05-12', '2024-10-15', '2025-06-04', '2025-11-28'],
+    [18, 25, 22, 25, 18, 18],
   );
 
-  console.log('Creando historial de campanas (Santa Rosa / Sorgo)...');
+  console.log('Creando historial de campanas (Sorgo)...');
   await crearHistorialParcela(
     santaRosa.id,
     santaRosa.hectareas,
     sorgo.id,
-    [4.0, 4.3, 3.9],
-    ['GRANADOR', 'ADV 1350', 'TOBAZ'],
+    [4.7, 3.9, 3.1, 4.0, 4.3, 3.9],
+    ['ADV 1350', 'TOBAZ', 'GRANADOR', 'TOBAZ', 'ADV 1350', 'TOBAZ'],
+    ['2023-05-05', '2023-11-05', '2024-06-02', '2024-11-05', '2025-05-05', '2025-11-05'],
+    [40, 36, 30, 40, 40, 40],
+  );
+  await crearHistorialParcela(
+    monteVerde.id,
+    monteVerde.hectareas,
+    sorgo.id,
+    [3.1, 4.7, 3.9, 4.7, 3.1, 4.6],
+    ['GRANADOR', 'ADV 1350', 'TOBAZ', 'ADV 1350', 'GRANADOR', 'ADV 1350'],
+    ['2023-06-05', '2023-10-15', '2024-05-14', '2024-10-15', '2025-06-04', '2025-10-15'],
+    [14, 20, 17, 20, 14, 20],
   );
 
-  console.log('Creando historial de campanas (Los Almendros / Trigo)...');
+  console.log('Creando historial de campanas (Trigo)...');
   await crearHistorialParcela(
     losAlmendros.id,
     losAlmendros.hectareas,
     trigo.id,
-    [2.0, 2.2, 2.1],
-    ['ACHIRA', 'BR 18', 'MOTACU'],
+    [2.3, 2.1, 1.9, 2.0, 2.2, 2.1],
+    ['BR 18', 'MOTACU', 'ACHIRA', 'ACHIRA', 'BR 18', 'MOTACU'],
+    ['2023-05-05', '2023-11-12', '2024-06-02', '2024-11-25', '2025-05-05', '2025-11-05'],
+  );
+  await crearHistorialParcela(
+    sanLorenzo.id,
+    sanLorenzo.hectareas,
+    trigo.id,
+    [1.8, 2.6, 2.2, 2.6, 1.85, 2.6],
+    ['ACHIRA', 'BR 18', 'MOTACU', 'BR 18', 'ACHIRA', 'BR 18'],
+    ['2023-06-04', '2023-10-16', '2024-05-14', '2024-10-18', '2025-06-04', '2025-10-16'],
+    [16, 25, 21, 25, 16, 25],
   );
 
   console.log('Creando correccion de ejemplo sobre una cosecha...');
@@ -394,6 +467,8 @@ async function main(): Promise<void> {
       [elCeibo.id]: elCeibo.hectareas,
       [santaRosa.id]: santaRosa.hectareas,
       [losAlmendros.id]: losAlmendros.hectareas,
+      [sanLorenzo.id]: sanLorenzo.hectareas,
+      [monteVerde.id]: monteVerde.hectareas,
     },
     nombreCultivoPorId: {
       [soya.id]: soya.nombre,
@@ -403,6 +478,16 @@ async function main(): Promise<void> {
     registradoPorId: contabilidad.id,
     parcelaConGastoAnuladoId: elCeibo.id,
   });
+
+  console.log('Entrenando modelos Random Forest (Soya, Sorgo y Trigo)...');
+  const entrenamientoService = new EntrenamientoService(
+    new DatosRendimientoPrismaRepository(prisma),
+    new ModeloIaPrismaRepository(prisma),
+    new RandomForestRegresor(),
+  );
+  for (const cultivo of [soya, sorgo, trigo]) {
+    await entrenamientoService.entrenar(cultivo.id);
+  }
 
   console.log('Creando contactos...');
   await contactosService.create({

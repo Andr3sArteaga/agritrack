@@ -3,6 +3,20 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuth } from "./auth-context";
 
+export interface MetricasDesempenoResumen {
+  maeModelo: number;
+  maeLineaBase: number;
+  diferenciaMae: number;
+  icDiferenciaMae: [number, number];
+  rmseModelo: number;
+  rmseLineaBase: number;
+  r2Modelo: number | null;
+  superaLineaBase: boolean;
+  conclusion: "supera" | "no_concluyente" | "peor";
+  filasEvaluadas: number;
+  cortesEvaluados: number;
+}
+
 export interface Estimacion {
   /** null = sin datos. */
   valor_t_ha: number | null;
@@ -11,6 +25,7 @@ export interface Estimacion {
   version_modelo: string | null;
   campañas_usadas: number;
   advertencias: string[];
+  metricas_evaluacion?: MetricasDesempenoResumen | null;
 }
 
 export interface EstimacionRespuesta {

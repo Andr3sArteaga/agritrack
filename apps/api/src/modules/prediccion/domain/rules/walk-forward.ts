@@ -50,8 +50,38 @@ export function concluir(
   return 'no_concluyente';
 }
 
+/** Raiz del error cuadratico medio (RMSE) a partir de errores individuales o absolutos. */
+export function calcularRmse(erroresAbsolutos: readonly number[]): number {
+  if (erroresAbsolutos.length === 0) return 0;
+  return Math.sqrt(promedio(erroresAbsolutos.map((e) => e * e)));
+}
+
+/**
+ * Coeficiente de determinacion R^2 = 1 - SS_res / SS_tot.
+ * Devuelve null si hay menos de 2 observaciones o varianza total nula.
+ */
+export function calcularR2(
+  reales: readonly number[],
+  predichos: readonly number[],
+): number | null {
+  if (reales.length < 2 || reales.length !== predichos.length) return null;
+  const media = promedio(reales);
+  let ssRes = 0;
+  let ssTot = 0;
+  for (let i = 0; i < reales.length; i += 1) {
+    const residual = reales[i] - predichos[i];
+    const desviacion = reales[i] - media;
+    ssRes += residual * residual;
+    ssTot += desviacion * desviacion;
+  }
+  if (ssTot / reales.length <= 1e-4) return null;
+  return 1 - ssRes / ssTot;
+}
+
 interface ErrorFila {
   parcelaId: string;
+  real: number;
+  predicho: number;
   errorModelo: number;
   /** null = el corte no tiene linea base. */
   errorBase: number | null;
@@ -85,18 +115,28 @@ export function evaluarWalkForward(
 
     const errores: ErrorFila[] = prueba.map((fila, i) => ({
       parcelaId: fila.parcelaId,
+      real: fila.rendimiento,
+      predicho: predicciones[i],
       errorModelo: Math.abs(fila.rendimiento - predicciones[i]),
       errorBase: base === null ? null : Math.abs(fila.rendimiento - base),
     }));
 
     const erroresModelo = errores.map((e) => e.errorModelo);
+    const rmseModelo = calcularRmse(erroresModelo);
+    const r2Modelo = calcularR2(
+      errores.map((e) => e.real),
+      errores.map((e) => e.predicho),
+    );
     let maeLineaBase: number | null = null;
+    let rmseLineaBase: number | null = null;
     let diferencia: number | null = null;
     let icDiferencia: Intervalo | null = null;
     let conclusion: ConclusionCorte = 'sin_linea_base';
     if (base !== null) {
+      const erroresBase = errores.map((e) => e.errorBase as number);
       const diferencias = errores.map((e) => e.errorModelo - (e.errorBase as number));
-      maeLineaBase = promedio(errores.map((e) => e.errorBase as number));
+      maeLineaBase = promedio(erroresBase);
+      rmseLineaBase = calcularRmse(erroresBase);
       diferencia = promedio(diferencias);
       // Dentro de un corte cada lote aparece una vez: la unidad es la fila.
       icDiferencia = intervaloBootstrap(diferencias.map((d) => [d]));
@@ -116,9 +156,12 @@ export function evaluarWalkForward(
         codificar(entrenamiento, codificador).imputadas.filter(Boolean).length +
         matrizPrueba.imputadas.filter(Boolean).length,
       maeModelo: promedio(erroresModelo),
+      rmseModelo,
+      r2Modelo,
       icMaeModelo: intervaloBootstrap(erroresModelo.map((e) => [e])),
       lineaBase: base,
       maeLineaBase,
+      rmseLineaBase,
       diferencia,
       icDiferencia,
       conclusion,
@@ -145,14 +188,25 @@ function calcularGlobal(
     porLote.set(e.parcelaId, lista);
   }
   const icDiferencia = intervaloBootstrap([...porLote.values()]);
-  const maeModelo = promedio(errores.map((e) => e.errorModelo));
-  const maeLineaBase = promedio(errores.map((e) => e.errorBase));
+  const erroresModelo = errores.map((e) => e.errorModelo);
+  const erroresBase = errores.map((e) => e.errorBase);
+  const maeModelo = promedio(erroresModelo);
+  const maeLineaBase = promedio(erroresBase);
+  const rmseModelo = calcularRmse(erroresModelo);
+  const rmseLineaBase = calcularRmse(erroresBase);
+  const r2Modelo = calcularR2(
+    errores.map((e) => e.real),
+    errores.map((e) => e.predicho),
+  );
   return {
     cortes,
     filas: errores.length,
     lotes: porLote.size,
     maeModelo,
     maeLineaBase,
+    rmseModelo,
+    rmseLineaBase,
+    r2Modelo,
     diferencia: maeModelo - maeLineaBase,
     icDiferencia,
     conclusion: concluir(icDiferencia),

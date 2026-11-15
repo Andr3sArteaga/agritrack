@@ -1,4 +1,7 @@
-import type { ContextoEstimacion } from '../modelo-rendimiento';
+import type {
+  ContextoEstimacion,
+  MetricasDesempenoResumen,
+} from '../modelo-rendimiento';
 
 export const ESTIMADOR_LINEA_BASE = Symbol('ESTIMADOR_LINEA_BASE');
 export const ESTIMADOR_MODELO = Symbol('ESTIMADOR_MODELO');
@@ -15,6 +18,7 @@ export interface EstimacionRendimiento {
   version_modelo: string | null;
   campañas_usadas: number;
   advertencias: string[];
+  metricas_evaluacion?: MetricasDesempenoResumen | null;
 }
 
 export interface EstimadorRendimientoPort {

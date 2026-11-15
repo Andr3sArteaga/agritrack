@@ -256,6 +256,13 @@ describe('Componente de estimacion con datos de demostracion (enmascarados)', ()
     expect(Math.abs(porCorte['2025-2026'].maeModelo - 0.33)).toBeLessThan(0.05);
     expect(version.metricas.varianteA.global).toMatchObject({ filas: 123, lotes: 42 });
     expect(version.metricas.varianteA.global?.maeLineaBase).toBeCloseTo(0.671, 3);
+    const global = version.metricas.varianteA.global!;
+    expect(global.maeModelo).toBeLessThan(global.maeLineaBase);
+    expect(global.rmseModelo).toBeGreaterThanOrEqual(global.maeModelo);
+    expect(global.rmseLineaBase).toBeGreaterThanOrEqual(global.maeLineaBase);
+    expect(global.rmseModelo).toBeLessThan(global.rmseLineaBase);
+    expect(typeof global.r2Modelo).toBe('number');
+    expect(Number.isFinite(global.r2Modelo)).toBe(true);
   });
 
   it('con datos REALES iguales tampoco se activaria: es peor en la ultima campaña', async () => {
@@ -282,6 +289,17 @@ describe('Componente de estimacion con datos de demostracion (enmascarados)', ()
       campañas_usadas: 5,
     });
     expect(typeof respuesta.experimental?.valor_t_ha).toBe('number');
+    expect(respuesta.experimental?.metricas_evaluacion).toMatchObject({
+      superaLineaBase: true,
+      conclusion: 'supera',
+      filasEvaluadas: 123,
+      cortesEvaluados: 3,
+    });
+    expect(respuesta.experimental?.metricas_evaluacion?.maeModelo).toBeLessThan(
+      respuesta.experimental!.metricas_evaluacion!.maeLineaBase,
+    );
+    expect(typeof respuesta.experimental?.metricas_evaluacion?.rmseModelo).toBe('number');
+    expect(typeof respuesta.experimental?.metricas_evaluacion?.r2Modelo).toBe('number');
     expect(respuesta.referencia_linea_base).toBeNull();
     expect(respuesta.origen_datos).toBe('demo_enmascarado');
     expect(respuesta.etiqueta_datos).toBe('Datos iniciales (V1)');
