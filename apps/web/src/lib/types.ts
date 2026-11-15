@@ -306,3 +306,48 @@ export const ESTADO_GASTO_LABEL: Record<EstadoGasto, string> = {
   PAGADO: "Pagado",
   COMPROMETIDO: "Comprometido",
 };
+
+// ---------- Monitoreo de la parcela: suelo y clima (carga manual)
+
+/** pH 0-14; nitrogeno, fosforo y potasio en ppm (mg/kg); materia organica en %. */
+export interface AnalisisSuelo {
+  id: string;
+  parcelaId: string;
+  fecha: string;
+  ph: number | null;
+  nitrogeno: number | null;
+  fosforo: number | null;
+  potasio: number | null;
+  materiaOrganica: number | null;
+  /** Humedad del suelo en %, medida en campo. */
+  humedad: number | null;
+  notas: string | null;
+}
+
+export type CondicionClima =
+  | "SOLEADO"
+  | "NUBLADO"
+  | "LLUVIA_LIGERA"
+  | "LLUVIA_FUERTE"
+  | "HELADA"
+  | "GRANIZO"
+  | "VIENTO_FUERTE";
+
+export const CONDICION_CLIMA_LABEL: Record<CondicionClima, string> = {
+  SOLEADO: "Soleado",
+  NUBLADO: "Nublado",
+  LLUVIA_LIGERA: "Lluvia ligera",
+  LLUVIA_FUERTE: "Lluvia fuerte",
+  HELADA: "Helada",
+  GRANIZO: "Granizo",
+  VIENTO_FUERTE: "Viento fuerte",
+};
+
+export interface RegistroClima {
+  id: string;
+  parcelaId: string;
+  fecha: string;
+  condicion: CondicionClima;
+  lluviaMm: number | null;
+  notas: string | null;
+}

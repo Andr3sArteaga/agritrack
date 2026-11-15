@@ -1,8 +1,7 @@
-import { ChevronDown, CloudSun, Layers, Sprout, type LucideIcon } from "lucide-react";
+import { ChevronDown, CircleCheck, CloudSun, Layers, Sprout, type LucideIcon } from "lucide-react";
 import { formatearFecha } from "@/lib/format";
 import type { AreaId, AreaResumen, Indicador } from "@/lib/resumen-parcela";
 import { EstadoBadge } from "./estado-badge";
-import { MarcadorPendiente } from "./marcadores";
 
 export const ICONO_AREA: Record<AreaId, LucideIcon> = {
   SUELO: Layers,
@@ -10,25 +9,44 @@ export const ICONO_AREA: Record<AreaId, LucideIcon> = {
   CLIMA: CloudSun,
 };
 
-/** Lo que se ve a la derecha de cada fila: la regla pendiente o el estado. */
-function EtiquetaIndicador({ indicador }: { indicador: Indicador }) {
-  if (indicador.pendiente === "REGLA") return <MarcadorPendiente tipo="REGLA" corto />;
-  return <EstadoBadge estado={indicador.estado} tamano="sm" />;
+/** Botones para cargar datos de un area (solo donde se puede cargar: el detalle de la parcela). */
+export type AccionesArea = Partial<Record<AreaId, React.ReactNode>>;
+
+/**
+ * Hay un valor cargado, pero nadie definio todavia cuando ese valor es bueno o malo.
+ * No es un estado: solo dice que el dato esta. Nunca se muestra como "Bien".
+ */
+export function ChipRegistrado({ texto = "Registrado" }: { texto?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-stone-400 bg-white px-2 py-0.5 text-sm font-bold text-stone-800">
+      <CircleCheck size={14} className="shrink-0 text-stone-600" aria-hidden />
+      {texto}
+    </span>
+  );
 }
 
+/** true = el area tiene todos sus datos, pero ninguno con un estado calculado. */
+export const areaSoloRegistrada = (area: AreaResumen): boolean =>
+  area.estado === "SIN_DATOS" && area.conDato === area.indicadores.length;
+
 function FilaIndicador({ indicador }: { indicador: Indicador }) {
+  const tieneValor = indicador.valor !== null;
   return (
     <details className="group border-b border-stone-200 last:border-b-0">
       <summary className="grid min-h-[52px] cursor-pointer list-none grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 px-4 py-3 md:grid-cols-[1.4fr_1fr_auto] [&::-webkit-details-marker]:hidden">
         <span className="font-bold text-stone-900">{indicador.nombre}</span>
-        <span className="order-3 col-span-2 text-sm text-stone-600 md:order-none md:col-span-1">
-          {indicador.valor ? `Valor: ${indicador.valor}` : "Sin dato"}
+        <span className="order-3 col-span-2 text-base text-stone-800 md:order-none md:col-span-1">
+          {tieneValor ? <b>{indicador.valor}</b> : <span className="text-sm text-stone-600">Falta cargarlo</span>}
         </span>
         <span className="justify-self-end">
-          <EtiquetaIndicador indicador={indicador} />
+          {tieneValor && indicador.estado === "SIN_DATOS" ? (
+            <ChipRegistrado />
+          ) : (
+            <EstadoBadge estado={indicador.estado} tamano="sm" />
+          )}
         </span>
       </summary>
-      <div className="px-4 pb-4 text-sm text-stone-600">
+      <div className="px-4 pb-4 text-sm text-stone-700">
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5">
           {indicador.queMide && (
             <>
@@ -40,36 +58,36 @@ function FilaIndicador({ indicador }: { indicador: Indicador }) {
             <>
               <dt className="font-bold text-stone-900">Última revisión</dt>
               <dd>Ahora mismo, al abrir esta pantalla.</dd>
+              <dt className="font-bold text-stone-900">Cómo se decide</dt>
+              <dd>{indicador.regla}</dd>
             </>
           ) : (
             <>
-              <dt className="font-bold text-stone-900">Última medición</dt>
+              <dt className="font-bold text-stone-900">Fecha del dato</dt>
               <dd>{indicador.ultimaMedicion ? formatearFecha(indicador.ultimaMedicion) : "Sin registro"}</dd>
             </>
           )}
           {indicador.nota && (
             <>
-              <dt className="font-bold text-stone-900">Motivo</dt>
+              <dt className="font-bold text-stone-900">{tieneValor ? "Nota" : "Por qué falta"}</dt>
               <dd>{indicador.nota}</dd>
             </>
           )}
-          <dt className="font-bold text-stone-900">{indicador.pendiente === "DATOS" ? "Datos" : "Regla"}</dt>
-          <dd>
-            {indicador.pendiente === "DATOS" ? (
-              <MarcadorPendiente tipo="DATOS" />
-            ) : indicador.regla ? (
-              indicador.regla
-            ) : (
-              <MarcadorPendiente tipo="REGLA" />
-            )}
-          </dd>
         </dl>
       </div>
     </details>
   );
 }
 
-function Area({ area, abierta }: { area: AreaResumen; abierta: boolean }) {
+function Area({
+  area,
+  abierta,
+  accion,
+}: {
+  area: AreaResumen;
+  abierta: boolean;
+  accion?: React.ReactNode;
+}) {
   const Icono = ICONO_AREA[area.id];
   const total = area.indicadores.length;
   return (
@@ -77,11 +95,14 @@ function Area({ area, abierta }: { area: AreaResumen; abierta: boolean }) {
       <summary className="flex min-h-[52px] cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-[17px] font-bold text-stone-900 [&::-webkit-details-marker]:hidden">
         <Icono size={20} className="shrink-0 text-stone-600" aria-hidden />
         {area.nombre}
-        <EstadoBadge estado={area.estado} />
+        {areaSoloRegistrada(area) ? (
+          <ChipRegistrado texto="Datos registrados" />
+        ) : (
+          <EstadoBadge estado={area.estado} />
+        )}
         <span className="text-sm font-normal text-stone-600">
-          {total} indicadores: {area.conDato} con dato, {total - area.conDato} sin dato
+          {area.conDato} de {total} datos cargados
           {area.alertas > 0 && ` · ${area.alertas} ${area.alertas === 1 ? "alerta" : "alertas"}`}
-          {area.estado === "SIN_DATOS" && area.conDato === total && " · falta una regla validada"}
         </span>
         <ChevronDown
           size={20}
@@ -90,6 +111,7 @@ function Area({ area, abierta }: { area: AreaResumen; abierta: boolean }) {
         />
       </summary>
       <div className="border-t border-stone-200">
+        {accion && <div className="border-b border-stone-200 bg-stone-50 px-4 py-3">{accion}</div>}
         {area.indicadores.map((indicador) => (
           <FilaIndicador key={indicador.id} indicador={indicador} />
         ))}
@@ -99,12 +121,18 @@ function Area({ area, abierta }: { area: AreaResumen; abierta: boolean }) {
 }
 
 /** Desglose por area y por indicador. Cada area y cada indicador se abre y se cierra. */
-export function DesgloseAreas({ areas }: { areas: AreaResumen[] }) {
+export function DesgloseAreas({ areas, acciones }: { areas: AreaResumen[]; acciones?: AccionesArea }) {
   return (
     <div>
       {areas.map((area) => (
-        // Se abre sola la que tiene alertas: lo urgente no queda escondido.
-        <Area key={area.id} area={area} abierta={area.alertas > 0} />
+        // Se abren solas las que tienen alertas (lo urgente no queda escondido)
+        // y las que tienen un boton para cargar datos (que se vea donde se cargan).
+        <Area
+          key={area.id}
+          area={area}
+          abierta={area.alertas > 0 || Boolean(acciones?.[area.id])}
+          accion={acciones?.[area.id]}
+        />
       ))}
     </div>
   );

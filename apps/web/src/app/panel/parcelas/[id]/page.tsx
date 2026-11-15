@@ -32,9 +32,25 @@ import {
   type Parcela,
 } from "@/lib/types";
 import { CampanaForm } from "./campana-form";
+import { ClimaForm } from "./clima-form";
+import { SueloForm } from "./suelo-form";
 import { ActividadForm } from "./actividad-form";
 
 const ESTADOS: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"];
+
+/** Boton grande para cargar un dato, dentro del area a la que pertenece. */
+function BotonCargar({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex min-h-11 items-center gap-2 rounded-md border-2 border-emerald-700 bg-emerald-700 px-4 text-base font-bold text-white hover:bg-emerald-800"
+    >
+      <Plus className="h-5 w-5" aria-hidden />
+      {children}
+    </button>
+  );
+}
 
 export default function ParcelaPrivadaDetallePage() {
   const params = useParams<{ id: string }>();
@@ -54,7 +70,19 @@ export default function ParcelaPrivadaDetallePage() {
   const [mostrarFormCampana, setMostrarFormCampana] = useState(false);
   const [mostrarFormActividad, setMostrarFormActividad] = useState(false);
   const [corrigiendo, setCorrigiendo] = useState<Actividad | null>(null);
-  const { datos: resumenEstado, error: errorEstado } = useResumenParcela(parcela, campanas, cultivos);
+  // Suelo y clima: que formulario esta abierto, y contador para recargar el estado al guardar.
+  const [formMonitoreo, setFormMonitoreo] = useState<"suelo" | "clima" | null>(null);
+  const [versionEstado, setVersionEstado] = useState(0);
+  const { datos: resumenEstado, error: errorEstado } = useResumenParcela(
+    parcela,
+    campanas,
+    cultivos,
+    versionEstado,
+  );
+  const alGuardarMonitoreo = () => {
+    setFormMonitoreo(null);
+    setVersionEstado((v) => v + 1);
+  };
 
   const cargarParcela = useCallback(() => {
     api
@@ -148,7 +176,23 @@ export default function ParcelaPrivadaDetallePage() {
         {errorEstado ? (
           <p className="text-red-700">{errorEstado}</p>
         ) : resumenEstado ? (
-          <PanelEstadoParcela resumen={resumenEstado} />
+          <PanelEstadoParcela
+            resumen={resumenEstado}
+            acciones={
+              puedeRegistrarActividad
+                ? {
+                    SUELO: (
+                      <BotonCargar onClick={() => setFormMonitoreo("suelo")}>
+                        Agregar datos de suelo
+                      </BotonCargar>
+                    ),
+                    CLIMA: (
+                      <BotonCargar onClick={() => setFormMonitoreo("clima")}>Anotar clima</BotonCargar>
+                    ),
+                  }
+                : undefined
+            }
+          />
         ) : (
           <p className="text-stone-600">Cargando el estado de la parcela...</p>
         )}
@@ -313,6 +357,20 @@ export default function ParcelaPrivadaDetallePage() {
         ))}
       </div>
 
+      {formMonitoreo === "suelo" && (
+        <SueloForm
+          parcelaId={parcelaId}
+          onClose={() => setFormMonitoreo(null)}
+          onSaved={alGuardarMonitoreo}
+        />
+      )}
+      {formMonitoreo === "clima" && (
+        <ClimaForm
+          parcelaId={parcelaId}
+          onClose={() => setFormMonitoreo(null)}
+          onSaved={alGuardarMonitoreo}
+        />
+      )}
       {mostrarFormCampana && (
         <CampanaForm
           parcelaId={parcelaId}
