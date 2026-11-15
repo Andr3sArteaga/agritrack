@@ -3,7 +3,7 @@
 export type OrigenDatos = 'demo_enmascarado' | 'real';
 export type EstadoModelo = 'experimental' | 'activo' | 'archivado';
 
-export const ETIQUETA_DEMO = 'Datos de demostración (enmascarados)';
+export const ETIQUETA_DEMO = 'Datos iniciales (V1)';
 
 /** Datos de siembra y cosecha de un lote (parcela) en una campaña, tal como estan guardados. */
 export interface RegistroLote {

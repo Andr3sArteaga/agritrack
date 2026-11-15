@@ -215,8 +215,8 @@ describe('Componente de estimacion con datos de demostracion (enmascarados)', ()
     expect(typeof respuesta.experimental?.valor_t_ha).toBe('number');
     expect(respuesta.referencia_linea_base).toBeNull();
     expect(respuesta.origen_datos).toBe('demo_enmascarado');
-    expect(respuesta.etiqueta_datos).toBe('Datos de demostración (enmascarados)');
-    expect(respuesta.experimental?.advertencias.join(' ')).toContain('demostración');
+    expect(respuesta.etiqueta_datos).toBe('Datos iniciales (V1)');
+    expect(respuesta.experimental?.advertencias.join(' ')).toContain('datos iniciales');
   });
 
   it('sin campañas anteriores con total, la linea base responde "sin datos"', async () => {

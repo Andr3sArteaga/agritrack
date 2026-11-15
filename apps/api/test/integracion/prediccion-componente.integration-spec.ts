@@ -130,7 +130,7 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
   it('GET /prediccion/datos-demo lista las 42 parcelas de demostracion', async () => {
     const respuesta = await controller.datosDemo();
     expect(respuesta.parcelaIds).toHaveLength(42);
-    expect(respuesta.etiqueta).toBe('Datos de demostración (enmascarados)');
+    expect(respuesta.etiqueta).toBe('Datos iniciales (V1)');
   });
 
   it('POST /prediccion/entrenar crea la version v1 y queda "experimental"', async () => {
@@ -175,7 +175,7 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
       estado: 'experimental',
       version_modelo: 'v1',
     });
-    expect(respuesta.etiqueta_datos).toBe('Datos de demostración (enmascarados)');
+    expect(respuesta.etiqueta_datos).toBe('Datos iniciales (V1)');
   });
 
   it('un segundo entrenamiento crea v2 y tambien queda experimental', async () => {

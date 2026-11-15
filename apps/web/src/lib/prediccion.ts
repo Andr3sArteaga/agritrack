@@ -21,7 +21,7 @@ export interface EstimacionRespuesta {
   etiqueta_datos: string | null;
 }
 
-export const ETIQUETA_DEMO = "Datos de demostración (enmascarados)";
+export const ETIQUETA_DEMO = "Datos iniciales (V1)";
 
 /** Ids de las parcelas de demostracion. Si no se puede saber, se asume que no hay. */
 export async function cargarIdsDemo(): Promise<Set<string>> {

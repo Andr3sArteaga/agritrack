@@ -50,7 +50,7 @@ export class RandomForestAdapter implements EstimadorRendimientoPort {
     const advertencias: string[] = [];
     if (version.origenDatos === 'demo_enmascarado') {
       advertencias.push(
-        'Modelo entrenado con datos de demostración (enmascarados): no es una estimación real.',
+        'Calculada con datos iniciales (V1), no con registros propios de esta parcela.',
       );
     }
     if (version.campanasUsadas.length < MINIMO_CAMPANAS_RF32) {
