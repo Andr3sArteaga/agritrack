@@ -6,9 +6,6 @@ import { AccionesModal, Modal } from "@/components/modal";
 import { api, apiErrorMessage } from "@/lib/api";
 import { aFechaInput } from "@/lib/format";
 import {
-  ES_MODO_DEV,
-  type EscenarioSiembraImpacto,
-  type EscenariosImpacto,
   type RegistroCosechaCampana,
   type ResultadoImpacto,
 } from "@/lib/prediccion";
@@ -158,7 +155,6 @@ export function ActividadForm({
   const [motivoCorreccion, setMotivoCorreccion] = useState("");
 
   const [impacto, setImpacto] = useState<ResultadoImpacto | null>(null);
-  const [escenariosSiembra, setEscenariosSiembra] = useState<EscenariosImpacto | null>(null);
   const [cargandoImpacto, setCargandoImpacto] = useState(false);
   const [errorImpacto, setErrorImpacto] = useState<string | null>(null);
 
@@ -195,14 +191,6 @@ export function ActividadForm({
         .then((res) => {
           if (!cancelado) {
             setImpacto(res.data);
-            if (
-              res.data.escenarios &&
-              (res.data.escenarios.positivo ||
-                res.data.escenarios.neutro ||
-                res.data.escenarios.negativo)
-            ) {
-              setEscenariosSiembra(res.data.escenarios);
-            }
           }
         })
         .catch((err) => {
@@ -277,47 +265,29 @@ export function ActividadForm({
         });
       }
 
+      if (tipo === "COSECHA" && !corrigiendo && rendimientoTnHa.trim() !== "") {
+        const rindeNum = Number(rendimientoTnHa);
+        const haBase = registroCosecha?.haSembradas ?? hectareasParcela;
+        if (Number.isFinite(rindeNum) && rindeNum >= 0 && haBase > 0) {
+          try {
+            await api.put(`/campanas/${campanaId}/registro-cosecha`, {
+              ...(registroCosecha ? {} : { haSembradas: haBase }),
+              fechaCosecha: fecha,
+              haCosechadas: haBase,
+              toneladas: Math.round(haBase * rindeNum * 100) / 100,
+            });
+          } catch {
+            // La actividad ya quedó registrada; si el cierre de cosecha requiere ajuste se edita en Manejo.
+          }
+        }
+      }
+
       onSaved();
     } catch (err) {
       setError(apiErrorMessage(err, "No se pudo registrar la actividad"));
     } finally {
       setGuardando(false);
     }
-  }
-
-  function aplicarSiembraDev(
-    escenario: EscenarioSiembraImpacto | null | undefined,
-    modo: "positiva" | "neutra" | "negativa",
-  ) {
-    setTipo("SIEMBRA");
-    if (escenario) {
-      setHaSembradas(escenario.haSembradas.toString());
-      setFecha(escenario.fechaSiembra || new Date().toLocaleDateString("en-CA"));
-      setVariedad(escenario.variedad);
-    } else if (modo === "neutra") {
-      setHaSembradas(hectareasParcela.toString());
-      setFecha("");
-      setVariedad("");
-    }
-    setInsumo("Semilla certificada");
-    setCantidad("60");
-    setUnidad("kg/ha");
-    setDescripcion(
-      modo === "positiva"
-        ? "Siembra en ventana óptima con semilla certificada"
-        : modo === "negativa"
-          ? "Siembra tardía fuera de ventana óptima"
-          : "Siembra estándar con parámetros de referencia",
-    );
-  }
-
-  function aplicarFumigacionDev() {
-    setTipo("FUMIGACION");
-    setFecha(new Date().toLocaleDateString("en-CA"));
-    setDescripcion("Aplicación preventiva de control fitosanitario");
-    setInsumo("Insecticida sistémico");
-    setCantidad("1.5");
-    setUnidad("L/ha");
   }
 
   return (
@@ -327,46 +297,6 @@ export function ActividadForm({
       onClose={onClose}
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        {ES_MODO_DEV && !corrigiendo && (
-          <div className="rounded-lg border-2 border-dashed border-amber-500 bg-amber-50 p-3">
-            <p className="text-xs font-bold text-amber-950">
-              Modo Desarrollo · Relleno rápido de actividad e impacto
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={!escenariosSiembra?.positivo}
-                onClick={() => aplicarSiembraDev(escenariosSiembra?.positivo, "positiva")}
-                className="min-h-11 rounded-md border-2 border-emerald-700 bg-white px-2.5 text-xs font-bold text-emerald-900 hover:bg-emerald-50 disabled:opacity-40"
-              >
-                ↑ Siembra Positiva
-              </button>
-              <button
-                type="button"
-                onClick={() => aplicarSiembraDev(escenariosSiembra?.neutro, "neutra")}
-                className="min-h-11 rounded-md border-2 border-stone-500 bg-white px-2.5 text-xs font-bold text-stone-900 hover:bg-stone-100"
-              >
-                = Siembra Neutra
-              </button>
-              <button
-                type="button"
-                disabled={!escenariosSiembra?.negativo}
-                onClick={() => aplicarSiembraDev(escenariosSiembra?.negativo, "negativa")}
-                className="min-h-11 rounded-md border-2 border-red-700 bg-white px-2.5 text-xs font-bold text-red-900 hover:bg-red-50 disabled:opacity-40"
-              >
-                ↓ Siembra Negativa
-              </button>
-              <button
-                type="button"
-                onClick={aplicarFumigacionDev}
-                className="min-h-11 rounded-md border-2 border-amber-700 bg-white px-2.5 text-xs font-bold text-amber-950 hover:bg-amber-100"
-              >
-                = Labor Post-Siembra (Fumigación · Impacto Neutro)
-              </button>
-            </div>
-          </div>
-        )}
-
         {corrigiendo && (
           <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             El historial es inmutable: se creará un nuevo registro que corrige a la actividad #

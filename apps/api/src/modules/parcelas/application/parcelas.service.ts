@@ -6,6 +6,8 @@ import {
   PARCELA_REPOSITORY,
   type ParcelaRepository,
 } from '../domain/repositories/parcela.repository';
+import { validarNuevaFotoParcela } from '../domain/rules/validar-foto-parcela';
+import { CreateFotoParcelaDto, FotoParcelaResponseDto, UpdateFotoParcelaDto } from './dto/foto-parcela.dto';
 import { CreateParcelaDto } from './dto/create-parcela.dto';
 import { ParcelaResponseDto } from './dto/parcela-response.dto';
 import { PoligonoDto } from './dto/poligono.dto';
@@ -84,6 +86,63 @@ export class ParcelasService {
       disponibleParaPreventa: false,
     });
     return ParcelaResponseDto.fromEntity(parcela);
+  }
+
+  async listarFotos(parcelaId: string): Promise<FotoParcelaResponseDto[]> {
+    await this.findById(parcelaId);
+    const fotos = await this.parcelaRepository.listarFotos(parcelaId);
+    return fotos.map((foto) => FotoParcelaResponseDto.fromItem(foto));
+  }
+
+  async agregarFoto(
+    parcelaId: string,
+    dto: CreateFotoParcelaDto,
+    usuarioId: string,
+  ): Promise<FotoParcelaResponseDto> {
+    await this.findById(parcelaId);
+    const existentes = await this.parcelaRepository.listarFotos(parcelaId);
+    const validacion = validarNuevaFotoParcela(dto.imagenData, existentes.length);
+    if (!validacion.valido) {
+      throw new BadRequestException(validacion.motivo);
+    }
+
+    const foto = await this.parcelaRepository.crearFoto({
+      parcelaId,
+      imagenData: dto.imagenData.trim(),
+      descripcion: dto.descripcion?.trim() || null,
+      visibleEnPreventa: dto.visibleEnPreventa ?? true,
+      subidaPorId: usuarioId,
+    });
+    return FotoParcelaResponseDto.fromItem(foto);
+  }
+
+  async actualizarFoto(
+    parcelaId: string,
+    fotoId: string,
+    dto: UpdateFotoParcelaDto,
+  ): Promise<FotoParcelaResponseDto> {
+    const foto = await this.parcelaRepository.buscarFotoPorId(fotoId);
+    if (!foto || foto.parcelaId !== parcelaId) {
+      throw new NotFoundException('Foto no encontrada en esta parcela');
+    }
+
+    const actualizada = await this.parcelaRepository.actualizarFoto(fotoId, {
+      ...(dto.descripcion !== undefined
+        ? { descripcion: dto.descripcion?.trim() || null }
+        : {}),
+      ...(dto.visibleEnPreventa !== undefined
+        ? { visibleEnPreventa: dto.visibleEnPreventa }
+        : {}),
+    });
+    return FotoParcelaResponseDto.fromItem(actualizada);
+  }
+
+  async eliminarFoto(parcelaId: string, fotoId: string): Promise<void> {
+    const foto = await this.parcelaRepository.buscarFotoPorId(fotoId);
+    if (!foto || foto.parcelaId !== parcelaId) {
+      throw new NotFoundException('Foto no encontrada en esta parcela');
+    }
+    await this.parcelaRepository.eliminarFoto(fotoId);
   }
 
   private construirYValidarPoligono(

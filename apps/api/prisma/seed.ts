@@ -151,9 +151,12 @@ async function main(): Promise<void> {
 
   async function crearHistorialParcela(
     parcelaId: string,
+    hectareas: number,
     cultivoId: string,
     rendimientos: [number, number, number],
+    variedades: [string, string, string],
   ): Promise<void> {
+    const ha = Math.round(hectareas * 100) / 100;
     for (let i = 0; i < campanasPasadas.length; i++) {
       const config = campanasPasadas[i];
       const campana = await campanasService.create({
@@ -166,12 +169,13 @@ async function main(): Promise<void> {
 
       const fechaSiembra = new Date(config.fechaInicio);
       fechaSiembra.setDate(fechaSiembra.getDate() + 4);
+      const fechaSiembraIso = fechaSiembra.toISOString().slice(0, 10);
 
       await actividadesService.crear(
         {
           campanaId: campana.id,
           tipo: TipoActividad.SIEMBRA,
-          fecha: fechaSiembra.toISOString().slice(0, 10),
+          fecha: fechaSiembraIso,
           descripcion: 'Siembra de la temporada',
           insumo: 'Semilla certificada',
           cantidad: 60,
@@ -203,17 +207,48 @@ async function main(): Promise<void> {
         },
         operativo.id,
       );
+
+      await prisma.registroCosecha.create({
+        data: {
+          campanaId: campana.id,
+          variedad: variedades[i],
+          fechaSiembra: new Date(`${fechaSiembraIso}T00:00:00.000Z`),
+          haSembradas: ha,
+          fechaCosecha: new Date(`${config.fechaCosecha}T00:00:00.000Z`),
+          haCosechadas: ha,
+          toneladas: Math.round(ha * rendimientos[i] * 100) / 100,
+          origen: 'real',
+        },
+      });
     }
   }
 
   console.log('Creando historial de campanas (El Ceibo / Soya)...');
-  await crearHistorialParcela(elCeibo.id, soya.id, [2.8, 3.1, 3.4]);
+  await crearHistorialParcela(
+    elCeibo.id,
+    elCeibo.hectareas,
+    soya.id,
+    [2.8, 3.1, 3.4],
+    ['MUNASQA', 'DON MARIO', '6410'],
+  );
 
   console.log('Creando historial de campanas (Santa Rosa / Sorgo)...');
-  await crearHistorialParcela(santaRosa.id, sorgo.id, [4.0, 4.3, 3.9]);
+  await crearHistorialParcela(
+    santaRosa.id,
+    santaRosa.hectareas,
+    sorgo.id,
+    [4.0, 4.3, 3.9],
+    ['GRANADOR', 'ADV 1350', 'TOBAZ'],
+  );
 
   console.log('Creando historial de campanas (Los Almendros / Trigo)...');
-  await crearHistorialParcela(losAlmendros.id, trigo.id, [2.0, 2.2, 2.1]);
+  await crearHistorialParcela(
+    losAlmendros.id,
+    losAlmendros.hectareas,
+    trigo.id,
+    [2.0, 2.2, 2.1],
+    ['ACHIRA', 'BR 18', 'MOTACU'],
+  );
 
   console.log('Creando correccion de ejemplo sobre una cosecha...');
   const campanasElCeibo = await campanasService.findAll(elCeibo.id);
@@ -241,6 +276,12 @@ async function main(): Promise<void> {
         },
         jefe.id,
       );
+      await prisma.registroCosecha.update({
+        where: { campanaId: campanaInvierno2025.id },
+        data: {
+          toneladas: Math.round(elCeibo.hectareas * 3.3 * 100) / 100,
+        },
+      });
     }
   }
 
@@ -279,6 +320,15 @@ async function main(): Promise<void> {
     },
     operativo.id,
   );
+  await prisma.registroCosecha.create({
+    data: {
+      campanaId: campanaActualElCeibo.id,
+      variedad: '6410',
+      fechaSiembra: new Date('2026-06-05T00:00:00.000Z'),
+      haSembradas: Math.round(elCeibo.hectareas * 100) / 100,
+      origen: 'real',
+    },
+  });
 
   const campanaActualSantaRosa = await campanasService.create({
     parcelaId: santaRosa.id,
@@ -309,14 +359,32 @@ async function main(): Promise<void> {
     },
     operativo.id,
   );
+  await prisma.registroCosecha.create({
+    data: {
+      campanaId: campanaActualSantaRosa.id,
+      variedad: 'ADV 1350',
+      fechaSiembra: new Date('2026-06-05T00:00:00.000Z'),
+      haSembradas: Math.round(santaRosa.hectareas * 100) / 100,
+      origen: 'real',
+    },
+  });
 
   console.log('Creando campana planificada (Los Almendros)...');
-  await campanasService.create({
+  const campanaPlanificadaLosAlmendros = await campanasService.create({
     parcelaId: losAlmendros.id,
     cultivoId: trigo.id,
     temporada: 'Verano 2026',
     fechaInicio: '2026-11-01',
     fechaFin: '2027-03-15',
+  });
+  await prisma.registroCosecha.create({
+    data: {
+      campanaId: campanaPlanificadaLosAlmendros.id,
+      variedad: 'BR 18',
+      fechaSiembra: new Date('2026-11-05T00:00:00.000Z'),
+      haSembradas: Math.round(losAlmendros.hectareas * 100) / 100,
+      origen: 'real',
+    },
   });
 
   console.log('Creando insumos, gastos y presupuestos...');

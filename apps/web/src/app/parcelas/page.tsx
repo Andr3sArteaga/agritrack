@@ -46,39 +46,57 @@ export default async function CatalogoPage() {
               {parcelas.map((parcela) => (
                 <article
                   key={parcela.id}
-                  className="flex flex-col rounded-lg border border-stone-200 bg-white p-5 shadow-sm"
+                  className="flex flex-col overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm"
                 >
-                  <h2 className="text-xl font-bold text-stone-900">{parcela.nombre}</h2>
-                  <dl className="mt-4 space-y-2 text-base text-stone-700">
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="flex items-center gap-2">
-                        <Ruler className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
-                        Hectáreas
-                      </dt>
-                      <dd className="font-bold text-stone-900">{parcela.hectareas} ha</dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="flex items-center gap-2">
-                        <Sprout className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
-                        Cultivo actual
-                      </dt>
-                      <dd className="font-bold text-stone-900">
-                        {parcela.cultivoActual ?? "Sin campaña activa"}
-                      </dd>
-                    </div>
-                  </dl>
-                  <div className="mt-4">
-                    <LineaBasePublica
-                      rendimientoTnHa={lineaBaseDesdeToneladas(
-                        parcela.produccionEstimadaTn,
-                        parcela.hectareas,
+                  {parcela.fotoPortada && (
+                    <div className="relative h-44 w-full bg-stone-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={parcela.fotoPortada}
+                        alt={`Foto de ${parcela.nombre}`}
+                        className="h-full w-full object-cover"
+                      />
+                      {(parcela.totalFotosPublicadas ?? 0) > 1 && (
+                        <span className="absolute bottom-2.5 right-2.5 rounded-full bg-stone-900/75 px-2.5 py-1 text-xs font-semibold text-white">
+                          {parcela.totalFotosPublicadas} fotos
+                        </span>
                       )}
-                    />
-                  </div>
-                  <div className="mt-auto pt-5">
-                    <EnlaceBoton href={`/parcelas/${parcela.id}`} variante="secundario" completo>
-                      Ver detalle
-                    </EnlaceBoton>
+                    </div>
+                  )}
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <h2 className="text-xl font-bold text-stone-900">{parcela.nombre}</h2>
+                    <dl className="mt-4 space-y-2 text-base text-stone-700">
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="flex items-center gap-2">
+                          <Ruler className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
+                          Hectáreas
+                        </dt>
+                        <dd className="font-bold text-stone-900">{parcela.hectareas} ha</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="flex items-center gap-2">
+                          <Sprout className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
+                          Cultivo actual
+                        </dt>
+                        <dd className="font-bold text-stone-900">
+                          {parcela.cultivoActual ?? "Sin campaña activa"}
+                        </dd>
+                      </div>
+                    </dl>
+                    <div className="mt-4">
+                      <LineaBasePublica
+                        rendimientoTnHa={lineaBaseDesdeToneladas(
+                          parcela.produccionEstimadaTn,
+                          parcela.hectareas,
+                        )}
+                      />
+                    </div>
+                    <div className="mt-auto pt-5">
+                      <EnlaceBoton href={`/parcelas/${parcela.id}`} variante="secundario" completo>
+                        Ver detalle
+                      </EnlaceBoton>
+                    </div>
                   </div>
                 </article>
               ))}

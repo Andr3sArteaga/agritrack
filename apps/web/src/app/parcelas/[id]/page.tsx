@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, ListChecks, LineChart, Mail, MapPin, MapPinned, Phone, Ruler, Sprout } from "lucide-react";
+import { ArrowLeft, Building2, Camera, ListChecks, LineChart, Mail, MapPin, MapPinned, Phone, Ruler, Sprout } from "lucide-react";
 import { notFound } from "next/navigation";
 import { EstadoBadge } from "@/components/estado/estado-badge";
 import { EstadoVacio } from "@/components/estado/estado-vacio";
@@ -120,6 +120,31 @@ export default async function ParcelaDetallePage(
             <LineaBasePublica rendimientoTnHa={parcela.rendimientoEstimadoTnHa} />
           </div>
         </div>
+
+        {parcela.fotos.length > 0 && (
+          <Seccion titulo="Fotos de la parcela" icono={Camera}>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {parcela.fotos.map((foto, idx) => (
+                <figure
+                  key={foto.id}
+                  className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-xs"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={foto.imagenData}
+                    alt={foto.descripcion || `${parcela.nombre} · foto ${idx + 1}`}
+                    className="h-56 w-full object-cover"
+                  />
+                  {foto.descripcion && (
+                    <figcaption className="border-t border-stone-100 px-3 py-2 text-sm text-stone-700">
+                      {foto.descripcion}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          </Seccion>
+        )}
 
         {parcela.poligono && (
           <Seccion titulo="Dónde está la parcela" icono={MapPinned}>

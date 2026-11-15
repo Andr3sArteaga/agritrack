@@ -48,7 +48,6 @@ import {
 } from "@/lib/types";
 import { ParcelaForm } from "../parcela-form";
 import { ActividadForm } from "./actividad-form";
-import { BarraModoDesarrollo } from "./barra-modo-desarrollo";
 import { CampanaForm } from "./campana-form";
 import { ClimaForm } from "./clima-form";
 import {
@@ -56,6 +55,7 @@ import {
   type DimensionEstadoRegistro,
   type EstadoRegistroItem,
 } from "./estado-registro-parcela";
+import { FotosParcelaSeccion } from "./fotos-parcela-seccion";
 import {
   BadgeEstadoRegistro,
   ModalDetalleCompletitud,
@@ -657,24 +657,6 @@ function ParcelaPrivadaDetalleContenido() {
           )}
         </header>
 
-        {/* Barra de Modo Desarrollo (mantenida para pruebas rápidas en entorno dev) */}
-        {puedeRegistrarActividad && (
-          <BarraModoDesarrollo
-            parcelaId={parcela.id}
-            cultivos={cultivos}
-            campanaActual={campanaSeleccionada}
-            onRecargarTodo={(campanaFocusId) => {
-              if (campanaFocusId) setCampanaManualId(campanaFocusId);
-              setVersionDatos((v) => v + 1);
-              setVersionEstimacion((v) => v + 1);
-            }}
-            onAbrirImpacto={(campana) => {
-              setModalRegistroCosecha({ campana, modo: "siembra" });
-            }}
-            onVerEstimacion={() => setPestanaActiva("estimacion")}
-          />
-        )}
-
         {/* NAVEGACIÓN PRINCIPAL EN 2 PESTAÑAS */}
         <div
           role="tablist"
@@ -1044,6 +1026,13 @@ function ParcelaPrivadaDetalleContenido() {
                 </ol>
               )}
             </section>
+
+            {/* E. FOTOS DE LA PARCELA (Gestión y visibilidad en preventa) */}
+            <FotosParcelaSeccion
+              parcelaId={parcela.id}
+              disponibleParaPreventa={parcela.disponibleParaPreventa}
+              puedeEditar={puedeRegistrarActividad}
+            />
           </div>
         )}
 
@@ -1060,11 +1049,13 @@ function ParcelaPrivadaDetalleContenido() {
                 parcelaId={parcela.id}
                 campanaId={campanaSeleccionada.id}
                 temporada={campanaSeleccionada.temporada}
+                cultivoId={campanaSeleccionada.cultivoId}
                 cultivoNombre={cultivoNombre(campanaSeleccionada.cultivoId)}
                 hectareasParcela={parcela.hectareas}
                 campanasHistoricas={campanasHistoricas}
                 evaluacionRegistro={evaluacion}
                 versionRecarga={versionEstimacion}
+                puedeEntrenar={esJefe}
                 onEditarVariablesSiembra={
                   puedeRegistrarActividad
                     ? () =>

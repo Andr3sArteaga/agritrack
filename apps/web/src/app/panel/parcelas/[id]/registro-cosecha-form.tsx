@@ -7,8 +7,6 @@ import { AccionesModal, Modal } from "@/components/modal";
 import { api, apiErrorMessage } from "@/lib/api";
 import { aFechaInput } from "@/lib/format";
 import {
-  ES_MODO_DEV,
-  type EscenarioSiembraImpacto,
   type RegistroCosechaCampana,
   type ResultadoImpacto,
 } from "@/lib/prediccion";
@@ -134,30 +132,6 @@ export function RegistroCosechaForm({
     }
   }
 
-  const escenarios = impacto?.escenarios;
-
-  function aplicarEscenario(escenario: EscenarioSiembraImpacto | null | undefined, neutro = false) {
-    if (escenario) {
-      setHaSembradas(escenario.haSembradas.toString());
-      setFechaSiembra(escenario.fechaSiembra);
-      setVariedad(escenario.variedad);
-      return;
-    }
-    if (neutro) {
-      setHaSembradas(hectareasParcela.toString());
-      setFechaSiembra("");
-      setVariedad("");
-    }
-  }
-
-  function autocompletarCosechaDev() {
-    const baseHa = registro?.haSembradas ?? hectareasParcela;
-    const ton = Math.round(baseHa * 3.2 * 100) / 100;
-    setFechaCosecha(hoy());
-    setHaCosechadas(baseHa.toString());
-    setToneladas(ton.toString());
-  }
-
   return (
     <Modal
       titulo={
@@ -170,39 +144,6 @@ export function RegistroCosechaForm({
       <form onSubmit={onSubmit} className="space-y-4">
         {modo === "siembra" ? (
           <>
-            {ES_MODO_DEV && (
-              <div className="rounded-lg border-2 border-dashed border-amber-500 bg-amber-50 p-3">
-                <p className="text-xs font-bold text-amber-950">
-                  Modo Desarrollo · Probar escenarios de impacto en 1 clic
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    disabled={!escenarios?.positivo}
-                    onClick={() => aplicarEscenario(escenarios?.positivo)}
-                    className="min-h-11 rounded-md border-2 border-emerald-700 bg-white px-3 text-xs font-bold text-emerald-900 hover:bg-emerald-50 disabled:opacity-40"
-                  >
-                    ↑ Escenario Positivo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => aplicarEscenario(escenarios?.neutro, true)}
-                    className="min-h-11 rounded-md border-2 border-stone-500 bg-white px-3 text-xs font-bold text-stone-900 hover:bg-stone-100"
-                  >
-                    = Escenario Neutro
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!escenarios?.negativo}
-                    onClick={() => aplicarEscenario(escenarios?.negativo)}
-                    className="min-h-11 rounded-md border-2 border-red-700 bg-white px-3 text-xs font-bold text-red-900 hover:bg-red-50 disabled:opacity-40"
-                  >
-                    ↓ Escenario Negativo
-                  </button>
-                </div>
-              </div>
-            )}
-
             <fieldset className="space-y-3 rounded-lg border-2 border-stone-200 bg-stone-50/70 p-3.5">
               <legend className="px-1 text-sm font-bold text-stone-900">
                 Variables agronómicas de siembra (afectan al modelo IA)
@@ -297,19 +238,6 @@ export function RegistroCosechaForm({
           </>
         ) : (
           <>
-            {ES_MODO_DEV && (
-              <div className="rounded-lg border-2 border-dashed border-amber-500 bg-amber-50 p-3">
-                <button
-                  type="button"
-                  disabled={!registro}
-                  onClick={autocompletarCosechaDev}
-                  className="min-h-11 rounded-md border-2 border-amber-700 bg-white px-3 text-xs font-bold text-amber-950 hover:bg-amber-100 disabled:opacity-40"
-                >
-                  Modo Dev · Autocompletar cosecha coherente
-                </button>
-              </div>
-            )}
-
             {!registro && (
               <Advertencia tipo="ATENCION" titulo="Falta registrar la siembra">
                 Primero guarda los datos de siembra en &quot;Variables de siembra / Impacto&quot;

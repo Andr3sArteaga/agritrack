@@ -9,6 +9,7 @@ import {
   FlaskConical,
   History,
   Info,
+  RefreshCw,
   SlidersHorizontal,
   Sparkles,
   Sprout,
@@ -158,22 +159,26 @@ export function EstimacionComponente({
   parcelaId,
   campanaId,
   temporada,
+  cultivoId,
   cultivoNombre,
   hectareasParcela,
   campanasHistoricas = [],
   evaluacionRegistro,
   versionRecarga = 0,
+  puedeEntrenar = false,
   onEditarVariablesSiembra,
   onIrATabRegistro,
 }: {
   parcelaId: string;
   campanaId: string;
   temporada: string;
+  cultivoId?: string | null;
   cultivoNombre?: string | null;
   hectareasParcela?: number | null;
   campanasHistoricas?: PuntoHistoricoRendimiento[];
   evaluacionRegistro?: EvaluacionRegistroParcela | null;
   versionRecarga?: number;
+  puedeEntrenar?: boolean;
   onEditarVariablesSiembra?: () => void;
   onIrATabRegistro?: () => void;
 }) {
@@ -181,6 +186,12 @@ export function EstimacionComponente({
   const [impacto, setImpacto] = useState<ResultadoImpacto | null>(null);
   const [fechaConsultaIso, setFechaConsultaIso] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [recargaLocal, setRecargaLocal] = useState(0);
+  const [entrenandoModelo, setEntrenandoModelo] = useState(false);
+  const [avisoEntrenamiento, setAvisoEntrenamiento] = useState<{
+    tipo: "ok" | "error";
+    texto: string;
+  } | null>(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -209,7 +220,32 @@ export function EstimacionComponente({
     return () => {
       cancelado = true;
     };
-  }, [parcelaId, campanaId, versionRecarga]);
+  }, [parcelaId, campanaId, versionRecarga, recargaLocal]);
+
+  async function actualizarModeloIa() {
+    if (!cultivoId || entrenandoModelo) return;
+    setEntrenandoModelo(true);
+    setAvisoEntrenamiento(null);
+    try {
+      const { data } = await api.post<{ version: string; estado: string }>(
+        "/prediccion/entrenar",
+        null,
+        { params: { cultivo: cultivoId } },
+      );
+      setAvisoEntrenamiento({
+        tipo: "ok",
+        texto: `Modelo Random Forest actualizado (${data.version} · estado ${data.estado}).`,
+      });
+      setRecargaLocal((v) => v + 1);
+    } catch (err) {
+      setAvisoEntrenamiento({
+        tipo: "error",
+        texto: apiErrorMessage(err, "No se pudo entrenar el modelo con los datos actuales."),
+      });
+    } finally {
+      setEntrenandoModelo(false);
+    }
+  }
 
   const historicoOrdenado = useMemo(() => {
     const porCampana = new Map<string, PuntoHistoricoRendimiento>();
@@ -404,8 +440,37 @@ export function EstimacionComponente({
                 Línea base histórica
               </span>
             )}
+            {puedeEntrenar && cultivoId && (
+              <button
+                type="button"
+                disabled={entrenandoModelo}
+                onClick={actualizarModeloIa}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3 text-xs font-semibold text-[#17211D] hover:bg-[#E8F5EF] disabled:opacity-60"
+              >
+                <RefreshCw
+                  className={`h-3.5 w-3.5 text-[#006B4F] ${entrenandoModelo ? "animate-spin" : ""}`}
+                  aria-hidden
+                />
+                {entrenandoModelo ? "Actualizando..." : "Actualizar modelo IA"}
+              </button>
+            )}
           </div>
         </div>
+
+        {avisoEntrenamiento && (
+          <div className="mt-4">
+            {avisoEntrenamiento.tipo === "error" ? (
+              <Advertencia tipo="ATENCION" titulo="No se pudo actualizar el modelo">
+                {avisoEntrenamiento.texto}
+              </Advertencia>
+            ) : (
+              <div className="flex items-start gap-2.5 rounded-lg border border-[#006B4F]/40 bg-[#E8F5EF] px-3.5 py-2.5 text-sm text-[#17211D]">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#006B4F]" aria-hidden />
+                <span>{avisoEntrenamiento.texto}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Métrica hero t/ha y t totales */}

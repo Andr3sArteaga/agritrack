@@ -36,6 +36,20 @@ export class ContactoAgroAnDto {
   email: string | null;
 }
 
+export class FotoPublicaParcelaDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  imagenData: string;
+
+  @ApiPropertyOptional({ nullable: true })
+  descripcion: string | null;
+
+  @ApiProperty()
+  createdAt: Date;
+}
+
 export class DetalleParcelaPublicoDto {
   @ApiProperty()
   id: string;
@@ -72,6 +86,9 @@ export class DetalleParcelaPublicoDto {
 
   @ApiProperty()
   registrosVerificados: boolean;
+
+  @ApiProperty({ type: [FotoPublicaParcelaDto] })
+  fotos: FotoPublicaParcelaDto[];
 
   @ApiProperty({ type: ContactoAgroAnDto })
   contacto: ContactoAgroAnDto;

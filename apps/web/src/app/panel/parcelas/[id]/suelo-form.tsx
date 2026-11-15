@@ -4,7 +4,6 @@ import { useState, type FormEvent } from "react";
 import { Advertencia } from "@/components/estado/advertencia";
 import { AccionesModal, Modal } from "@/components/modal";
 import { api, apiErrorMessage } from "@/lib/api";
-import { ES_MODO_DEV } from "@/lib/prediccion";
 
 const hoy = (): string => new Date().toLocaleDateString("en-CA");
 
@@ -112,34 +111,9 @@ export function SueloForm({
     }
   }
 
-  function autocompletarDev() {
-    setFecha(hoy());
-    setValores({
-      ph: "6.2",
-      nitrogeno: "24",
-      fosforo: "18",
-      potasio: "165",
-      materiaOrganica: "2.8",
-      humedad: "23.5",
-    });
-    setNotas("Análisis completo de laboratorio (Modo Dev)");
-  }
-
   return (
     <Modal titulo="Agregar datos de suelo" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
-        {ES_MODO_DEV && (
-          <div className="rounded-lg border-2 border-dashed border-amber-500 bg-amber-50 p-3">
-            <button
-              type="button"
-              onClick={autocompletarDev}
-              className="min-h-11 rounded-md border-2 border-amber-700 bg-white px-3 text-xs font-bold text-amber-950 hover:bg-amber-100"
-            >
-              Modo Dev · Autocompletar datos de prueba
-            </button>
-          </div>
-        )}
-
         <p className="text-base text-stone-700">
           Anota solo lo que tengas: los valores del informe del laboratorio, la humedad medida en
           el campo, o ambos. Lo demás déjalo vacío.

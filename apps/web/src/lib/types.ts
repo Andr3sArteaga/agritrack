@@ -187,12 +187,35 @@ export interface ResultadoVerificacion {
   motivo: string | null;
 }
 
+export interface FotoParcela {
+  id: string;
+  parcelaId: string;
+  imagenData: string;
+  descripcion: string | null;
+  visibleEnPreventa: boolean;
+  subidaPorId: string;
+  createdAt: string;
+}
+
+export interface FotoPublicaParcela {
+  id: string;
+  imagenData: string;
+  descripcion: string | null;
+  createdAt: string;
+}
+
 export interface CatalogoParcela {
   id: string;
   nombre: string;
   hectareas: number;
   cultivoActual: string | null;
   produccionEstimadaTn: number | null;
+  fotoPortada?: string | null;
+  totalFotosPublicadas?: number;
+  ubicacionTexto?: string;
+  temporadaActual?: string | null;
+  rendimientoEstimadoTnHa?: number | null;
+  poligono?: PoligonoGeoJson | null;
 }
 
 export interface TimelineItem {
@@ -220,6 +243,7 @@ export interface DetalleParcelaPublico {
   historialCuidado: TimelineItem[];
   historicoRendimiento: HistoricoPublicoItem[];
   registrosVerificados: boolean;
+  fotos: FotoPublicaParcela[];
   contacto: {
     nombre: string | null;
     telefono: string | null;

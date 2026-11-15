@@ -9,7 +9,6 @@ import {
   ETIQUETA_DEMO,
   type ModeloIa,
   type OrigenDatos,
-  type PreparacionParcelaDev,
   type RegistroCosechaCampana,
   type ResultadoImpacto,
 } from '../domain/modelo-rendimiento';
@@ -39,6 +38,7 @@ import {
 import type { EstimacionResponseDto } from './dto/estimacion-response.dto';
 import type { ImpactoQueryDto } from './dto/impacto-prediccion.dto';
 import type { GuardarRegistroCosechaDto } from './dto/registro-cosecha.dto';
+import { EntrenamientoService } from './entrenamiento.service';
 
 const aDia = (texto: string): Date =>
   new Date(`${texto.slice(0, 10)}T00:00:00.000Z`);
@@ -59,6 +59,8 @@ export class EstimacionService {
     @Optional()
     @Inject(REGRESOR_PORT)
     private readonly regresor?: RegresorPort,
+    @Optional()
+    private readonly entrenamiento?: EntrenamientoService,
   ) {}
 
   /**
@@ -176,6 +178,14 @@ export class EstimacionService {
       const errorCosecha = errorDatosCosecha(datosCosecha, existente, hoy);
       if (errorCosecha) throw new BadRequestException(errorCosecha);
       existente = await this.datos.guardarCosecha(campanaId, datosCosecha);
+
+      if (this.entrenamiento && this.datos.cultivoDeCampana) {
+        const cultivoId = await this.datos.cultivoDeCampana(campanaId);
+        if (cultivoId) {
+          await this.entrenamiento.entrenarAlCerrarCampana(cultivoId);
+          this.cacheModelo = null;
+        }
+      }
     }
 
     return existente as RegistroCosechaCampana;
@@ -243,24 +253,5 @@ export class EstimacionService {
       haReferencia:
         contexto.siembra?.haSembradas ?? contexto.hectareasParcela ?? null,
     });
-  }
-
-  async prepararParcelaDev(
-    parcelaId: string,
-    cultivoId?: string,
-  ): Promise<PreparacionParcelaDev> {
-    if (process.env.NODE_ENV === 'production') {
-      throw new BadRequestException(
-        'Las herramientas de desarrollo no están disponibles en producción.',
-      );
-    }
-    const resultado = await this.datos.prepararHistorialDev(
-      parcelaId,
-      cultivoId,
-    );
-    if (!resultado) {
-      throw new NotFoundException('Parcela no encontrada.');
-    }
-    return resultado;
   }
 }

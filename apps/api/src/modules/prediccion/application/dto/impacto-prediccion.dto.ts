@@ -17,7 +17,6 @@ import type {
   EscenariosImpacto,
   FactorImpacto,
   OrigenDatos,
-  PreparacionParcelaDev,
   ResultadoImpacto,
 } from '../../domain/modelo-rendimiento';
 
@@ -116,38 +115,3 @@ export class ImpactoResponseDto implements ResultadoImpacto {
   escenarios?: EscenariosImpactoDto;
 }
 
-export class PrepararParcelaDevDto {
-  @ApiProperty({ description: 'Id de la parcela a poblar en modo desarrollo' })
-  @IsString()
-  @IsNotEmpty()
-  parcelaId!: string;
-
-  @ApiPropertyOptional({ description: 'Id del cultivo opcional' })
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  cultivoId?: string;
-}
-
-export class PrepararParcelaDevResponseDto implements PreparacionParcelaDev {
-  @ApiProperty() parcelaId!: string;
-  @ApiProperty() cultivoId!: string;
-  @ApiProperty() cultivoNombre!: string;
-  @ApiProperty() campanaActualId!: string;
-  @ApiProperty() temporadaActual!: string;
-  @ApiProperty() campanasHabilitadas!: number;
-  @ApiProperty()
-  campanasSinActividadCosecha!: {
-    campanaId: string;
-    fechaSiembra: string;
-    fechaCosecha: string;
-    rendimientoTnHa: number;
-  }[];
-  @ApiProperty({ nullable: true })
-  campanaActualNecesitaSiembra!: {
-    campanaId: string;
-    fechaSiembra: string;
-  } | null;
-  @ApiProperty() versionModelo!: string;
-  @ApiProperty() estadoModelo!: string;
-}
