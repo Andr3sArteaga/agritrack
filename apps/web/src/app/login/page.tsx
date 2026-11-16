@@ -120,7 +120,7 @@ export default function LoginPage() {
 
           <div className="mt-5 text-center">
             <p className="text-sm text-[#68736D]">
-              ¿Eres parte del equipo? Si no tienes cuenta, haz clic aquí
+              ¿Eres parte del equipo? Si no tienes cuenta,
             </p>
             <Link href="/solicitar-acceso" className="text-sm font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline">
               haz clic aquí
