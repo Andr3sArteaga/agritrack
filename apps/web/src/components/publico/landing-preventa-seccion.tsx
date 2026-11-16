@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Compass,
   MapPin,
+  Maximize2,
   Ruler,
   Scale,
   Sprout,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { EstadoVacio } from "@/components/estado/estado-vacio";
+import { VisorImagen, type ImagenVisorItem } from "@/components/visor-imagen";
 import type { CatalogoParcela } from "@/lib/types";
 
 const FILTROS_CULTIVO = [
@@ -160,6 +162,7 @@ export function LandingPreventaSeccion({
 
   const [filtroCultivo, setFiltroCultivo] =
     useState<(typeof FILTROS_CULTIVO)[number]>("Todos");
+  const [imagenAmpliada, setImagenAmpliada] = useState<ImagenVisorItem | null>(null);
 
   const parcelasFiltradas = useMemo(() => {
     if (filtroCultivo === "Todos") return baseParcelas;
@@ -280,8 +283,32 @@ export function LandingPreventaSeccion({
                         <img
                           src={parcela.fotoPortada}
                           alt={`Foto de ${parcela.nombre}`}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                          onClick={() =>
+                            setImagenAmpliada({
+                              src: parcela.fotoPortada!,
+                              alt: `Foto de ${parcela.nombre}`,
+                              descripcion: parcela.nombre,
+                              subtitulo: `${parcela.cultivo} · ${parcela.hectareas} ha · ${parcela.ubicacion}`,
+                            })
+                          }
+                          className="h-full w-full cursor-pointer object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                         />
+                        <button
+                          type="button"
+                          aria-label={`Expandir imagen de ${parcela.nombre}`}
+                          title="Expandir imagen"
+                          onClick={() =>
+                            setImagenAmpliada({
+                              src: parcela.fotoPortada!,
+                              alt: `Foto de ${parcela.nombre}`,
+                              descripcion: parcela.nombre,
+                              subtitulo: `${parcela.cultivo} · ${parcela.hectareas} ha · ${parcela.ubicacion}`,
+                            })
+                          }
+                          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-xs transition-colors hover:bg-black/80"
+                        >
+                          <Maximize2 className="h-4 w-4" aria-hidden />
+                        </button>
                         {parcela.totalFotosPublicadas > 1 && (
                           <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-[#071712]/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                             <Camera className="h-3.5 w-3.5 text-[#00a859]" aria-hidden />
@@ -386,6 +413,13 @@ export function LandingPreventaSeccion({
             </>
           )}
         </div>
+      )}
+
+      {imagenAmpliada && (
+        <VisorImagen
+          imagenes={[imagenAmpliada]}
+          onCerrar={() => setImagenAmpliada(null)}
+        />
       )}
     </section>
   );

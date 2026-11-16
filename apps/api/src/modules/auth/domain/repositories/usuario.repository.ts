@@ -25,6 +25,7 @@ export interface UsuarioRepository {
   findPendientes(): Promise<UsuarioEntity[]>;
   create(data: CrearUsuarioData): Promise<UsuarioEntity>;
   aprobar(id: string, rol: Rol): Promise<UsuarioEntity>;
+  eliminarPorId(id: string): Promise<void>;
   actualizarPerfil(
     id: string,
     data: ActualizarPerfilData,

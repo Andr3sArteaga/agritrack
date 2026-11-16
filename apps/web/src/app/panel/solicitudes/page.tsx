@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Mail, Phone, UserCheck } from "lucide-react";
+import { CheckCircle2, Mail, Phone, UserCheck, XCircle } from "lucide-react";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { Advertencia } from "@/components/estado/advertencia";
 import { api, apiErrorMessage } from "@/lib/api";
@@ -24,8 +24,9 @@ export default function SolicitudesAccesoPage() {
   const [rolesSeleccionados, setRolesSeleccionados] = useState<Record<string, Rol>>({});
   const [cargando, setCargando] = useState(esJefe);
   const [error, setError] = useState<string | null>(null);
-  const [aprobandoId, setAprobandoId] = useState<string | null>(null);
-  const [avisoAprobacion, setAvisoAprobacion] = useState<string | null>(null);
+  const [ocupadoId, setOcupadoId] = useState<string | null>(null);
+  const [accionActiva, setAccionActiva] = useState<"aprobar" | "rechazar" | null>(null);
+  const [avisoAccion, setAvisoAccion] = useState<string | null>(null);
 
   useEffect(() => {
     if (!esJefe) return;
@@ -59,8 +60,9 @@ export default function SolicitudesAccesoPage() {
   async function aprobar(solicitante: Usuario) {
     const rolElegido = rolesSeleccionados[solicitante.id] ?? "OPERATIVO";
     setError(null);
-    setAvisoAprobacion(null);
-    setAprobandoId(solicitante.id);
+    setAvisoAccion(null);
+    setOcupadoId(solicitante.id);
+    setAccionActiva("aprobar");
 
     try {
       const { data } = await api.patch<AprobarResponse>(
@@ -71,13 +73,35 @@ export default function SolicitudesAccesoPage() {
       const nombreCompleto = [data.usuario.nombre, data.usuario.apellido]
         .filter(Boolean)
         .join(" ");
-      setAvisoAprobacion(
+      setAvisoAccion(
         `${nombreCompleto} fue aprobado con el rol ${ROL_LABEL[data.usuario.rol]}. ${data.detalleCorreo}`,
       );
     } catch (err) {
       setError(apiErrorMessage(err, "No se pudo aprobar la solicitud"));
     } finally {
-      setAprobandoId(null);
+      setOcupadoId(null);
+      setAccionActiva(null);
+    }
+  }
+
+  async function rechazar(solicitante: Usuario) {
+    setError(null);
+    setAvisoAccion(null);
+    setOcupadoId(solicitante.id);
+    setAccionActiva("rechazar");
+
+    try {
+      await api.patch(`/auth/solicitudes/${solicitante.id}/rechazar`);
+      setSolicitudes((prev) => prev.filter((item) => item.id !== solicitante.id));
+      const nombreCompleto = [solicitante.nombre, solicitante.apellido]
+        .filter(Boolean)
+        .join(" ");
+      setAvisoAccion(`Se rechazó y eliminó la solicitud de ${nombreCompleto} (${solicitante.email}).`);
+    } catch (err) {
+      setError(apiErrorMessage(err, "No se pudo rechazar la solicitud"));
+    } finally {
+      setOcupadoId(null);
+      setAccionActiva(null);
     }
   }
 
@@ -104,13 +128,13 @@ export default function SolicitudesAccesoPage() {
         descripcion="Revisa los registros pendientes, asigna un rol y habilita el ingreso al sistema"
       />
 
-      {avisoAprobacion && (
+      {avisoAccion && (
         <div
           role="status"
           className="flex items-start gap-3 rounded-2xl border border-[#00a859]/30 bg-[#E8F5EF] p-4 text-sm text-[#004b36]"
         >
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#00a859]" aria-hidden />
-          <p className="font-medium">{avisoAprobacion}</p>
+          <p className="font-medium">{avisoAccion}</p>
         </div>
       )}
 
@@ -138,7 +162,7 @@ export default function SolicitudesAccesoPage() {
         <div className="space-y-4">
           {solicitudes.map((solicitante) => {
             const rolElegido = rolesSeleccionados[solicitante.id] ?? "OPERATIVO";
-            const enProceso = aprobandoId === solicitante.id;
+            const enProceso = ocupadoId === solicitante.id;
             const fecha = new Date(solicitante.createdAt).toLocaleDateString("es-BO", {
               day: "2-digit",
               month: "short",
@@ -206,11 +230,21 @@ export default function SolicitudesAccesoPage() {
                   <button
                     type="button"
                     disabled={enProceso}
+                    onClick={() => rechazar(solicitante)}
+                    className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <XCircle className="h-4 w-4" aria-hidden />
+                    {enProceso && accionActiva === "rechazar" ? "Rechazando..." : "Rechazar"}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={enProceso}
                     onClick={() => aprobar(solicitante)}
                     className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#004b36] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#00a859] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <CheckCircle2 className="h-4 w-4" aria-hidden />
-                    {enProceso ? "Aprobando..." : "Aprobar"}
+                    {enProceso && accionActiva === "aprobar" ? "Aprobando..." : "Aprobar"}
                   </button>
                 </div>
               </div>
