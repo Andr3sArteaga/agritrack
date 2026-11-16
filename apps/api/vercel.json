@@ -5,7 +5,7 @@
   "outputDirectory": "public",
   "functions": {
     "api/index.mjs": {
-      "includeFiles": "dist/**"
+      "includeFiles": "{dist/**,node_modules/swagger-ui-dist/**}"
     }
   },
   "rewrites": [
