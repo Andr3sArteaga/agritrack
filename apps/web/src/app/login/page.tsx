@@ -71,9 +71,17 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-[#17211D]">
-                Contraseña
-              </label>
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor="password" className="block text-sm font-semibold text-[#17211D]">
+                  Contraseña
+                </label>
+                <Link
+                  href="/recuperar-password"
+                  className="text-xs font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <div className="relative mt-1.5">
                 <input
                   id="password"
@@ -109,6 +117,15 @@ export default function LoginPage() {
               {cargando ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
+
+          <div className="mt-5 text-center">
+            <Link
+              href="/solicitar-acceso"
+              className="text-sm font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline"
+            >
+              ¿Eres parte del equipo? Si no tienes cuenta, haz clic aquí
+            </Link>
+          </div>
 
           <div className="mt-6 border-t border-[#E4EAE6] pt-6">
             <Link

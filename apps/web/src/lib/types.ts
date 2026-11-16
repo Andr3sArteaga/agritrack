@@ -1,5 +1,7 @@
 export type Rol = "JEFE" | "CONTABILIDAD" | "OPERATIVO";
 
+export type EstadoUsuario = "PENDIENTE" | "ACTIVO";
+
 export type EstadoCampana = "PLANIFICADA" | "EN_CURSO" | "COSECHADA";
 
 export type TipoActividad =
@@ -21,8 +23,11 @@ export type TipoContacto =
 export interface Usuario {
   id: string;
   nombre: string;
+  apellido?: string | null;
   email: string;
+  telefono?: string | null;
   rol: Rol;
+  estado?: EstadoUsuario;
   createdAt: string;
 }
 

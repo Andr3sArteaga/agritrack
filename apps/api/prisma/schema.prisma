@@ -23,6 +23,11 @@ enum Rol {
   OPERATIVO
 }
 
+enum EstadoUsuario {
+  PENDIENTE
+  ACTIVO
+}
+
 enum EstadoCampana {
   PLANIFICADA
   EN_CURSO
@@ -82,13 +87,16 @@ enum EstadoGasto {
 // =========================================
 
 model Usuario {
-  id           String   @id @default(cuid())
+  id           String        @id @default(cuid())
   nombre       String
-  email        String   @unique
+  apellido     String?
+  email        String        @unique
+  telefono     String?
   passwordHash String
   rol          Rol
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  estado       EstadoUsuario @default(ACTIVO)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   actividadesRegistradas Actividad[]     @relation("ResponsableActividad")
   gastosRegistrados      Gasto[]         @relation("RegistradoPorGasto")
@@ -96,6 +104,7 @@ model Usuario {
   registrosClima         RegistroClima[]
   fotosParcela           FotoParcela[]
 
+  @@index([estado])
   @@map("usuarios")
 }
 
