@@ -36,6 +36,8 @@ Plataforma web de gestión agrícola para AgroAn (Pailón Sur, Santa Cruz, Boliv
 
 Monorepo con dos aplicaciones y una base de datos:
 
+> **Dónde vive el Machine Learning:** el motor predictivo (**Random Forest Regression** con `ml-random-forest`) corre integrado dentro de `apps/api/src/modules/prediccion/` y persiste cada versión entrenada en la tabla `modelos_ia` de PostgreSQL, sin depender de un microservicio Python separado.
+
 ```
 AgriTrack/
 ├── docker-compose.yml          # PostgreSQL 16 en localhost:5433
@@ -43,16 +45,22 @@ AgriTrack/
 ├── docs/
 │   ├── evidencias/             # salidas de pruebas, build y lint
 │   ├── guia-visual/            # guía de estados, colores y textos
-│   └── prediccion/             # explicación del componente de estimación
+│   └── prediccion/             # explicación del componente de estimación (ML)
 └── apps/
     ├── api/                    # NestJS + Prisma
     │   ├── prisma/
-    │   │   ├── schema.prisma
+    │   │   ├── schema.prisma   # incluye registros_cosecha, totales_campana y modelos_ia
     │   │   ├── migrations/
-    │   │   ├── seed.ts         # datos de prueba generales
-    │   │   └── seeds/demo/     # datos iniciales del modelo (enmascarados)
+    │   │   ├── seed.ts         # datos operativos + 6 campañas históricas (Soya, Sorgo y Trigo)
+    │   │   └── seeds/demo/     # dataset histórico enmascarado de 5 campañas de soya
     │   ├── src/
-    │   │   ├── modules/        # un módulo por tema (ver abajo)
+    │   │   ├── modules/
+    │   │   │   ├── prediccion/ # Módulo de ML (Random Forest Regression + Línea Base)
+    │   │   │   │   ├── domain/rules/        # variables.ts, walk-forward.ts, bootstrap.ts, activacion.ts, impacto-prediccion.ts
+    │   │   │   │   ├── application/         # entrenamiento.service.ts, estimacion.service.ts
+    │   │   │   │   ├── infrastructure/      # random-forest.regresor.ts (ml-random-forest) y adaptadores
+    │   │   │   │   └── presentation/        # prediccion.controller.ts
+    │   │   │   └── ...         # auth, parcelas, cultivos, campanas, actividades, costos, etc.
     │   │   └── shared/         # PrismaService y canonicalización de actividades
     │   └── test/integracion/   # pruebas contra PostgreSQL real
     └── web/                    # Next.js (App Router)
@@ -108,8 +116,9 @@ El componente compara dos formas de estimar las toneladas por hectárea de un lo
 - **Modelo:** 300 árboles, semilla fija 42. Se guarda serializado en la base de datos.
 - **Predictores (solo lo conocido a la siembra):** superficie sembrada, variedad (one-hot) y días desde el 1 de octubre hasta la siembra. Hay una prueba que falla si un dato posterior a la siembra entra al modelo.
 - **Validación walk-forward:** para cada campaña desde la segunda, se entrena solo con las anteriores y se prueba en ella.
-- **Métricas:** error absoluto medio (MAE) del modelo y de la línea base, y su diferencia con intervalo de confianza por bootstrap sobre lotes (1000 repeticiones, semilla 12345).
+- **Métricas:** error absoluto medio (`MAE` del modelo vs. línea base), raíz del error cuadrático medio (`RMSE`: `rmseModelo` y `rmseLineaBase`), coeficiente de determinación (`R²`: `r2Modelo`) y la diferencia `ΔMAE` con intervalo de confianza al 95 % por bootstrap sobre lotes (1000 repeticiones, semilla 12345).
 - **Versiones:** cada entrenamiento crea una versión en `modelos_ia` con sus métricas, las campañas usadas y un hash de los datos.
+- **Impacto en tiempo real:** `impacto-prediccion.ts` calcula la sensibilidad marginal pre-siembra y genera escenarios comparativos (Positivo, Neutro y Negativo).
 
 ### Cuándo manda el modelo
 
@@ -120,21 +129,23 @@ Un modelo pasa a `activo`, y su estimación a ser la oficial, solo si cumple tod
 3. No es peor que la línea base en la última campaña.
 4. Está entrenado con datos reales.
 
-Si no, queda `experimental` y se muestra aparte, con esa etiqueta. Hoy el modelo está en ese estado: con los datos iniciales gana en dos campañas y pierde en la más reciente.
+Si no cumple las cuatro condiciones, queda `experimental` y se muestra aparte con esa etiqueta (caso del dataset enmascarado `demo_enmascarado`, donde el modelo mejora el MAE global pero pierde en la campaña más reciente). En cambio, con las 6 campañas históricas multi-cultivo de `prisma/seed.ts` (`origen = real`) en **Soya**, **Sorgo** y **Trigo**, el Random Forest supera a la línea base en MAE y RMSE con un IC 95 % que excluye al `0` y pasa a estado **`activo`**.
 
 ### Datos
 
-- **Tablas:** `registros_cosecha` (siembra y cosecha por parcela y campaña), `totales_campana` (rendimiento total por cultivo y temporada) y `modelos_ia`.
-- **Datos iniciales:** `prisma/seeds/demo/` trae 5 campañas de soya en 42 lotes. Están enmascarados: no son los valores reales de la empresa. En pantalla aparecen como "Datos iniciales (V1)" y están ocultos por defecto en las listas.
-- **Datos reales:** se usarán cuando existan registros de cosecha propios. Reales e iniciales nunca se mezclan en un mismo entrenamiento.
+- **Tablas:** `registros_cosecha` (siembra y cosecha por parcela y campaña), `totales_campana` (rendimiento total por cultivo y temporada) y `modelos_ia` (pesos serializados, métricas y estado de cada versión).
+- **Datos operativos (`prisma/seed.ts`, `origen = real`):** 5 parcelas en Santa Cruz con 6 campañas históricas cerradas (`Invierno 2023` a `Verano 2025`) para **Soya**, **Sorgo** y **Trigo** (12 registros históricos por cultivo) que permiten entrenar modelos en estado `activo`.
+- **Datos iniciales (`prisma/seeds/demo/`, `origen = demo_enmascarado`):** 5 campañas de soya en 42 lotes (179 registros enmascarados: no son los valores reales de la empresa). En pantalla aparecen como `"Datos iniciales (V1)"` y están ocultos por defecto en las listas.
+- **Aislamiento:** los registros `real` y `demo_enmascarado` nunca se mezclan en un mismo entrenamiento.
 
 ### Endpoints
 
 | Método y ruta | Rol | Qué hace |
 |---|---|---|
-| `GET /prediccion/estimacion?lote=&campana=` | Cualquiera con sesión | Estimación oficial y experimental de un lote. |
-| `POST /prediccion/entrenar?cultivo=` | JEFE | Entrena, evalúa y guarda una versión. |
-| `GET /prediccion/modelos?cultivo=` | JEFE | Versiones con estado y métricas. |
+| `GET /prediccion/estimacion?lote=&campana=` | Cualquiera con sesión | Estimación oficial y experimental de un lote (incluye métricas `MAE`, `RMSE` y `R²`). |
+| `GET /prediccion/impacto` | Cualquiera con sesión | Sensibilidad marginal y simulador de escenarios (Positivo, Neutro y Negativo) pre-siembra. |
+| `POST /prediccion/entrenar?cultivo=` | JEFE | Entrena, evalúa (walk-forward) y guarda una nueva versión en `modelos_ia`. |
+| `GET /prediccion/modelos?cultivo=` | JEFE | Versiones entrenadas con estado y métricas. |
 | `GET /prediccion/datos-demo` | Cualquiera con sesión | Parcelas de datos iniciales, para el filtro del panel. |
 | `GET /prediccion` | Cualquiera con sesión | Estimación anterior (promedio de cosechas), que aún usan el Resumen y la parte pública. |
 
@@ -267,21 +278,21 @@ Resultado actual: 221 pruebas unitarias y 21 de integración pasan. La web no ti
 **Hecho**
 
 - Autenticación y roles.
-- Parcelas con mapa, campañas y actividades con cadena de integridad.
+- Parcelas con mapa, campañas, fotos y actividades con cadena de integridad SHA-256.
 - Verificación de integridad global y por parcela.
-- Costos por campaña: gastos, presupuesto, ahorro y costo por hectárea.
-- Reportes: histórico, resumen y reporte por campaña.
-- Estimación de rendimiento con línea base oficial y Random Forest experimental.
+- Costos por campaña: gastos pagados y comprometidos, presupuesto, ahorro y costo por hectárea.
+- Reportes: histórico, resumen, reporte por campaña y exportación a PDF y Excel.
+- Registro de siembra y cosecha reales por campaña.
+- Estimación de rendimiento con línea base oficial, Random Forest multi-cultivo (`activo` y `experimental` evaluado con MAE, RMSE y R²) y simulador de impacto pre-siembra.
 - Carga manual de suelo, humedad y clima.
 - Parte pública de preventa y contactos.
 - Rediseño visual con estados claros y accesibles.
 
 **Pendiente**
 
-- Registrar siembra y cosecha reales por campaña, e importar campañas pasadas desde una plantilla.
-- Cierre de campaña con huella de integridad y bitácora general.
-- Costo automático de los insumos aplicados en las labores.
-- Exportar reportes a PDF y Excel, y alertas.
+- Importar campañas pasadas desde una plantilla CSV.
+- Cierre de campaña con huella de integridad, reentrenamiento automático y bitácora general.
+- Costo automático de los insumos aplicados en las labores y alertas.
 - Gestión completa de usuarios.
 - Integración continua, despliegue y manuales.
 
