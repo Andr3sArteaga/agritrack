@@ -1,16 +1,22 @@
-import { Ruler, Sprout } from "lucide-react";
+import Link from "next/link";
+import { Mail, MapPin, Phone, Sprout } from "lucide-react";
 import { Advertencia } from "@/components/estado/advertencia";
-import { EstadoVacio } from "@/components/estado/estado-vacio";
-import { EnlaceBoton } from "@/components/enlace-boton";
-import { EncabezadoPublico } from "@/components/publico/encabezado-publico";
-import { LineaBasePublica } from "@/components/publico/linea-base-publica";
-import { lineaBaseDesdeToneladas } from "@/lib/linea-base";
+import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { LandingPreventaSeccion } from "@/components/publico/landing-preventa-seccion";
 import type { CatalogoParcela } from "@/lib/types";
+
+const TELEFONO_CONTACTO =
+  process.env.NEXT_PUBLIC_CONTACTO_TELEFONO ?? "+591 70000000";
+const EMAIL_CONTACTO =
+  process.env.NEXT_PUBLIC_CONTACTO_EMAIL ?? "contacto@agroan.com";
 
 /** null = no se pudo cargar (distinto de "no hay parcelas"). */
 async function obtenerCatalogo(): Promise<CatalogoParcela[] | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) return null;
+
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/parcelas`, {
+    const res = await fetch(`${apiUrl}/public/parcelas`, {
       cache: "no-store",
     });
     return res.ok ? res.json() : null;
@@ -23,87 +29,99 @@ export default async function CatalogoPage() {
   const parcelas = await obtenerCatalogo();
 
   return (
-    <div className="flex flex-1 flex-col">
-      <EncabezadoPublico>
-        <EnlaceBoton href="/login">Ingresar</EnlaceBoton>
-      </EncabezadoPublico>
+    <div className="flex min-h-screen flex-col bg-[#f8faf9] text-[#17211D]">
+      <LandingNavbar />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-12">
-        <h1 className="text-3xl font-bold text-stone-900">Parcelas disponibles para preventa</h1>
-        <p className="mt-2 text-lg text-stone-700">Elige una parcela para ver su detalle.</p>
-
-        <div className="mt-8">
-          {parcelas === null ? (
+      <main className="flex-1">
+        {parcelas === null ? (
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
             <Advertencia tipo="ATENCION" titulo="No pudimos cargar las parcelas" rol="alert">
               Intenta de nuevo en unos minutos.
             </Advertencia>
-          ) : parcelas.length === 0 ? (
-            <EstadoVacio titulo="Todavía no hay parcelas disponibles">
-              <p>Cuando haya parcelas para preventa, aparecerán aquí.</p>
-            </EstadoVacio>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {parcelas.map((parcela) => (
-                <article
-                  key={parcela.id}
-                  className="flex flex-col overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm"
-                >
-                  {parcela.fotoPortada && (
-                    <div className="relative h-44 w-full bg-stone-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={parcela.fotoPortada}
-                        alt={`Foto de ${parcela.nombre}`}
-                        className="h-full w-full object-cover"
-                      />
-                      {(parcela.totalFotosPublicadas ?? 0) > 1 && (
-                        <span className="absolute bottom-2.5 right-2.5 rounded-full bg-stone-900/75 px-2.5 py-1 text-xs font-semibold text-white">
-                          {parcela.totalFotosPublicadas} fotos
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex flex-1 flex-col p-5">
-                    <h2 className="text-xl font-bold text-stone-900">{parcela.nombre}</h2>
-                    <dl className="mt-4 space-y-2 text-base text-stone-700">
-                      <div className="flex items-center justify-between gap-3">
-                        <dt className="flex items-center gap-2">
-                          <Ruler className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
-                          Hectáreas
-                        </dt>
-                        <dd className="font-bold text-stone-900">{parcela.hectareas} ha</dd>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <dt className="flex items-center gap-2">
-                          <Sprout className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
-                          Cultivo actual
-                        </dt>
-                        <dd className="font-bold text-stone-900">
-                          {parcela.cultivoActual ?? "Sin campaña activa"}
-                        </dd>
-                      </div>
-                    </dl>
-                    <div className="mt-4">
-                      <LineaBasePublica
-                        rendimientoTnHa={lineaBaseDesdeToneladas(
-                          parcela.produccionEstimadaTn,
-                          parcela.hectareas,
-                        )}
-                      />
-                    </div>
-                    <div className="mt-auto pt-5">
-                      <EnlaceBoton href={`/parcelas/${parcela.id}`} variante="secundario" completo>
-                        Ver detalle
-                      </EnlaceBoton>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <LandingPreventaSeccion parcelasReales={parcelas} modoPaginaCompleta />
+        )}
       </main>
+
+      <footer className="border-t border-[#E4EAE6] bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <div className="grid gap-8 md:grid-cols-3 md:items-start">
+            <div>
+              <Link href="/#inicio" className="inline-flex items-center gap-2.5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#004b36] text-[#00a859]">
+                  <Sprout className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="text-lg font-bold text-[#17211D]">AgriTrack</span>
+              </Link>
+              <p className="mt-3 max-w-xs text-sm text-[#68736D]">
+                Gestión agrícola inteligente, trazabilidad verificable y preventa
+                transparente para AgroAn.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#68736D]">
+                Enlaces útiles
+              </p>
+              <ul className="mt-3 space-y-2 text-sm font-medium text-[#17211D]">
+                <li>
+                  <Link href="/#inicio" className="hover:text-[#00a859]">
+                    Inicio
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#parcelas-preventa" className="hover:text-[#00a859]">
+                    Parcelas de preventa
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/parcelas" className="hover:text-[#00a859]">
+                    Catálogo público completo
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="hover:text-[#00a859]">
+                    Acceder al panel
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#68736D]">
+                Contacto directo
+              </p>
+              <ul className="mt-3 space-y-2.5 text-sm text-[#17211D]">
+                <li className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 text-[#00a859]" aria-hidden />
+                  Pailón Sur, Santa Cruz, Bolivia
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 shrink-0 text-[#00a859]" aria-hidden />
+                  <a
+                    href={`tel:${TELEFONO_CONTACTO.replace(/\s+/g, "")}`}
+                    className="hover:text-[#00a859]"
+                  >
+                    {TELEFONO_CONTACTO}
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 shrink-0 text-[#00a859]" aria-hidden />
+                  <a href={`mailto:${EMAIL_CONTACTO}`} className="hover:text-[#00a859]">
+                    {EMAIL_CONTACTO}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-stone-100 pt-6 text-center text-xs text-[#68736D]">
+            AgroAn © {new Date().getFullYear()} · AgriTrack. Todos los derechos
+            reservados.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
