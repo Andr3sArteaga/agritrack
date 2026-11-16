@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,6 +14,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import logoBlack from "@/assets/Logo_AgriTrack_black.png";
 import { useAuth } from "@/lib/auth-context";
 import { ROL_LABEL, type Rol } from "@/lib/types";
 
@@ -92,8 +94,17 @@ export function Sidebar({
         }`}
       >
         <div className="flex items-center justify-between border-b border-[#E4EAE6] px-6 py-5">
-          <Link href="/panel/dashboard" className="text-lg font-bold tracking-tight text-[#006B4F]">
-            AgriTrack
+          <Link
+            href="/panel/dashboard"
+            className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-[#006B4F]"
+          >
+            <Image
+              src={logoBlack}
+              alt="Logo AgriTrack"
+              className="h-8 w-8 object-contain"
+              priority
+            />
+            <span>AgriTrack</span>
           </Link>
           <button
             onClick={onCerrar}

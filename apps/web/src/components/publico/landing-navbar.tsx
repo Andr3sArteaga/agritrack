@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Sprout, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import logoWhite from "@/assets/Logo_AgriTrack_white.png";
 
 export function LandingNavbar() {
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -17,9 +19,12 @@ export function LandingNavbar() {
           href="/#inicio"
           className="flex w-fit items-center gap-2.5 rounded-full py-1 text-white"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#00a859] text-white shadow-sm">
-            <Sprout className="h-5 w-5" aria-hidden />
-          </span>
+          <Image
+            src={logoWhite}
+            alt="Logo AgriTrack"
+            className="h-9 w-9 object-contain"
+            priority
+          />
           <span className="text-lg font-bold tracking-tight">AgriTrack</span>
         </Link>
 
