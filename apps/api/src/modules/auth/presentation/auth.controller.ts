@@ -69,6 +69,14 @@ export class AuthController {
     return this.authService.aprobarSolicitud(id, dto);
   }
 
+  @Patch('solicitudes/:id/rechazar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Rol.JEFE)
+  @ApiBearerAuth()
+  rechazarSolicitud(@Param('id') id: string) {
+    return this.authService.rechazarSolicitud(id);
+  }
+
   @Post('recuperar-password')
   @HttpCode(HttpStatus.OK)
   recuperarPassword(@Body() dto: RecuperarPasswordDto) {

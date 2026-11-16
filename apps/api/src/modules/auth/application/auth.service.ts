@@ -115,6 +115,23 @@ export class AuthService {
     };
   }
 
+  async rechazarSolicitud(
+    id: string,
+  ): Promise<{ rechazado: boolean; email: string }> {
+    const existente = await this.usuarioRepository.findById(id);
+    if (!existente) {
+      throw new NotFoundException('Solicitud de usuario no encontrada');
+    }
+    if (existente.estado === EstadoUsuario.ACTIVO) {
+      throw new BadRequestException(
+        'No se puede rechazar un usuario que ya está activo',
+      );
+    }
+
+    await this.usuarioRepository.eliminarPorId(id);
+    return { rechazado: true, email: existente.email };
+  }
+
   async obtenerPerfil(id: string): Promise<UsuarioResponseDto> {
     const usuario = await this.usuarioRepository.findById(id);
     if (!usuario) {

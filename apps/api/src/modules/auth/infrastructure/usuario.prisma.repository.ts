@@ -46,6 +46,10 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
     return this.toEntity(usuario);
   }
 
+  async eliminarPorId(id: string): Promise<void> {
+    await this.prisma.usuario.delete({ where: { id } });
+  }
+
   async actualizarPerfil(
     id: string,
     data: ActualizarPerfilData,

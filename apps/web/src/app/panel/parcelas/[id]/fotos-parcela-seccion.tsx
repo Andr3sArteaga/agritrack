@@ -1,8 +1,8 @@
 "use client";
 
-import { Camera, Eye, EyeOff, ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { Camera, Eye, EyeOff, ImagePlus, Loader2, Maximize2, Trash2 } from "lucide-react";
 import { useEffect, useId, useState, type ChangeEvent } from "react";
-import { Modal } from "@/components/modal";
+import { VisorImagen } from "@/components/visor-imagen";
 import { api, apiErrorMessage } from "@/lib/api";
 import { formatearFecha } from "@/lib/format";
 import type { FotoParcela } from "@/lib/types";
@@ -60,7 +60,7 @@ export function FotosParcelaSeccion({
 
   const [descripcionNueva, setDescripcionNueva] = useState("");
   const [visibleAlSubir, setVisibleAlSubir] = useState(true);
-  const [fotoAmpliada, setFotoAmpliada] = useState<FotoParcela | null>(null);
+  const [indiceAmpliado, setIndiceAmpliado] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -154,9 +154,6 @@ export function FotosParcelaSeccion({
         { visibleEnPreventa: !foto.visibleEnPreventa },
       );
       setFotos((prev) => prev.map((f) => (f.id === foto.id ? data : f)));
-      if (fotoAmpliada?.id === foto.id) {
-        setFotoAmpliada(data);
-      }
     } catch (err) {
       setError(apiErrorMessage(err, "No se pudo actualizar la visibilidad en preventa"));
     } finally {
@@ -171,9 +168,7 @@ export function FotosParcelaSeccion({
     try {
       await api.delete(`/parcelas/${parcelaId}/fotos/${foto.id}`);
       setFotos((prev) => prev.filter((f) => f.id !== foto.id));
-      if (fotoAmpliada?.id === foto.id) {
-        setFotoAmpliada(null);
-      }
+      setIndiceAmpliado(null);
     } catch (err) {
       setError(apiErrorMessage(err, "No se pudo eliminar la foto"));
     } finally {
@@ -320,9 +315,9 @@ export function FotosParcelaSeccion({
               >
                 <button
                   type="button"
-                  onClick={() => setFotoAmpliada(foto)}
+                  onClick={() => setIndiceAmpliado(index)}
                   className="group relative h-44 w-full overflow-hidden bg-stone-100 text-left"
-                  title="Ampliar foto"
+                  title="Expandir imagen"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -343,6 +338,12 @@ export function FotosParcelaSeccion({
                       <EyeOff className="h-3 w-3" aria-hidden />
                     )}
                     {foto.visibleEnPreventa ? "Publicada en preventa" : "Solo uso interno"}
+                  </span>
+                  <span
+                    className="absolute right-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-xs transition-colors group-hover:bg-black/80"
+                    aria-hidden
+                  >
+                    <Maximize2 className="h-4 w-4" />
                   </span>
                 </button>
 
@@ -400,32 +401,19 @@ export function FotosParcelaSeccion({
         </div>
       )}
 
-      {fotoAmpliada && (
-        <Modal
-          titulo={fotoAmpliada.descripcion || "Vista previa de la parcela"}
-          onClose={() => setFotoAmpliada(null)}
-          ancho="2xl"
-        >
-          <div className="space-y-4 pb-5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fotoAmpliada.imagenData}
-              alt={fotoAmpliada.descripcion || "Foto ampliada de la parcela"}
-              className="max-h-[65dvh] w-full rounded-lg object-contain bg-stone-100"
-            />
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#68736D]">
-              <span>
-                Estado:{" "}
-                <strong className="text-[#17211D]">
-                  {fotoAmpliada.visibleEnPreventa
-                    ? "Visible en catálogo público de preventa"
-                    : "Solo uso interno"}
-                </strong>
-              </span>
-              <span>Subida el {formatearFecha(fotoAmpliada.createdAt)}</span>
-            </div>
-          </div>
-        </Modal>
+      {indiceAmpliado !== null && (
+        <VisorImagen
+          imagenes={fotos.map((f, idx) => ({
+            src: f.imagenData,
+            alt: f.descripcion || `Foto ${idx + 1} de la parcela`,
+            descripcion: f.descripcion || "Foto de la parcela",
+            subtitulo: `${
+              f.visibleEnPreventa ? "Visible en catálogo público" : "Solo uso interno"
+            } · Subida el ${formatearFecha(f.createdAt)}`,
+          }))}
+          indiceInicial={indiceAmpliado}
+          onCerrar={() => setIndiceAmpliado(null)}
+        />
       )}
     </section>
   );

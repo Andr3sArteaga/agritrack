@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ChevronRight,
   Contact,
   FileBarChart,
   LayoutDashboard,
@@ -69,13 +70,6 @@ const NAV_ITEMS: NavItem[] = [
     ayuda: "Revisar y aprobar solicitudes de nuevos integrantes del equipo",
     icono: UserCheck,
     roles: ["JEFE"],
-  },
-  {
-    href: "/panel/perfil",
-    label: "Mi Perfil",
-    ayuda: "Consulta y actualiza tus datos personales",
-    icono: UserRound,
-    roles: ["JEFE", "CONTABILIDAD", "OPERATIVO"],
   },
 ];
 
@@ -159,18 +153,26 @@ export function Sidebar({
         </nav>
 
         <div className="border-t border-[#E4EAE6] px-4 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E8F5EF] text-[#006B4F]">
-              <UserRound className="h-4 w-4" aria-hidden />
+          <Link
+            href="/panel/perfil"
+            onClick={onCerrar}
+            title="Ver o editar mi perfil"
+            className="-mx-2 flex items-center justify-between gap-2 rounded-xl p-2 transition-colors hover:bg-[#F8FAF9]"
+          >
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E8F5EF] text-[#006B4F]">
+                <UserRound className="h-4 w-4" aria-hidden />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[#17211D]">
+                  {usuario.nombre}
+                  {usuario.apellido ? ` ${usuario.apellido}` : ""}
+                </p>
+                <p className="text-xs text-[#68736D]">{ROL_LABEL[usuario.rol]}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[#17211D]">
-                {usuario.nombre}
-                {usuario.apellido ? ` ${usuario.apellido}` : ""}
-              </p>
-              <p className="text-xs text-[#68736D]">{ROL_LABEL[usuario.rol]}</p>
-            </div>
-          </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-[#68736D]" aria-hidden />
+          </Link>
           <button
             onClick={logout}
             title="Cerrar la sesión en este equipo"

@@ -26,6 +26,7 @@ import { formatearFecha } from "@/lib/format";
 import { puedePublicarse, TEXTOS } from "@/lib/textos";
 import type { DetalleParcelaPublico } from "@/lib/types";
 import { TIPO_ACTIVIDAD_LABEL } from "@/lib/types";
+import { GaleriaFotosCliente } from "./galeria-fotos-cliente";
 import { MiniMapaCliente } from "./mini-mapa-cliente";
 import { RendimientoChart } from "./rendimiento-chart";
 
@@ -236,28 +237,10 @@ export default async function ParcelaDetallePage(
                   Fotos de campo ({parcela.fotos.length})
                 </h2>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  {parcela.fotos.map((foto, idx) => (
-                    <figure
-                      key={foto.id}
-                      className="overflow-hidden rounded-2xl border border-[#E4EAE6] bg-[#f8faf9]"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={foto.imagenData}
-                        alt={
-                          foto.descripcion || `${parcela.nombre} · foto ${idx + 1}`
-                        }
-                        className="h-52 w-full object-cover"
-                      />
-                      {foto.descripcion && (
-                        <figcaption className="border-t border-[#E4EAE6] px-3.5 py-2.5 text-xs font-medium text-[#68736D]">
-                          {foto.descripcion}
-                        </figcaption>
-                      )}
-                    </figure>
-                  ))}
-                </div>
+                <GaleriaFotosCliente
+                  fotos={parcela.fotos}
+                  nombreParcela={parcela.nombre}
+                />
               </section>
             )}
 
