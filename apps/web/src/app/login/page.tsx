@@ -119,11 +119,11 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-5 text-center">
-            <Link
-              href="/solicitar-acceso"
-              className="text-sm font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline"
-            >
+            <p className="text-sm text-[#68736D]">
               ¿Eres parte del equipo? Si no tienes cuenta, haz clic aquí
+            </p>
+            <Link href="/solicitar-acceso" className="text-sm font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline">
+              haz clic aquí
             </Link>
           </div>
 
