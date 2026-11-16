@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../../application/auth.service';
-import { Rol } from '../../../../generated/prisma/enums';
+import { EstadoUsuario, Rol } from '../../../../generated/prisma/enums';
 
 export interface JwtPayload {
   sub: string;
@@ -14,8 +14,11 @@ export interface JwtPayload {
 export interface UsuarioAutenticado {
   id: string;
   nombre: string;
+  apellido: string | null;
   email: string;
+  telefono: string | null;
   rol: Rol;
+  estado: EstadoUsuario;
 }
 
 @Injectable()
@@ -33,15 +36,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload): Promise<UsuarioAutenticado> {
     const usuario = await this.authService.validateUsuario(payload.sub);
-    if (!usuario) {
+    if (!usuario || usuario.estado !== EstadoUsuario.ACTIVO) {
       throw new UnauthorizedException();
     }
 
     return {
       id: usuario.id,
       nombre: usuario.nombre,
+      apellido: usuario.apellido,
       email: usuario.email,
+      telefono: usuario.telefono,
       rol: usuario.rol,
+      estado: usuario.estado,
     };
   }
 }

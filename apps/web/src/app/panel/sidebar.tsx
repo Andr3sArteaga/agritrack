@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   MapPinned,
+  UserCheck,
   UserRound,
   Wallet,
   X,
@@ -60,6 +61,20 @@ const NAV_ITEMS: NavItem[] = [
     label: "Contactos",
     ayuda: "Compradores, transportistas, proveedores y otros contactos",
     icono: Contact,
+    roles: ["JEFE", "CONTABILIDAD", "OPERATIVO"],
+  },
+  {
+    href: "/panel/solicitudes",
+    label: "Solicitudes de acceso",
+    ayuda: "Revisar y aprobar solicitudes de nuevos integrantes del equipo",
+    icono: UserCheck,
+    roles: ["JEFE"],
+  },
+  {
+    href: "/panel/perfil",
+    label: "Mi Perfil",
+    ayuda: "Consulta y actualiza tus datos personales",
+    icono: UserRound,
     roles: ["JEFE", "CONTABILIDAD", "OPERATIVO"],
   },
 ];
@@ -149,7 +164,10 @@ export function Sidebar({
               <UserRound className="h-4 w-4" aria-hidden />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[#17211D]">{usuario.nombre}</p>
+              <p className="truncate text-sm font-semibold text-[#17211D]">
+                {usuario.nombre}
+                {usuario.apellido ? ` ${usuario.apellido}` : ""}
+              </p>
               <p className="text-xs text-[#68736D]">{ROL_LABEL[usuario.rol]}</p>
             </div>
           </div>

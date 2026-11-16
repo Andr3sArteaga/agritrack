@@ -15,6 +15,7 @@ interface AuthContextValue {
   cargando: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  actualizarUsuario: (usuario: Usuario) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -63,8 +64,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUsuario(null);
   }, []);
 
+  const actualizarUsuario = useCallback((nuevo: Usuario) => {
+    window.localStorage.setItem(USUARIO_KEY, JSON.stringify(nuevo));
+    setUsuario(nuevo);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ usuario, cargando, login, logout }}>
+    <AuthContext.Provider value={{ usuario, cargando, login, logout, actualizarUsuario }}>
       {children}
     </AuthContext.Provider>
   );

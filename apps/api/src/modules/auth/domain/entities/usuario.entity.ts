@@ -1,4 +1,4 @@
-import { Rol } from '../../../../generated/prisma/enums';
+import { EstadoUsuario, Rol } from '../../../../generated/prisma/enums';
 
 export class UsuarioEntity {
   constructor(
@@ -9,5 +9,8 @@ export class UsuarioEntity {
     public readonly rol: Rol,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly apellido: string | null = null,
+    public readonly telefono: string | null = null,
+    public readonly estado: EstadoUsuario = EstadoUsuario.ACTIVO,
   ) {}
 }

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { USUARIO_REPOSITORY } from './domain/repositories/usuario.repository';
+import { NotificacionCorreoService } from './infrastructure/notificacion-correo.service';
 import { UsuarioPrismaRepository } from './infrastructure/usuario.prisma.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { AuthService } from './application/auth.service';
@@ -31,6 +32,7 @@ import { AuthController } from './presentation/auth.controller';
   controllers: [AuthController],
   providers: [
     AuthService,
+    NotificacionCorreoService,
     JwtStrategy,
     { provide: USUARIO_REPOSITORY, useClass: UsuarioPrismaRepository },
   ],
