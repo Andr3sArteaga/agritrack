@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Ban,
   CircleCheck,
@@ -21,7 +21,6 @@ import { TarjetaMetrica } from "@/components/tarjeta-metrica";
 import { api, apiErrorMessage } from "@/lib/api";
 import { cargarIdsDemo } from "@/lib/prediccion";
 import { useAuth } from "@/lib/auth-context";
-import { calcularResumenCostos } from "@/lib/costos";
 import { formatearBs, formatearFecha } from "@/lib/format";
 import {
   CATEGORIA_GASTO_LABEL,
@@ -29,7 +28,7 @@ import {
   type Campana,
   type Cultivo,
   type Gasto,
-  type HistoricoItem,
+  type ResumenCostos,
   type Parcela,
   type Presupuesto,
 } from "@/lib/types";
@@ -41,7 +40,7 @@ interface DetalleCampana {
   gastos: Gasto[];
   presupuesto: Presupuesto | null;
   hectareas: number;
-  rendimientoTnHa: number | null;
+  resumen: ResumenCostos;
 }
 
 export default function CostosPage() {
@@ -71,7 +70,7 @@ export default function CostosPage() {
       setCargando(true);
       setError(null);
       try {
-        const [gastos, presupuesto, historico] = await Promise.all([
+        const [gastos, presupuesto, resumen] = await Promise.all([
           api
             .get<Gasto[]>("/gastos", {
               params: { campanaId: campana.id, incluirAnulados: true },
@@ -86,10 +85,9 @@ export default function CostosPage() {
               }
               throw err;
             }),
+          // El calculo (RF-30) vive solo en la API: aqui no se repite.
           api
-            .get<HistoricoItem[]>("/reportes/historico", {
-              params: { parcelaId: campana.parcelaId },
-            })
+            .get<ResumenCostos>(`/reportes/campanas/${campana.id}/costos`)
             .then((res) => res.data),
         ]);
         setDetalle({
@@ -98,9 +96,7 @@ export default function CostosPage() {
           hectareas:
             parcelasDisponibles.find((p) => p.id === campana.parcelaId)
               ?.hectareas ?? 0,
-          rendimientoTnHa:
-            historico.find((h) => h.campanaId === campana.id)
-              ?.rendimientoTnHa ?? null,
+          resumen,
         });
       } catch (err) {
         setError(apiErrorMessage(err, "No se pudieron cargar los costos"));
@@ -158,18 +154,7 @@ export default function CostosPage() {
     return `${parcela ?? "Parcela"} · ${campana.temporada} · ${cultivo ?? "—"} (${ESTADO_CAMPANA_LABEL[campana.estado]})`;
   }
 
-  const resumen = useMemo(
-    () =>
-      detalle
-        ? calcularResumenCostos({
-            gastos: detalle.gastos,
-            presupuesto: detalle.presupuesto?.montoTotal ?? null,
-            hectareas: detalle.hectareas,
-            rendimientoTnHa: detalle.rendimientoTnHa,
-          })
-        : null,
-    [detalle],
-  );
+  const resumen = detalle?.resumen ?? null;
 
   if (usuario?.rol === "OPERATIVO") return null;
 

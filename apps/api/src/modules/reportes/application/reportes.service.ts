@@ -17,7 +17,7 @@ import { generarExcelReporteCampana } from '../infrastructure/exportar-reporte-e
 import { generarPdfReporteCampana } from '../infrastructure/exportar-reporte-pdf';
 import { HistoricoItemDto } from './dto/historico-item.dto';
 import { ReporteCampanaQueryDto } from './dto/reporte-campana-query.dto';
-import { ReporteCampanaDto } from './dto/reporte-campana.dto';
+import { CostosReporteDto, ReporteCampanaDto } from './dto/reporte-campana.dto';
 import { ResumenDashboardDto } from './dto/resumen-dashboard.dto';
 
 const LIMITE_PROXIMAS_COSECHAS = 5;
@@ -79,6 +79,30 @@ export class ReportesService {
       historicoRendimiento,
       prediccionProximaCampana,
     };
+  }
+
+  /**
+   * RF-30: resumen de costos de TODA la campana (sin filtro de fechas: un gasto
+   * hecho antes de iniciar la campaña tambien cuenta). Lo usa la pantalla de costos.
+   */
+  async resumenCostosCampana(campanaId: string): Promise<CostosReporteDto> {
+    const campana = await this.reportesQuery.campanaParaReporte(campanaId);
+    if (!campana) {
+      throw new NotFoundException('Campana no encontrada');
+    }
+    const { actividades, gastos } = await this.reportesQuery.movimientosDelPeriodo(
+      campanaId,
+      { desde: new Date(0), hastaExclusivo: new Date(8.64e15) },
+    );
+    const cosecha = actividades
+      .filter((a) => a.tipo === TipoActividad.COSECHA && a.rendimientoTnHa !== null)
+      .at(-1);
+    return calcularResumenCostos({
+      gastos,
+      presupuesto: campana.presupuestoTotal,
+      hectareas: campana.parcela.hectareas,
+      rendimientoTnHa: cosecha?.rendimientoTnHa ?? null,
+    });
   }
 
   /**
