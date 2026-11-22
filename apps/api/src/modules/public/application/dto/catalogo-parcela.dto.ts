@@ -22,7 +22,7 @@ export class CatalogoParcelaDto {
 
   @ApiPropertyOptional({
     nullable: true,
-    description: 'Primera foto marcada como visible en preventa',
+    description: 'Ruta en la API de la primera foto visible en preventa',
   })
   fotoPortada: string | null;
 

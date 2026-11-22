@@ -22,9 +22,9 @@ import { AuthController } from './presentation/auth.controller';
       useFactory: (config: ConfigService): JwtModuleOptions => ({
         secret: config.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: config.get<string>(
-            'JWT_EXPIRES_IN',
-          ) as JwtSignOptions['expiresIn'],
+          // Sin valor, el token se firmaria sin vencimiento.
+          expiresIn: (config.get<string>('JWT_EXPIRES_IN') ||
+            '1d') as JwtSignOptions['expiresIn'],
         },
       }),
     }),

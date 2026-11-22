@@ -13,8 +13,7 @@ import {
   calcularLineaBase,
   rendimientosPorTemporada,
 } from '../domain/rules/linea-base';
-
-export const redondear2 = (valor: number): number => Math.round(valor * 100) / 100;
+import { redondear } from '../../../shared/numeros';
 
 /** Estimacion oficial: promedio de los rendimientos totales de las campañas anteriores del cultivo. */
 @Injectable()
@@ -51,7 +50,7 @@ export class LineaBaseAdapter implements EstimadorRendimientoPort {
     }
 
     return {
-      valor_t_ha: base.valor === null ? null : redondear2(base.valor),
+      valor_t_ha: base.valor === null ? null : redondear(base.valor),
       fuente: 'linea_base',
       estado: 'oficial',
       version_modelo: null,

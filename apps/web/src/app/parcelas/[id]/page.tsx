@@ -121,7 +121,13 @@ export default async function ParcelaDetallePage(
                   Registros protegidos contra cambios:
                 </span>
                 <EstadoBadge
-                  estado={parcela.registrosVerificados ? "BIEN" : "CRITICO"}
+                  estado={
+                    parcela.registrosRevisados === 0
+                      ? "SIN_DATOS"
+                      : parcela.registrosVerificados
+                        ? "BIEN"
+                        : "CRITICO"
+                  }
                 />
               </div>
               <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#68736D]">
@@ -299,7 +305,7 @@ export default async function ParcelaDetallePage(
             {/* Tarjeta de contacto directo */}
             <section className="rounded-3xl bg-[#004b36] p-6 text-white shadow-xl sm:p-7">
               <span className="inline-flex rounded-full bg-[#00a859]/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#00a859]">
-                Preventa directa
+                CONTACTO DIRECTO
               </span>
               <h2 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">
                 ¿Te interesa esta parcela? Contáctate con AgroAn

@@ -177,7 +177,7 @@ export default async function LandingPage() {
               <p className="mt-5 max-w-xl text-base leading-relaxed text-emerald-100/90 sm:text-lg">
                 Supervisa campañas reales en Santa Cruz con trazabilidad de
                 labores, monitoreo en campo y estimación de rendimiento
-                respaldada por datos antes de cerrar cada negociación.
+                basada en datos antes de cerrar acuerdos.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3.5">

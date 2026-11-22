@@ -34,7 +34,16 @@ interface ContextoResumen {
   cultivos: Cultivo[];
   /** null = este rol no puede ver el historico. */
   historico: HistoricoItem[] | null;
+  /** Suelo y clima de todas las parcelas, si ya se pidieron de una vez (resumen general). */
+  monitoreo?: { suelo: AnalisisSuelo[]; clima: RegistroClima[] };
 }
+
+const pedirSuelo = (parcelaId?: string) =>
+  api.get<AnalisisSuelo[]>("/monitoreo/suelo", { params: { parcelaId } }).then((res) => res.data);
+const pedirClima = (parcelaId?: string) =>
+  api
+    .get<RegistroClima[]>("/monitoreo/clima", { params: { parcelaId, desde: hace30Dias() } })
+    .then((res) => res.data);
 
 const veRegistrosYReportes = (rol: Rol) => rol === "JEFE" || rol === "CONTABILIDAD";
 
@@ -73,10 +82,12 @@ export async function cargarResumenParcela(
           })
           .then((res) => res.data)
       : Promise.resolve(null),
-    api.get<AnalisisSuelo[]>("/monitoreo/suelo", { params: { parcelaId: parcela.id } }).then((res) => res.data),
-    api
-      .get<RegistroClima[]>("/monitoreo/clima", { params: { parcelaId: parcela.id, desde: hace30Dias() } })
-      .then((res) => res.data),
+    contexto.monitoreo
+      ? contexto.monitoreo.suelo.filter((s) => s.parcelaId === parcela.id)
+      : pedirSuelo(parcela.id),
+    contexto.monitoreo
+      ? contexto.monitoreo.clima.filter((c) => c.parcelaId === parcela.id)
+      : pedirClima(parcela.id),
   ]);
 
   return construirResumenParcela({
@@ -119,17 +130,21 @@ export function useResumenesParcelas(
     if (!rol) return;
     let cancelado = false;
     (async () => {
-      const [parcelas, campanas, cultivos, historico, idsDemo] = await Promise.all([
+      // Suelo y clima van en una sola peticion para todas las parcelas, no una por parcela.
+      const [parcelas, campanas, cultivos, historico, idsDemo, suelo, clima] = await Promise.all([
         api.get<Parcela[]>("/parcelas").then((res) => res.data),
         api.get<Campana[]>("/campanas").then((res) => res.data),
         api.get<Cultivo[]>("/cultivos").then((res) => res.data),
         cargarHistorico(rol),
         cargarIdsDemo(),
+        pedirSuelo(),
+        pedirClima(),
       ]);
+      const monitoreo = { suelo, clima };
       return Promise.all(
         parcelas
           .filter((p) => p.activa && (incluirDemo || !idsDemo.has(p.id)))
-          .map((p) => cargarResumenParcela(p, { campanas, cultivos, historico }, rol)),
+          .map((p) => cargarResumenParcela(p, { campanas, cultivos, historico, monitoreo }, rol)),
       );
     })()
       .then((datos) => !cancelado && setEstado({ datos, error: null }))

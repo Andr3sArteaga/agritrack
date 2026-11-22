@@ -204,7 +204,8 @@ export interface FotoParcela {
 
 export interface FotoPublicaParcela {
   id: string;
-  imagenData: string;
+  /** Ruta de la imagen en la API: usar con urlApi(). */
+  url: string;
   descripcion: string | null;
   createdAt: string;
 }
@@ -215,6 +216,7 @@ export interface CatalogoParcela {
   hectareas: number;
   cultivoActual: string | null;
   produccionEstimadaTn: number | null;
+  /** Ruta de la imagen en la API: usar con urlApi(). */
   fotoPortada?: string | null;
   totalFotosPublicadas?: number;
   ubicacionTexto?: string;
@@ -248,6 +250,8 @@ export interface DetalleParcelaPublico {
   historialCuidado: TimelineItem[];
   historicoRendimiento: HistoricoPublicoItem[];
   registrosVerificados: boolean;
+  /** 0 = no hay registros que verificar: no se puede decir que esten protegidos. */
+  registrosRevisados: number;
   fotos: FotoPublicaParcela[];
   contacto: {
     nombre: string | null;
@@ -379,4 +383,14 @@ export interface RegistroClima {
   condicion: CondicionClima;
   lluviaMm: number | null;
   notas: string | null;
+}
+
+/** Resumen de costos de una campaña (RF-30), calculado por la API. */
+export interface ResumenCostos {
+  gastado: number;
+  comprometido: number;
+  presupuesto: number | null;
+  ahorro: number | null;
+  costoPorHa: number | null;
+  costoPorTonelada: number | null;
 }

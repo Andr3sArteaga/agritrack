@@ -28,7 +28,6 @@ export interface DatosRendimientoRepository {
   /** Parcelas que solo existen como datos de demostracion. */
   parcelasDemo(): Promise<string[]>;
   existeCampana(campanaId: string): Promise<boolean>;
-  cultivoDeCampana?(campanaId: string): Promise<string | null>;
   obtenerRegistroCosecha(campanaId: string): Promise<RegistroCosechaCampana | null>;
   guardarSiembra(
     campanaId: string,

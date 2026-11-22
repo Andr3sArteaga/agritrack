@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../../auth/presentation/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/presentation/guards/roles.guard';
 import { HistoricoItemDto } from '../application/dto/historico-item.dto';
 import { ReporteCampanaQueryDto } from '../application/dto/reporte-campana-query.dto';
-import { ReporteCampanaDto } from '../application/dto/reporte-campana.dto';
+import { CostosReporteDto, ReporteCampanaDto } from '../application/dto/reporte-campana.dto';
 import { ResumenDashboardDto } from '../application/dto/resumen-dashboard.dto';
 import { ReportesService } from '../application/reportes.service';
 
@@ -38,6 +38,14 @@ export class ReportesController {
   @Get('dashboard')
   dashboard(): Promise<ResumenDashboardDto> {
     return this.reportesService.resumenDashboard();
+  }
+
+  @Get('campanas/:id/costos')
+  @ApiOperation({ summary: 'Resumen de costos de toda la campana (RF-30)' })
+  @ApiOkResponse({ type: CostosReporteDto })
+  @ApiNotFoundResponse({ description: 'Campana no encontrada' })
+  resumenCostos(@Param('id') id: string): Promise<CostosReporteDto> {
+    return this.reportesService.resumenCostosCampana(id);
   }
 
   @Get('campanas/:id')

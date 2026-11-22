@@ -17,6 +17,7 @@ import type {
   ResultadoImpacto,
 } from '../modelo-rendimiento';
 import { codificar, diasDesdePrimeroDeOctubre } from './variables';
+import { promedio, redondear } from '../../../../shared/numeros';
 
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 const ESCENARIOS_VACIOS: EscenariosImpacto = {
@@ -26,11 +27,6 @@ const ESCENARIOS_VACIOS: EscenariosImpacto = {
 };
 
 export const UMBRAL_IMPACTO_T_HA = 0.01;
-
-const redondear2 = (valor: number): number => Math.round(valor * 100) / 100;
-
-const promedio = (valores: readonly number[]): number =>
-  valores.reduce((acc, v) => acc + v, 0) / valores.length;
 
 const formatoDelta = (delta: number): string =>
   delta > 0 ? `+${delta.toFixed(2)}` : delta.toFixed(2);
@@ -114,10 +110,10 @@ export function calcularImpactoPrediccion(
         ],
         codificador,
       );
-      estimadoActual = redondear2(predecir(matriz.X)[0]);
+      estimadoActual = redondear(predecir(matriz.X)[0]);
     }
     const referencia =
-      lineaBase_t_ha !== null ? redondear2(lineaBase_t_ha) : estimadoActual;
+      lineaBase_t_ha !== null ? redondear(lineaBase_t_ha) : estimadoActual;
     return {
       efectoGlobal: 'NEUTRO',
       resumen:
@@ -127,7 +123,7 @@ export function calcularImpactoPrediccion(
       diferencia_t_ha: 0,
       produccion_estimada_tn:
         estimadoActual !== null && haSembradas !== null && haSembradas > 0
-          ? redondear2(estimadoActual * haSembradas)
+          ? redondear(estimadoActual * haSembradas)
           : null,
       fuenteReferencia:
         lineaBase_t_ha !== null
@@ -146,7 +142,7 @@ export function calcularImpactoPrediccion(
   }
 
   const refLineaBase =
-    lineaBase_t_ha !== null ? redondear2(lineaBase_t_ha) : null;
+    lineaBase_t_ha !== null ? redondear(lineaBase_t_ha) : null;
 
   if (!codificador || !predecir) {
     return {
@@ -262,20 +258,20 @@ export function calcularImpactoPrediccion(
   );
   const predNeutroModelo = promedio(predicciones.slice(inicioNeutro));
 
-  const estimado_t_ha = redondear2(predActual);
+  const estimado_t_ha = redondear(predActual);
   const sinVariablesEspecificadas =
     !fechaSiembra && !variedadCanonica && Math.abs(haSembradas - haRef) < 0.01;
   const fuenteReferencia =
     refLineaBase !== null ? 'linea_base' : 'mediana_modelo';
   const referenciaBase =
-    refLineaBase !== null ? refLineaBase : redondear2(predNeutroModelo);
+    refLineaBase !== null ? refLineaBase : redondear(predNeutroModelo);
   const referencia_t_ha = sinVariablesEspecificadas
     ? estimado_t_ha
     : referenciaBase;
   const diferencia_t_ha = sinVariablesEspecificadas
     ? 0
-    : redondear2(estimado_t_ha - referencia_t_ha);
-  const produccion_estimada_tn = redondear2(estimado_t_ha * haSembradas);
+    : redondear(estimado_t_ha - referencia_t_ha);
+  const produccion_estimada_tn = redondear(estimado_t_ha * haSembradas);
   const efectoGlobal = clasificarEfecto(diferencia_t_ha);
 
   const resumen = sinVariablesEspecificadas
@@ -374,7 +370,7 @@ function construirFactorFecha(
         'Sin fecha ingresada: se aplica la mediana histórica del modelo (se mantiene igual).',
     };
   }
-  const delta = redondear2(predActual - predBaseFecha);
+  const delta = redondear(predActual - predBaseFecha);
   const efecto = clasificarEfecto(delta);
   const fechaTexto = `${fechaSiembra.toISOString().slice(0, 10)} (${diasSiembra} d desde 1 oct)`;
   const detalle =
@@ -416,7 +412,7 @@ function construirFactorVariedad(
     };
   }
   const promedioVariedades = promedio(predsVariedades);
-  const delta = redondear2(predActual - promedioVariedades);
+  const delta = redondear(predActual - promedioVariedades);
   const efecto = clasificarEfecto(delta);
   const detalle =
     efecto === 'POSITIVO'
@@ -442,7 +438,7 @@ function construirFactorHa(
   estimado_t_ha: number,
   produccion_estimada_tn: number,
 ): FactorImpacto {
-  const delta = redondear2(predActual - predBaseHa);
+  const delta = redondear(predActual - predBaseHa);
   const efecto = clasificarEfecto(delta);
   const resumenVolumen = `Producción total estimada: ${produccion_estimada_tn.toFixed(2)} t (${estimado_t_ha.toFixed(2)} t/ha × ${haSembradas} ha).`;
   const detalle =
@@ -490,10 +486,10 @@ function calcularEscenariosImpacto(params: {
   const haCandidatas = [
     ...new Set(
       [
-        redondear2(haRef),
-        redondear2(haRef * 0.9),
-        redondear2(haRef * 0.75),
-        redondear2(haRef * 1.15),
+        redondear(haRef),
+        redondear(haRef * 0.9),
+        redondear(haRef * 0.75),
+        redondear(haRef * 1.15),
       ].filter((ha) => ha > 0),
     ),
   ];
@@ -534,15 +530,15 @@ function calcularEscenariosImpacto(params: {
 
   const matriz = codificar(entradas, codificador);
   const preds = predecir(matriz.X);
-  const predBaseSinDetalle = redondear2(preds[0]);
+  const predBaseSinDetalle = redondear(preds[0]);
 
   let positivo: EscenarioSiembraImpacto | null = null;
   let negativo: EscenarioSiembraImpacto | null = null;
   let neutro: EscenarioSiembraImpacto | null = null;
 
   candidatos.forEach((candidato, indice) => {
-    const estimado = redondear2(preds[indice + 1]);
-    const diferencia = redondear2(estimado - referencia_t_ha);
+    const estimado = redondear(preds[indice + 1]);
+    const diferencia = redondear(estimado - referencia_t_ha);
     const actual: EscenarioSiembraImpacto = {
       haSembradas: candidato.haSembradas,
       fechaSiembra: candidato.fechaSiembra,
@@ -582,7 +578,7 @@ function calcularEscenariosImpacto(params: {
 
   if (!neutro) {
     neutro = {
-      haSembradas: redondear2(haRef),
+      haSembradas: redondear(haRef),
       fechaSiembra: '',
       variedad: '',
       estimado_t_ha: predBaseSinDetalle,

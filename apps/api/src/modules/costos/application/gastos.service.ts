@@ -26,8 +26,7 @@ import { CreateGastoDto } from './dto/create-gasto.dto';
 import { GastoResponseDto } from './dto/gasto-response.dto';
 import { ListarGastosQueryDto } from './dto/listar-gastos-query.dto';
 import { UpdateGastoDto } from './dto/update-gasto.dto';
-
-const redondear = (valor: number): number => Math.round(valor * 100) / 100;
+import { redondear } from '../../../shared/numeros';
 
 @Injectable()
 export class GastosService {

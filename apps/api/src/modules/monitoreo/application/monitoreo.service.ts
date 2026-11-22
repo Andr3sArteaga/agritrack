@@ -37,8 +37,9 @@ export class MonitoreoService {
     private readonly parcelas: ParcelaRepository,
   ) {}
 
-  async listarSuelo(parcelaId: string): Promise<AnalisisSuelo[]> {
-    await this.exigirParcela(parcelaId);
+  /** Sin parcelaId: los de todas las parcelas (el resumen del panel los pide de una vez). */
+  async listarSuelo(parcelaId?: string): Promise<AnalisisSuelo[]> {
+    if (parcelaId) await this.exigirParcela(parcelaId);
     return this.monitoreo.listarSuelo(parcelaId);
   }
 
@@ -64,8 +65,8 @@ export class MonitoreoService {
     });
   }
 
-  async listarClima(parcelaId: string, desde?: string): Promise<RegistroClima[]> {
-    await this.exigirParcela(parcelaId);
+  async listarClima(parcelaId?: string, desde?: string): Promise<RegistroClima[]> {
+    if (parcelaId) await this.exigirParcela(parcelaId);
     return this.monitoreo.listarClima(parcelaId, desde ? aDia(desde) : undefined);
   }
 

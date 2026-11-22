@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import type { Usuario as UsuarioModel } from '../../../generated/prisma/client';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { Prisma, type Usuario as UsuarioModel } from '../../../generated/prisma/client';
 import { EstadoUsuario, Rol } from '../../../generated/prisma/enums';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { UsuarioEntity } from '../domain/entities/usuario.entity';
@@ -34,8 +34,16 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
   }
 
   async create(data: CrearUsuarioData): Promise<UsuarioEntity> {
-    const usuario = await this.prisma.usuario.create({ data });
-    return this.toEntity(usuario);
+    try {
+      const usuario = await this.prisma.usuario.create({ data });
+      return this.toEntity(usuario);
+    } catch (error) {
+      // Dos registros con el mismo correo al mismo tiempo: gana uno, el otro es 409, no 500.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Ya existe un usuario registrado con ese correo');
+      }
+      throw error;
+    }
   }
 
   async aprobar(id: string, rol: Rol): Promise<UsuarioEntity> {

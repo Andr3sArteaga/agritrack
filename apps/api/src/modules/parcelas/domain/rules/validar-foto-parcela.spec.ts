@@ -1,6 +1,7 @@
 import {
   MAX_FOTOS_POR_PARCELA,
   MAX_LONGITUD_DATA_URL,
+  decodificarImagen,
   validarNuevaFotoParcela,
 } from './validar-foto-parcela';
 
@@ -29,5 +30,22 @@ describe('validarNuevaFotoParcela', () => {
     const res = validarNuevaFotoParcela(muyGrande, 1);
     expect(res.valido).toBe(false);
     expect(res.motivo).toContain('2 MB');
+  });
+});
+
+describe('decodificarImagen', () => {
+  it('devuelve el tipo y los bytes de una imagen en base64', () => {
+    const imagen = decodificarImagen(`data:image/png;base64,${Buffer.from('hola').toString('base64')}`);
+    expect(imagen?.tipo).toBe('image/png');
+    expect(imagen?.bytes.toString()).toBe('hola');
+  });
+
+  it('normaliza jpg a image/jpeg', () => {
+    expect(decodificarImagen('data:image/jpg;base64,AAAA')?.tipo).toBe('image/jpeg');
+  });
+
+  it('rechaza lo que no es una imagen permitida (ej. SVG o HTML)', () => {
+    expect(decodificarImagen('data:image/svg+xml;base64,AAAA')).toBeNull();
+    expect(decodificarImagen('data:text/html;base64,AAAA')).toBeNull();
   });
 });

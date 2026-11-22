@@ -47,10 +47,11 @@ export type NuevoRegistroClima = Omit<RegistroClima, 'id' | 'createdAt'>;
 
 export interface MonitoreoRepository {
   /** Del mas reciente al mas antiguo. */
-  listarSuelo(parcelaId: string): Promise<AnalisisSuelo[]>;
+  /** Sin parcelaId: los de todas las parcelas. */
+  listarSuelo(parcelaId?: string): Promise<AnalisisSuelo[]>;
   crearSuelo(datos: NuevoAnalisisSuelo): Promise<AnalisisSuelo>;
   /** Del mas reciente al mas antiguo; `desde` incluido. */
-  listarClima(parcelaId: string, desde?: Date): Promise<RegistroClima[]>;
+  listarClima(parcelaId?: string, desde?: Date): Promise<RegistroClima[]>;
   /** Un registro por parcela y dia: si ya existe el de ese dia, lo reemplaza. */
   guardarClima(datos: NuevoRegistroClima): Promise<RegistroClima>;
 }

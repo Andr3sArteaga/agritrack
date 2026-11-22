@@ -120,7 +120,6 @@ describe('Componente de estimacion (PostgreSQL real, datos de demostracion)', ()
       datos,
       modelos,
       regresor,
-      entrenamientoService,
     );
     controller = new PrediccionController(
       {} as PrediccionService,

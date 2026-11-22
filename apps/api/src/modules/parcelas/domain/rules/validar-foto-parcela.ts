@@ -38,3 +38,16 @@ export function validarNuevaFotoParcela(
 
   return { valido: true };
 }
+
+/** Separa una data URL de imagen en su tipo y sus bytes; null si no es una imagen valida. */
+export function decodificarImagen(
+  dataUrl: string,
+): { tipo: string; bytes: Buffer } | null {
+  const partes = DATA_URL_IMAGEN_REGEX.exec(dataUrl.trim());
+  if (!partes) return null;
+  const tipo = partes[1] === 'jpg' ? 'jpeg' : partes[1];
+  return {
+    tipo: `image/${tipo}`,
+    bytes: Buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64'),
+  };
+}

@@ -41,6 +41,8 @@ export interface CrearFotoParcelaData {
   subidaPorId: string;
 }
 
+export type FotoPublicaItem = Pick<FotoParcelaItem, 'id' | 'descripcion' | 'createdAt'>;
+
 export interface ActualizarFotoParcelaData {
   descripcion?: string | null;
   visibleEnPreventa?: boolean;
@@ -51,7 +53,11 @@ export interface ParcelaRepository {
   findById(id: string): Promise<ParcelaEntity | null>;
   create(data: CrearParcelaData): Promise<ParcelaEntity>;
   update(id: string, data: ActualizarParcelaData): Promise<ParcelaEntity>;
-  listarFotos(parcelaId: string, soloPreventa?: boolean): Promise<FotoParcelaItem[]>;
+  listarFotos(parcelaId: string): Promise<FotoParcelaItem[]>;
+  /** Fotos visibles en preventa, sin la imagen (pesa demasiado para un listado). */
+  listarFotosPublicas(parcelaId: string): Promise<FotoPublicaItem[]>;
+  /** Imagen (data URL) de una foto visible en preventa de esa parcela; null si no lo es. */
+  buscarImagenPublica(parcelaId: string, fotoId: string): Promise<string | null>;
   buscarFotoPorId(fotoId: string): Promise<FotoParcelaItem | null>;
   crearFoto(data: CrearFotoParcelaData): Promise<FotoParcelaItem>;
   actualizarFoto(fotoId: string, data: ActualizarFotoParcelaData): Promise<FotoParcelaItem>;

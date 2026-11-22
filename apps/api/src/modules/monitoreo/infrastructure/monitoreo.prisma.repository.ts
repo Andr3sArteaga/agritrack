@@ -12,9 +12,9 @@ import type {
 export class MonitoreoPrismaRepository implements MonitoreoRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  listarSuelo(parcelaId: string): Promise<AnalisisSuelo[]> {
+  listarSuelo(parcelaId?: string): Promise<AnalisisSuelo[]> {
     return this.prisma.analisisSuelo.findMany({
-      where: { parcelaId },
+      where: parcelaId ? { parcelaId } : {},
       orderBy: [{ fecha: 'desc' }, { createdAt: 'desc' }],
     });
   }
@@ -23,9 +23,9 @@ export class MonitoreoPrismaRepository implements MonitoreoRepository {
     return this.prisma.analisisSuelo.create({ data: datos });
   }
 
-  listarClima(parcelaId: string, desde?: Date): Promise<RegistroClima[]> {
+  listarClima(parcelaId?: string, desde?: Date): Promise<RegistroClima[]> {
     return this.prisma.registroClima.findMany({
-      where: { parcelaId, ...(desde ? { fecha: { gte: desde } } : {}) },
+      where: { ...(parcelaId ? { parcelaId } : {}), ...(desde ? { fecha: { gte: desde } } : {}) },
       orderBy: { fecha: 'desc' },
     });
   }
