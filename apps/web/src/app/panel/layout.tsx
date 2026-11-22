@@ -22,35 +22,35 @@ export default function PanelLayout({ children }: LayoutProps<"/panel">) {
   if (cargando || !usuario) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-stone-500">Cargando...</p>
+        <p className="text-tinta-suave">Cargando...</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-1 flex-col md:flex-row">
-      <header className="flex items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 md:hidden">
+      <header className="sticky top-0 z-[800] flex items-center gap-2 border-b border-borde bg-superficie px-2 py-2 md:hidden">
         <button
           onClick={() => setMenuAbierto(true)}
           aria-label="Abrir menú"
           title="Abrir menú"
-          className="rounded-md p-1 text-stone-600 hover:bg-stone-100"
+          className="grid size-11 place-items-center rounded-control text-tinta hover:bg-fondo"
         >
           <Menu className="h-6 w-6" aria-hidden />
         </button>
         <div className="flex items-center gap-2">
           <Image
             src={logoBlack}
-            alt="Logo AgriTrack"
+            alt=""
             className="h-7 w-7 object-contain"
             priority
           />
-          <span className="text-lg font-bold text-[#006B4F]">AgriTrack</span>
+          <span className="text-lg font-semibold text-marca">AgriTrack</span>
         </div>
       </header>
       <Sidebar abierto={menuAbierto} onCerrar={() => setMenuAbierto(false)} />
-      <main className="min-w-0 flex-1 overflow-y-auto bg-stone-50 px-4 py-6 md:px-8 md:py-8">
-        {children}
+      <main className="min-w-0 flex-1 bg-fondo px-4 py-6 md:px-8 md:py-8">
+        <div className="mx-auto w-full max-w-[1400px]">{children}</div>
       </main>
     </div>
   );

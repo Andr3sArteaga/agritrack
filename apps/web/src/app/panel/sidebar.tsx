@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ChevronRight,
   Contact,
   FileBarChart,
   LayoutDashboard,
@@ -16,7 +15,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import logoBlack from "@/assets/Logo_AgriTrack_black.png";
+import logoWhite from "@/assets/Logo_AgriTrack_white.png";
 import { useAuth } from "@/lib/auth-context";
 import { ROL_LABEL, type Rol } from "@/lib/types";
 
@@ -73,7 +72,16 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-/** En pantallas chicas es un cajon que se abre con el boton de menu; desde `md` es fijo. */
+/**
+ * Texto que se ve en el celular (cajon) y en pantallas grandes; en tamaño
+ * mediano la barra queda solo con iconos y el texto sigue para lectores de pantalla.
+ */
+const TEXTO = "md:sr-only xl:not-sr-only";
+
+/**
+ * Barra lateral oscura. Celular: cajon que se abre con el boton de menu.
+ * Tablet / laptop chica: solo iconos. Desde 1280 px: iconos con texto.
+ */
 export function Sidebar({
   abierto,
   onCerrar,
@@ -87,6 +95,8 @@ export function Sidebar({
   if (!usuario) return null;
 
   const items = NAV_ITEMS.filter((item) => item.roles.includes(usuario.rol));
+  const nombre = `${usuario.nombre}${usuario.apellido ? ` ${usuario.apellido}` : ""}`;
+  const enPerfil = pathname.startsWith("/panel/perfil");
 
   return (
     <>
@@ -98,34 +108,32 @@ export function Sidebar({
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-[950] flex w-60 flex-col border-r border-[#E4EAE6] bg-white transition-transform md:static md:z-auto md:h-full md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-[950] flex w-64 flex-col bg-tinta text-white transition-transform md:sticky md:top-0 md:z-auto md:h-dvh md:w-[76px] md:translate-x-0 xl:w-60 ${
           abierto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-[#E4EAE6] px-6 py-5">
+        <div className="flex items-center justify-between px-4 py-5 md:justify-center xl:justify-between xl:px-5">
           <Link
             href="/panel/dashboard"
-            className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-[#006B4F]"
+            title="AgriTrack"
+            className="flex items-center gap-2.5 rounded-control text-lg font-semibold tracking-tight"
           >
-            <Image
-              src={logoBlack}
-              alt="Logo AgriTrack"
-              className="h-8 w-8 object-contain"
-              priority
-            />
-            <span>AgriTrack</span>
+            <span className="grid size-10 shrink-0 place-items-center rounded-control bg-marca">
+              <Image src={logoWhite} alt="" className="h-6 w-6 object-contain" priority />
+            </span>
+            <span className={TEXTO}>AgriTrack</span>
           </Link>
           <button
             onClick={onCerrar}
             aria-label="Cerrar menú"
             title="Cerrar menú"
-            className="rounded-md p-1 text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D] md:hidden"
+            className="grid size-11 place-items-center rounded-control text-white/75 hover:bg-white/10 hover:text-white md:hidden"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav aria-label="Menú principal" className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
           {items.map((item) => {
             const activo = pathname.startsWith(item.href);
             const Icono = item.icono;
@@ -136,50 +144,44 @@ export function Sidebar({
                 title={item.ayuda}
                 onClick={onCerrar}
                 aria-current={activo ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
+                className={`flex min-h-11 items-center gap-3 rounded-control px-3 text-base font-medium transition-colors md:justify-center xl:justify-start ${
                   activo
-                    ? "bg-[#E8F5EF] text-[#006B4F]"
-                    : "text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D]"
+                    ? "bg-marca text-white"
+                    : "text-white/75 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                <Icono
-                  className={`h-5 w-5 shrink-0 ${activo ? "text-[#006B4F]" : "text-[#68736D]"}`}
-                  aria-hidden
-                />
-                {item.label}
+                <Icono className="h-5 w-5 shrink-0" aria-hidden />
+                <span className={TEXTO}>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-[#E4EAE6] px-4 py-4">
+        <div className="space-y-1 border-t border-white/10 px-3 py-4">
           <Link
             href="/panel/perfil"
             onClick={onCerrar}
-            title="Ver o editar mi perfil"
-            className="-mx-2 flex items-center justify-between gap-2 rounded-xl p-2 transition-colors hover:bg-[#F8FAF9]"
+            title={`${nombre} · ${ROL_LABEL[usuario.rol]}. Ver o editar mi perfil`}
+            aria-current={enPerfil ? "page" : undefined}
+            className={`flex min-h-11 items-center gap-3 rounded-control px-2 py-1.5 transition-colors md:justify-center xl:justify-start ${
+              enPerfil ? "bg-white/10" : "hover:bg-white/10"
+            }`}
           >
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E8F5EF] text-[#006B4F]">
-                <UserRound className="h-4 w-4" aria-hidden />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[#17211D]">
-                  {usuario.nombre}
-                  {usuario.apellido ? ` ${usuario.apellido}` : ""}
-                </p>
-                <p className="text-xs text-[#68736D]">{ROL_LABEL[usuario.rol]}</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#68736D]" aria-hidden />
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/15 text-white">
+              <UserRound className="h-4 w-4" aria-hidden />
+            </span>
+            <span className={`min-w-0 ${TEXTO}`}>
+              <span className="block truncate text-sm font-semibold text-white">{nombre}</span>
+              <span className="block text-xs text-white/70">{ROL_LABEL[usuario.rol]}</span>
+            </span>
           </Link>
           <button
             onClick={logout}
             title="Cerrar la sesión en este equipo"
-            className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#E4EAE6] bg-white px-3 py-1.5 text-sm font-medium text-[#17211D] hover:bg-[#F8FAF9]"
+            className="flex min-h-11 w-full items-center gap-3 rounded-control px-3 text-base font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white md:justify-center xl:justify-start"
           >
-            <LogOut className="h-4 w-4 text-[#68736D]" aria-hidden />
-            Cerrar sesión
+            <LogOut className="h-5 w-5 shrink-0" aria-hidden />
+            <span className={TEXTO}>Cerrar sesión</span>
           </button>
         </div>
       </aside>
