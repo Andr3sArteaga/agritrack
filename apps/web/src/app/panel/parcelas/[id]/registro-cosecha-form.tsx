@@ -144,11 +144,11 @@ export function RegistroCosechaForm({
       <form onSubmit={onSubmit} className="space-y-4">
         {modo === "siembra" ? (
           <>
-            <fieldset className="space-y-3 rounded-lg border-2 border-stone-200 bg-stone-50/70 p-3.5">
-              <legend className="px-1 text-sm font-bold text-stone-900">
+            <fieldset className="space-y-3 rounded-control border-2 border-borde bg-fondo-suave/70 p-3.5">
+              <legend className="px-1 text-sm font-bold text-tinta">
                 Variables agronómicas de siembra (afectan al modelo IA)
               </legend>
-              <p className="text-xs text-stone-600">
+              <p className="text-xs text-tinta-suave">
                 Edita cualquiera de estas 3 variables para ver al instante si la producción estimada
                 aumenta, se mantiene o disminuye.
               </p>
@@ -157,9 +157,9 @@ export function RegistroCosechaForm({
                 <div>
                   <label
                     htmlFor="reg-ha-sembradas"
-                    className="block text-sm font-bold text-stone-800"
+                    className="block text-sm font-bold text-tinta"
                   >
-                    1. Superficie sembrada <span className="font-normal text-stone-600">(ha)</span>
+                    1. Superficie sembrada <span className="font-normal text-tinta-suave">(ha)</span>
                   </label>
                   <input
                     id="reg-ha-sembradas"
@@ -170,13 +170,13 @@ export function RegistroCosechaForm({
                     step="0.01"
                     value={haSembradas}
                     onChange={(e) => setHaSembradas(e.target.value)}
-                    className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 bg-white px-3 text-base"
+                    className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave bg-white px-3 text-base"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="reg-fecha-siembra"
-                    className="block text-sm font-bold text-stone-800"
+                    className="block text-sm font-bold text-tinta"
                   >
                     2. Fecha de siembra
                   </label>
@@ -186,13 +186,13 @@ export function RegistroCosechaForm({
                     max={hoy()}
                     value={fechaSiembra}
                     onChange={(e) => setFechaSiembra(e.target.value)}
-                    className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 bg-white px-3 text-base"
+                    className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave bg-white px-3 text-base"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="reg-variedad" className="block text-sm font-bold text-stone-800">
+                <label htmlFor="reg-variedad" className="block text-sm font-bold text-tinta">
                   3. Variedad o semilla
                 </label>
                 <input
@@ -201,11 +201,11 @@ export function RegistroCosechaForm({
                   placeholder="Ej. 6410 o MUNASQA"
                   value={variedad}
                   onChange={(e) => setVariedad(e.target.value)}
-                  className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 bg-white px-3 text-base"
+                  className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave bg-white px-3 text-base"
                 />
                 {impacto && impacto.variedadesConocidas.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="self-center text-xs text-stone-600">
+                    <span className="self-center text-xs text-tinta-suave">
                       Variedades del modelo:
                     </span>
                     {impacto.variedadesConocidas.map((opcion) => {
@@ -215,10 +215,10 @@ export function RegistroCosechaForm({
                           key={opcion}
                           type="button"
                           onClick={() => setVariedad(opcion)}
-                          className={`min-h-11 rounded-md border-2 px-3 text-xs font-bold ${
+                          className={`min-h-11 rounded-control border-2 px-3 text-xs font-bold ${
                             activa
-                              ? "border-emerald-700 bg-emerald-50 text-emerald-900"
-                              : "border-stone-300 bg-white text-stone-800 hover:bg-stone-50"
+                              ? "border-marca bg-marca-suave text-marca-hover"
+                              : "border-borde bg-white text-tinta hover:bg-fondo-suave"
                           }`}
                         >
                           {opcion}
@@ -246,7 +246,7 @@ export function RegistroCosechaForm({
             )}
 
             {registro && (
-              <p className="rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700">
+              <p className="rounded-control border border-borde bg-fondo-suave px-3 py-2 text-sm text-tinta-suave">
                 Siembra registrada: <strong>{registro.haSembradas} ha</strong>
                 {registro.variedad ? ` · Variedad ${registro.variedad}` : ""}
               </p>
@@ -255,7 +255,7 @@ export function RegistroCosechaForm({
             <div>
               <label
                 htmlFor="reg-fecha-cosecha"
-                className="block text-sm font-bold text-stone-800"
+                className="block text-sm font-bold text-tinta"
               >
                 Fecha de cosecha
               </label>
@@ -266,7 +266,7 @@ export function RegistroCosechaForm({
                 max={hoy()}
                 value={fechaCosecha}
                 onChange={(e) => setFechaCosecha(e.target.value)}
-                className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base"
+                className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave px-3 text-base"
               />
             </div>
 
@@ -274,7 +274,7 @@ export function RegistroCosechaForm({
               <div>
                 <label
                   htmlFor="reg-ha-cosechadas"
-                  className="block text-sm font-bold text-stone-800"
+                  className="block text-sm font-bold text-tinta"
                 >
                   Hectáreas cosechadas
                 </label>
@@ -288,11 +288,11 @@ export function RegistroCosechaForm({
                   step="0.01"
                   value={haCosechadas}
                   onChange={(e) => setHaCosechadas(e.target.value)}
-                  className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base"
+                  className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave px-3 text-base"
                 />
               </div>
               <div>
-                <label htmlFor="reg-toneladas" className="block text-sm font-bold text-stone-800">
+                <label htmlFor="reg-toneladas" className="block text-sm font-bold text-tinta">
                   Toneladas totales
                 </label>
                 <input
@@ -304,13 +304,13 @@ export function RegistroCosechaForm({
                   step="0.01"
                   value={toneladas}
                   onChange={(e) => setToneladas(e.target.value)}
-                  className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base"
+                  className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave px-3 text-base"
                 />
               </div>
             </div>
 
             {rendimientoPreview !== null && (
-              <div className="rounded-lg border-2 border-emerald-700 bg-emerald-50 p-3 text-emerald-950">
+              <div className="rounded-control border-2 border-marca bg-marca-suave p-3 text-tinta">
                 <p className="text-xs font-bold uppercase tracking-wide">
                   Rendimiento real calculado
                 </p>

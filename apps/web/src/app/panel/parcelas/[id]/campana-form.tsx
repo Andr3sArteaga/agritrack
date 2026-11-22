@@ -47,12 +47,12 @@ export function CampanaForm({
     <Modal titulo="Nueva campaña" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700">Cultivo</label>
+          <label className="block text-sm font-medium text-tinta-suave">Cultivo</label>
           <select
             required
             value={cultivoId}
             onChange={(e) => setCultivoId(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm"
           >
             {cultivos.map((cultivo) => (
               <option key={cultivo.id} value={cultivo.id}>
@@ -62,40 +62,40 @@ export function CampanaForm({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700">Temporada</label>
+          <label className="block text-sm font-medium text-tinta-suave">Temporada</label>
           <input
             required
             placeholder="Verano 2026"
             value={temporada}
             onChange={(e) => setTemporada(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-stone-700">Fecha inicio</label>
+            <label className="block text-sm font-medium text-tinta-suave">Fecha inicio</label>
             <input
               required
               type="date"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700">
+            <label className="block text-sm font-medium text-tinta-suave">
               Fecha fin (opcional)
             </label>
             <input
               type="date"
               value={fechaFin}
               onChange={(e) => setFechaFin(e.target.value)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm"
             />
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-critico-borde">{error}</p>}
 
         <AccionesModal onCancelar={onClose} etiqueta="Crear campaña" guardando={guardando} />
       </form>
