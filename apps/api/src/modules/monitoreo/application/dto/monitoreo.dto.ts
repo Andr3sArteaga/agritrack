@@ -88,10 +88,11 @@ export class CrearRegistroClimaDto {
 }
 
 export class ListarMonitoreoQueryDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ description: 'Sin ella, devuelve los de todas las parcelas' })
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  parcelaId!: string;
+  parcelaId?: string;
 
   @ApiPropertyOptional({ example: '2026-10-01', description: 'Solo clima: desde esta fecha' })
   @IsOptional()

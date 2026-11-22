@@ -194,14 +194,6 @@ export class DatosRendimientoPrismaRepository
     return campana !== null;
   }
 
-  async cultivoDeCampana(campanaId: string): Promise<string | null> {
-    const campana = await this.prisma.campana.findUnique({
-      where: { id: campanaId },
-      select: { cultivoId: true },
-    });
-    return campana?.cultivoId ?? null;
-  }
-
   async obtenerRegistroCosecha(
     campanaId: string,
   ): Promise<RegistroCosechaCampana | null> {

@@ -38,7 +38,6 @@ import {
 import type { EstimacionResponseDto } from './dto/estimacion-response.dto';
 import type { ImpactoQueryDto } from './dto/impacto-prediccion.dto';
 import type { GuardarRegistroCosechaDto } from './dto/registro-cosecha.dto';
-import { EntrenamientoService } from './entrenamiento.service';
 
 const aDia = (texto: string): Date =>
   new Date(`${texto.slice(0, 10)}T00:00:00.000Z`);
@@ -59,8 +58,6 @@ export class EstimacionService {
     @Optional()
     @Inject(REGRESOR_PORT)
     private readonly regresor?: RegresorPort,
-    @Optional()
-    private readonly entrenamiento?: EntrenamientoService,
   ) {}
 
   /**
@@ -177,15 +174,9 @@ export class EstimacionService {
       const datosCosecha = { haCosechadas, toneladas, fechaCosecha };
       const errorCosecha = errorDatosCosecha(datosCosecha, existente, hoy);
       if (errorCosecha) throw new BadRequestException(errorCosecha);
+      // No se reentrena aqui: cargar las cosechas de una campaña lote por lote
+      // reentrenaria una vez por lote. Se entrena con POST /prediccion/entrenar.
       existente = await this.datos.guardarCosecha(campanaId, datosCosecha);
-
-      if (this.entrenamiento && this.datos.cultivoDeCampana) {
-        const cultivoId = await this.datos.cultivoDeCampana(campanaId);
-        if (cultivoId) {
-          await this.entrenamiento.entrenarAlCerrarCampana(cultivoId);
-          this.cacheModelo = null;
-        }
-      }
     }
 
     return existente as RegistroCosechaCampana;
