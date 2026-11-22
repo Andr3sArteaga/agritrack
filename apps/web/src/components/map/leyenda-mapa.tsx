@@ -7,9 +7,9 @@ export function LeyendaMapa() {
     <div
       role="group"
       aria-label="Leyenda del mapa: estado de las parcelas"
-      className="absolute bottom-16 left-3 z-10 rounded-md border border-stone-300 bg-white/95 px-3 py-2 shadow"
+      className="absolute bottom-16 left-3 z-10 rounded-control border border-borde bg-superficie/95 px-3 py-2 shadow-flotante"
     >
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-stone-800 sm:grid-cols-1">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-tinta sm:grid-cols-1">
         {ESTADOS_EN_PANTALLA.map((estado) => {
           const { color, fillColor, dashArray } = ESTILO_POLIGONO[estado];
           return (

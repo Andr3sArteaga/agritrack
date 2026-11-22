@@ -1,9 +1,10 @@
 "use client";
 
-import { MapPin, Ruler, Sprout, Tag, X } from "lucide-react";
+import { MapPin, Ruler, Tag as IconoTag, X } from "lucide-react";
 import { useEffect } from "react";
-import { Badge } from "@/components/badge";
-import { EnlaceBoton } from "@/components/enlace-boton";
+import { LinkButton } from "@/components/ui/button";
+import { CropChip } from "@/components/ui/crop-chip";
+import { Tag } from "@/components/ui/tag";
 import { EstadoBadge } from "@/components/estado/estado-badge";
 import type { ResumenParcela } from "@/lib/resumen-parcela";
 import type { Parcela } from "@/lib/types";
@@ -38,16 +39,16 @@ export function PanelFlotanteParcela({
   return (
     <section
       aria-label={`Resumen de ${parcela.nombre}`}
-      className="absolute inset-x-0 bottom-0 z-20 max-h-[80%] overflow-y-auto rounded-t-xl border-2 border-stone-300 bg-white p-3 shadow-xl sm:p-4 sm:inset-x-auto sm:bottom-auto sm:left-14 sm:top-3 sm:w-80 sm:rounded-xl"
+      className="absolute inset-x-0 bottom-0 z-20 max-h-[80%] overflow-y-auto rounded-t-tarjeta border border-borde bg-superficie p-4 shadow-flotante sm:p-5 sm:inset-x-auto sm:bottom-auto sm:left-14 sm:top-3 sm:w-80 sm:rounded-tarjeta"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-lg font-bold text-stone-900">{parcela.nombre}</h3>
+        <h3 className="text-lg font-semibold text-tinta">{parcela.nombre}</h3>
         <button
           type="button"
           onClick={onCerrar}
           aria-label="Cerrar"
           title="Cerrar"
-          className="-mr-2 -mt-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-stone-700 hover:bg-stone-100"
+          className="-mr-2 -mt-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-tinta-suave hover:bg-fondo"
         >
           <X className="h-5 w-5" aria-hidden />
         </button>
@@ -59,25 +60,26 @@ export function PanelFlotanteParcela({
         ) : estadoListo ? (
           <EstadoBadge estado="SIN_DATOS" />
         ) : (
-          <span className="text-sm text-stone-600">Revisando estado...</span>
+          <span className="text-sm text-tinta-suave">Revisando estado...</span>
         )}
       </div>
 
       {/* En celular cultivo y superficie van en una linea y se omite la ubicación: la hoja tapa menos mapa. */}
-      <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-base text-stone-800 sm:block sm:space-y-1">
+      <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-base text-tinta sm:block sm:space-y-1">
         <div className="flex items-center gap-2">
           <dt className="sr-only">Cultivo</dt>
-          <Sprout className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
-          <dd>{cultivo ?? "Sin campaña"}</dd>
+          <dd>
+            <CropChip cultivo={cultivo} />
+          </dd>
         </div>
         <div className="flex items-center gap-2">
           <dt className="sr-only">Superficie</dt>
-          <Ruler className="h-4 w-4 shrink-0 text-stone-600" aria-hidden />
+          <Ruler className="h-4 w-4 shrink-0 text-tinta-suave" aria-hidden />
           <dd>{parcela.hectareas} ha</dd>
         </div>
         <div className="hidden items-start gap-2 sm:flex">
           <dt className="sr-only">Ubicación</dt>
-          <MapPin className="mt-1 h-4 w-4 shrink-0 text-stone-600" aria-hidden />
+          <MapPin className="mt-1 h-4 w-4 shrink-0 text-tinta-suave" aria-hidden />
           <dd>{parcela.ubicacionTexto}</dd>
         </div>
       </dl>
@@ -91,18 +93,18 @@ export function PanelFlotanteParcela({
           ))}
           {parcela.disponibleParaPreventa && (
             <li>
-              <Badge tono="verde" icono={Tag} ayuda="Visible para compradores en la página pública">
+              <Tag tono="marca" icono={IconoTag}>
                 En preventa
-              </Badge>
+              </Tag>
             </li>
           )}
         </ul>
       )}
 
       <div className="mt-4">
-        <EnlaceBoton href={`/panel/parcelas/${parcela.id}`} completo>
+        <LinkButton href={`/panel/parcelas/${parcela.id}`} completo>
           Ver parcela
-        </EnlaceBoton>
+        </LinkButton>
       </div>
     </section>
   );

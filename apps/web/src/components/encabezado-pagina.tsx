@@ -12,11 +12,11 @@ export function EncabezadoPagina({
 }) {
   return (
     <div>
-      <h1 className="flex items-center gap-2 text-2xl font-bold text-stone-900">
-        <Icono className="h-6 w-6 shrink-0 text-emerald-700" aria-hidden />
+      <h1 className="flex items-center gap-2.5 text-[28px] font-semibold leading-tight text-tinta">
+        <Icono className="h-7 w-7 shrink-0 text-marca" aria-hidden />
         {titulo}
       </h1>
-      <p className="mt-1 text-stone-600">{descripcion}</p>
+      <p className="mt-1 text-base text-tinta-suave">{descripcion}</p>
     </div>
   );
 }
