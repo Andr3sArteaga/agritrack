@@ -9,6 +9,7 @@ import {
   CrearFotoParcelaData,
   CrearParcelaData,
   FotoParcelaItem,
+  FotoPublicaItem,
   ParcelaRepository,
 } from '../domain/repositories/parcela.repository';
 
@@ -50,14 +51,33 @@ export class ParcelaPrismaRepository implements ParcelaRepository {
     }
   }
 
-  async listarFotos(
-    parcelaId: string,
-    soloPreventa?: boolean,
-  ): Promise<FotoParcelaItem[]> {
+  async listarFotos(parcelaId: string): Promise<FotoParcelaItem[]> {
     return this.prisma.fotoParcela.findMany({
-      where: soloPreventa ? { parcelaId, visibleEnPreventa: true } : { parcelaId },
+      where: { parcelaId },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async listarFotosPublicas(parcelaId: string): Promise<FotoPublicaItem[]> {
+    return this.prisma.fotoParcela.findMany({
+      where: { parcelaId, visibleEnPreventa: true },
+      select: { id: true, descripcion: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async buscarImagenPublica(parcelaId: string, fotoId: string): Promise<string | null> {
+    const foto = await this.prisma.fotoParcela.findFirst({
+      // Misma regla que el catalogo: la parcela tiene que seguir en preventa.
+      where: {
+        id: fotoId,
+        parcelaId,
+        visibleEnPreventa: true,
+        parcela: { activa: true, disponibleParaPreventa: true },
+      },
+      select: { imagenData: true },
+    });
+    return foto?.imagenData ?? null;
   }
 
   async buscarFotoPorId(fotoId: string): Promise<FotoParcelaItem | null> {

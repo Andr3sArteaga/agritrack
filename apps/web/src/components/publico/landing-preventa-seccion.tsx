@@ -17,6 +17,7 @@ import {
 import { useMemo, useState } from "react";
 import { EstadoVacio } from "@/components/estado/estado-vacio";
 import { VisorImagen, type ImagenVisorItem } from "@/components/visor-imagen";
+import { urlApi } from "@/lib/api";
 import type { CatalogoParcela } from "@/lib/types";
 
 const FILTROS_CULTIVO = [
@@ -137,7 +138,7 @@ function convertirCatalogoATarjeta(p: CatalogoParcela): TarjetaParcelaVista {
     rendimientoTnHa: rendimiento,
     produccionEstimadaTn: produccion,
     estadoLabel: "Disponible para preventa",
-    fotoPortada: p.fotoPortada ?? null,
+    fotoPortada: p.fotoPortada ? urlApi(p.fotoPortada) : null,
     totalFotosPublicadas: p.totalFotosPublicadas ?? (p.fotoPortada ? 1 : 0),
     hrefDetalle: `/parcelas/${p.id}`,
     esReferencia: false,

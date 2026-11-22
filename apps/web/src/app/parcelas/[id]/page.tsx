@@ -121,7 +121,13 @@ export default async function ParcelaDetallePage(
                   Registros protegidos contra cambios:
                 </span>
                 <EstadoBadge
-                  estado={parcela.registrosVerificados ? "BIEN" : "CRITICO"}
+                  estado={
+                    parcela.registrosRevisados === 0
+                      ? "SIN_DATOS"
+                      : parcela.registrosVerificados
+                        ? "BIEN"
+                        : "CRITICO"
+                  }
                 />
               </div>
               <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#68736D]">

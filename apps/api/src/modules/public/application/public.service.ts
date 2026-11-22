@@ -19,10 +19,16 @@ import {
   type ParcelaRepository,
 } from '../../parcelas/domain/repositories/parcela.repository';
 import { ParcelaEntity } from '../../parcelas/domain/entities/parcela.entity';
+import { decodificarImagen } from '../../parcelas/domain/rules/validar-foto-parcela';
 import { PrediccionService } from '../../prediccion/application/prediccion.service';
 import { ReportesService } from '../../reportes/application/reportes.service';
+import { redondear } from '../../../shared/numeros';
 import { CatalogoParcelaDto } from './dto/catalogo-parcela.dto';
 import { DetalleParcelaPublicoDto } from './dto/detalle-parcela-publico.dto';
+
+/** Ruta (relativa a la API) donde se sirve la imagen de una foto publicada. */
+const rutaFotoPublica = (parcelaId: string, fotoId: string): string =>
+  `/public/parcelas/${parcelaId}/fotos/${fotoId}`;
 
 @Injectable()
 export class PublicService {
@@ -76,7 +82,7 @@ export class PublicService {
       rendimientoEstimadoTnHa = prediccion.rendimientoEstimadoTnHa;
       produccionEstimadaTotalTn =
         prediccion.rendimientoEstimadoTnHa !== null
-          ? this.redondear(
+          ? redondear(
               prediccion.rendimientoEstimadoTnHa * parcela.hectareas,
             )
           : null;
@@ -106,7 +112,7 @@ export class PublicService {
 
     const [verificacion, fotosPublicas] = await Promise.all([
       this.integridadService.verificarPorParcela(parcelaId),
-      this.parcelaRepository.listarFotos(parcelaId, true),
+      this.parcelaRepository.listarFotosPublicas(parcelaId),
     ]);
 
     return {
@@ -122,9 +128,10 @@ export class PublicService {
       historialCuidado,
       historicoRendimiento: historicoAnterior,
       registrosVerificados: verificacion.valido,
+      registrosRevisados: verificacion.totalVerificadas,
       fotos: fotosPublicas.map((f) => ({
         id: f.id,
-        imagenData: f.imagenData,
+        url: rutaFotoPublica(parcelaId, f.id),
         descripcion: f.descripcion,
         createdAt: f.createdAt,
       })),
@@ -160,15 +167,14 @@ export class PublicService {
       rendimientoEstimadoTnHa = prediccion.rendimientoEstimadoTnHa;
       produccionEstimadaTn =
         prediccion.rendimientoEstimadoTnHa !== null
-          ? this.redondear(
+          ? redondear(
               prediccion.rendimientoEstimadoTnHa * parcela.hectareas,
             )
           : null;
     }
 
-    const fotosPublicas = await this.parcelaRepository.listarFotos(
+    const fotosPublicas = await this.parcelaRepository.listarFotosPublicas(
       parcela.id,
-      true,
     );
 
     return {
@@ -177,13 +183,28 @@ export class PublicService {
       hectareas: parcela.hectareas,
       cultivoActual,
       produccionEstimadaTn,
-      fotoPortada: fotosPublicas[0]?.imagenData ?? null,
+      fotoPortada: fotosPublicas[0]
+        ? rutaFotoPublica(parcela.id, fotosPublicas[0].id)
+        : null,
       totalFotosPublicadas: fotosPublicas.length,
       ubicacionTexto: parcela.ubicacionTexto,
       temporadaActual,
       rendimientoEstimadoTnHa,
       poligono: parcela.poligono,
     };
+  }
+
+  /** Imagen de una foto publicada; las fotos viajan aparte para no inflar el JSON. */
+  async obtenerImagenPublica(
+    parcelaId: string,
+    fotoId: string,
+  ): Promise<{ tipo: string; bytes: Buffer }> {
+    const dataUrl = await this.parcelaRepository.buscarImagenPublica(parcelaId, fotoId);
+    const imagen = dataUrl ? decodificarImagen(dataUrl) : null;
+    if (!imagen) {
+      throw new NotFoundException('Foto no disponible');
+    }
+    return imagen;
   }
 
   private async obtenerCampanaActual(
@@ -196,9 +217,5 @@ export class PublicService {
       return enCurso;
     }
     return this.campanaRepository.findProximaPlanificada(parcelaId);
-  }
-
-  private redondear(valor: number): number {
-    return Math.round(valor * 100) / 100;
   }
 }

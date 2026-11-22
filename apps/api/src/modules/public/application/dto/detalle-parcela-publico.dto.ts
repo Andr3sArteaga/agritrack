@@ -40,8 +40,8 @@ export class FotoPublicaParcelaDto {
   @ApiProperty()
   id: string;
 
-  @ApiProperty()
-  imagenData: string;
+  @ApiProperty({ description: 'Ruta de la imagen en la API (GET)' })
+  url: string;
 
   @ApiPropertyOptional({ nullable: true })
   descripcion: string | null;
@@ -86,6 +86,9 @@ export class DetalleParcelaPublicoDto {
 
   @ApiProperty()
   registrosVerificados: boolean;
+
+  @ApiProperty({ description: 'Registros revisados; 0 = no hay nada que verificar' })
+  registrosRevisados: number;
 
   @ApiProperty({ type: [FotoPublicaParcelaDto] })
   fotos: FotoPublicaParcelaDto[];
