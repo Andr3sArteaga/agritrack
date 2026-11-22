@@ -29,9 +29,6 @@ export function percentil(ordenados: readonly number[], p: number): number {
   );
 }
 
-export const promedio = (valores: readonly number[]): number =>
-  valores.reduce((total, valor) => total + valor, 0) / valores.length;
-
 /**
  * IC 95 % del promedio de las observaciones, remuestreando unidades con reemplazo.
  * @param unidades cada unidad es la lista de observaciones de un lote.

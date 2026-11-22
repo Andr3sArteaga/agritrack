@@ -19,10 +19,9 @@ import {
 } from '../domain/repositories/modelo-ia.repository';
 import { MINIMO_CAMPANAS_RF32 } from '../domain/rules/activacion';
 import { codificar, diasDesdePrimeroDeOctubre } from '../domain/rules/variables';
-import { redondear2 } from './linea-base.adapter';
+import { redondear } from '../../../shared/numeros';
 
 export const etiquetaVersion = (version: number): string => `v${version}`;
-const redondear3 = (valor: number): number => Math.round(valor * 1000) / 1000;
 
 function resumirMetricasEvaluacion(
   version: ModeloIaConPesos,
@@ -38,18 +37,18 @@ function resumirMetricasEvaluacion(
     return null;
   }
   return {
-    maeModelo: redondear3(global.maeModelo),
-    maeLineaBase: redondear3(global.maeLineaBase),
-    diferenciaMae: redondear3(global.diferencia),
+    maeModelo: redondear(global.maeModelo, 3),
+    maeLineaBase: redondear(global.maeLineaBase, 3),
+    diferenciaMae: redondear(global.diferencia, 3),
     icDiferenciaMae: [
-      redondear3(global.icDiferencia[0]),
-      redondear3(global.icDiferencia[1]),
+      redondear(global.icDiferencia[0], 3),
+      redondear(global.icDiferencia[1], 3),
     ],
-    rmseModelo: redondear3(global.rmseModelo),
-    rmseLineaBase: redondear3(global.rmseLineaBase),
+    rmseModelo: redondear(global.rmseModelo, 3),
+    rmseLineaBase: redondear(global.rmseLineaBase, 3),
     r2Modelo:
       typeof global.r2Modelo === 'number' && Number.isFinite(global.r2Modelo)
-        ? redondear3(global.r2Modelo)
+        ? redondear(global.r2Modelo, 3)
         : null,
     superaLineaBase: global.conclusion === 'supera',
     conclusion: global.conclusion,
@@ -140,7 +139,7 @@ export class RandomForestAdapter implements EstimadorRendimientoPort {
     }
     return {
       ...base,
-      valor_t_ha: redondear2(this.cache.modelo.predecir(matriz.X)[0]),
+      valor_t_ha: redondear(this.cache.modelo.predecir(matriz.X)[0]),
       advertencias,
     };
   }

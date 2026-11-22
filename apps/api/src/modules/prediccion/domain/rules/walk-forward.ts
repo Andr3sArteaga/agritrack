@@ -12,9 +12,10 @@ import type {
   ResultadoWalkForward,
 } from '../modelo-rendimiento';
 import type { RegresorPort } from '../ports/regresor.port';
-import { intervaloBootstrap, promedio } from './bootstrap';
+import { intervaloBootstrap } from './bootstrap';
 import { calcularLineaBase, type RendimientoTemporada } from './linea-base';
 import { ajustarCodificador, codificar } from './variables';
+import { promedio } from '../../../../shared/numeros';
 
 export interface Corte {
   prueba: string;

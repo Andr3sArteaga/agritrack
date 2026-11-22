@@ -1,5 +1,6 @@
 import { EstadoGasto } from '../../../../generated/prisma/enums';
 import type { GastoEntity } from '../entities/gasto.entity';
+import { redondear } from '../../../../shared/numeros';
 
 /** Solo lo que el calculo necesita de un gasto (lo reusa el reporte por campana). */
 export type GastoParaResumen = Pick<GastoEntity, 'anulado' | 'estado' | 'monto'>;
@@ -20,8 +21,6 @@ export interface ResumenCostos {
   costoPorHa: number | null;
   costoPorTonelada: number | null;
 }
-
-const redondear = (valor: number): number => Math.round(valor * 100) / 100;
 
 /**
  * RF-30: resumen de costos de una campana. El "gasto real" es solo lo PAGADO;
