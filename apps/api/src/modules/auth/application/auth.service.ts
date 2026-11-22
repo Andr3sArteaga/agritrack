@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EstadoUsuario, Rol } from '../../../generated/prisma/enums';
 import { UsuarioEntity } from '../domain/entities/usuario.entity';
+import { huellaPassword } from '../domain/rules/tokens';
 import {
   USUARIO_REPOSITORY,
   type UsuarioRepository,
@@ -180,6 +181,7 @@ export class AuthService {
         sub: usuario.id,
         email: usuario.email,
         purpose: 'password-reset',
+        huella: huellaPassword(usuario.passwordHash),
       },
       { expiresIn: '30m' },
     );
@@ -210,9 +212,14 @@ export class AuthService {
         sub?: string;
         email?: string;
         purpose?: string;
+        huella?: string;
       }>(dto.token);
       if (payload.purpose === 'password-reset' && payload.sub) {
-        usuario = await this.usuarioRepository.findById(payload.sub);
+        const candidato = await this.usuarioRepository.findById(payload.sub);
+        // Si la contraseña ya cambio, el enlace no sirve mas (un solo uso).
+        if (candidato && payload.huella === huellaPassword(candidato.passwordHash)) {
+          usuario = candidato;
+        }
       }
     } catch {
       // No es un JWT interno de recuperación; intentamos validarlo contra Supabase Auth.

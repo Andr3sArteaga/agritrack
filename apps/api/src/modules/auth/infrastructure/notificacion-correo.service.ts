@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { esSesionDeRecuperacionSupabase } from '../domain/rules/tokens';
 
 export interface ResultadoCorreo {
   enviado: boolean;
@@ -241,12 +242,20 @@ export class NotificacionCorreoService {
       }
     }
 
-    this.logger.log(`[RECUPERACION DEV] Enlace para ${email}: ${fallbackUrl}`);
+    // El enlace solo se muestra si el entorno se declara de desarrollo a proposito:
+    // cualquier otro (demo, staging, produccion) lo entregaria a quien pida recuperar.
+    const esDesarrollo = process.env.NODE_ENV === 'development';
+    if (esDesarrollo) {
+      this.logger.log(`[RECUPERACION DEV] Enlace para ${email}: ${fallbackUrl}`);
+    } else {
+      this.logger.warn(
+        `No se pudo enviar el correo de recuperación a ${email}: configura Supabase o RESEND_API_KEY.`,
+      );
+    }
     return {
       enviado: false,
       proveedor: 'desarrollo',
-      resetUrlDesarrollo:
-        process.env.NODE_ENV !== 'production' ? fallbackUrl : undefined,
+      resetUrlDesarrollo: esDesarrollo ? fallbackUrl : undefined,
     };
   }
 
@@ -256,7 +265,9 @@ export class NotificacionCorreoService {
     const { url: supabaseUrl, anonKey, serviceRoleKey } =
       this.obtenerSupabaseConfig();
     const apiKeySupabase = anonKey || serviceRoleKey;
-    if (!supabaseUrl || !apiKeySupabase) {
+    // Una sesion normal de Supabase (o una cuenta recien registrada) no autoriza
+    // a cambiar la contraseña: solo la que nace de un enlace de recuperacion.
+    if (!supabaseUrl || !apiKeySupabase || !esSesionDeRecuperacionSupabase(accessToken)) {
       return null;
     }
 

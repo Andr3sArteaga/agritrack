@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../../application/auth.service';
 import { EstadoUsuario, Rol } from '../../../../generated/prisma/enums';
+import { esTokenDeSesion } from '../../domain/rules/tokens';
 
 export interface JwtPayload {
   sub: string;
@@ -35,6 +36,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<UsuarioAutenticado> {
+    if (!esTokenDeSesion(payload)) {
+      throw new UnauthorizedException();
+    }
     const usuario = await this.authService.validateUsuario(payload.sub);
     if (!usuario || usuario.estado !== EstadoUsuario.ACTIVO) {
       throw new UnauthorizedException();
