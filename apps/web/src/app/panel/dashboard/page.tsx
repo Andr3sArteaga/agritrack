@@ -63,17 +63,17 @@ interface DetalleSeleccionada {
 }
 
 const PUNTO_ESTADO: Record<EstadoIndicador, string> = {
-  BIEN: "bg-[#006B4F]",
-  ATENCION: "bg-amber-500",
-  CRITICO: "bg-red-600",
-  SIN_DATOS: "bg-slate-400",
+  BIEN: "bg-marca",
+  ATENCION: "bg-atencion-icono",
+  CRITICO: "bg-critico-borde",
+  SIN_DATOS: "bg-sindatos-icono",
 };
 
 const COLOR_BARRA_AREA: Record<EstadoIndicador, string> = {
-  BIEN: "bg-[#006B4F]",
-  ATENCION: "bg-amber-500",
-  CRITICO: "bg-red-600",
-  SIN_DATOS: "bg-slate-400",
+  BIEN: "bg-marca",
+  ATENCION: "bg-atencion-icono",
+  CRITICO: "bg-critico-borde",
+  SIN_DATOS: "bg-sindatos-icono",
 };
 
 function TarjetaKpiEstado({
@@ -105,21 +105,21 @@ function TarjetaKpiEstado({
 
   return (
     <article
-      className={`flex flex-col justify-between rounded-xl bg-white p-4 shadow-xs ${bordeClase} ${
+      className={`flex flex-col justify-between rounded-tarjeta bg-white p-4 shadow-xs ${bordeClase} ${
         punteado ? "border-2 border-dashed" : "border"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#68736D]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-tinta-suave">
             {titulo}
           </p>
-          <p className="mt-2 text-3xl font-extrabold tracking-tight text-[#17211D]">
+          <p className="mt-2 text-3xl font-extrabold tracking-tight text-tinta">
             {cantidad}
           </p>
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${fondoIcono}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-control ${fondoIcono}`}
         >
           <Icono className={`h-5 w-5 ${colorIcono}`} aria-hidden />
         </div>
@@ -127,10 +127,10 @@ function TarjetaKpiEstado({
 
       <div className="mt-3 space-y-2">
         <div className="flex items-center justify-between gap-2 text-xs">
-          <span className="truncate text-[#68736D]">{subtitulo}</span>
+          <span className="truncate text-tinta-suave">{subtitulo}</span>
           <span className={`shrink-0 font-bold ${acento}`}>{porcentaje}%</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#F8FAF9] ring-1 ring-[#E4EAE6]">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-fondo-suave ring-1 ring-borde">
           <div
             className={`h-full rounded-full transition-all duration-300 ${colorBarra}`}
             style={{ width: `${cantidad > 0 ? Math.max(8, porcentaje) : 0}%` }}
@@ -340,10 +340,10 @@ export default function DashboardPage() {
     carruselRef.current.scrollBy({ left: delta, behavior: "smooth" });
   }
 
-  if (error) return <p className="text-red-700">{error}</p>;
+  if (error) return <p className="text-critico-borde">{error}</p>;
   if (!resumen) {
     return (
-      <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+      <div className="rounded-tarjeta border border-borde bg-white p-6 text-sm text-tinta-suave">
         Cargando resumen general...
       </div>
     );
@@ -480,15 +480,15 @@ export default function DashboardPage() {
   const tieneFiltrosActivos = filtroFinca !== "TODAS" || filtroCampana !== "TODAS";
 
   return (
-    <div className="-mx-4 -my-6 min-h-full bg-[#F8FAF9] px-4 py-6 text-[#17211D] md:-mx-8 md:-my-8 md:px-8 md:py-8">
+    <div className="-mx-4 -my-6 min-h-full bg-fondo-suave px-4 py-6 text-tinta md:-mx-8 md:-my-8 md:px-8 md:py-8">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* 1. ENCABEZADO Y FILTROS */}
-        <header className="flex flex-col gap-4 rounded-xl border border-[#E4EAE6] bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between">
+        <header className="flex flex-col gap-4 rounded-tarjeta border border-borde bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
               Resumen
             </h1>
-            <p className="mt-0.5 text-sm text-[#68736D]">
+            <p className="mt-0.5 text-sm text-tinta-suave">
               Estado de tus parcelas y de la operación
             </p>
           </div>
@@ -496,15 +496,15 @@ export default function DashboardPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="min-w-[175px] flex-1 sm:flex-initial">
               <label htmlFor="filtro-finca" className="sr-only">
-                Selector de finca
+                Filtrar por ubicación
               </label>
               <select
                 id="filtro-finca"
                 value={filtroFinca}
                 onChange={(e) => setFiltroFinca(e.target.value)}
-                className="min-h-11 w-full rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3 text-sm font-medium text-[#17211D]"
+                className="min-h-11 w-full rounded-control border border-borde bg-fondo-suave px-3 text-sm font-medium text-tinta"
               >
-                <option value="TODAS">Todas las fincas</option>
+                <option value="TODAS">Todas las ubicaciones</option>
                 {fincasDisponibles.map((finca) => (
                   <option key={finca} value={finca}>
                     {finca}
@@ -521,7 +521,7 @@ export default function DashboardPage() {
                 id="filtro-campana"
                 value={filtroCampana}
                 onChange={(e) => setFiltroCampana(e.target.value)}
-                className="min-h-11 w-full rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3 text-sm font-medium text-[#17211D]"
+                className="min-h-11 w-full rounded-control border border-borde bg-fondo-suave px-3 text-sm font-medium text-tinta"
               >
                 <option value="TODAS">Todas las campañas</option>
                 {campanasDisponibles.temporadas.map((temp) => (
@@ -540,15 +540,15 @@ export default function DashboardPage() {
                 type="button"
                 aria-pressed={mostrarDemo}
                 onClick={() => setMostrarDemo((prev) => !prev)}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-lg border px-3.5 text-xs font-bold transition-colors ${
+                className={`inline-flex min-h-11 items-center gap-2 rounded-control border px-3.5 text-xs font-bold transition-colors ${
                   mostrarDemo
-                    ? "border-[#006B4F] bg-[#E8F5EF] text-[#006B4F]"
-                    : "border-[#E4EAE6] bg-white text-[#17211D] hover:bg-[#F8FAF9]"
+                    ? "border-marca bg-marca-suave text-marca"
+                    : "border-borde bg-white text-tinta hover:bg-fondo-suave"
                 }`}
               >
                 <FlaskConical className="h-4 w-4 shrink-0" aria-hidden />
                 {mostrarDemo ? "Ocultar datos iniciales" : "Mostrar datos iniciales"}
-                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] ring-1 ring-[#E4EAE6]">
+                <span className="rounded-full bg-white px-2 py-0.5 text-xs ring-1 ring-borde">
                   {idsDemo?.size ?? 0}
                 </span>
               </button>
@@ -557,11 +557,11 @@ export default function DashboardPage() {
         </header>
 
         {errorParcelas ? (
-          <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <p className="rounded-tarjeta border border-critico-borde/30 bg-critico-fondo p-4 text-sm text-critico-borde">
             {errorParcelas}
           </p>
         ) : parcelas === null ? (
-          <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+          <div className="rounded-tarjeta border border-borde bg-white p-6 text-sm text-tinta-suave">
             Cargando el estado de tus parcelas...
           </div>
         ) : parcelas.length === 0 ? (
@@ -571,7 +571,7 @@ export default function DashboardPage() {
               <p className="mt-3">
                 <Link
                   href="/panel/parcelas"
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                 >
                   <Plus className="h-4 w-4" aria-hidden />
                   Ir a Parcelas
@@ -595,11 +595,11 @@ export default function DashboardPage() {
                         : "Falta información de monitoreo"
                     }
                     icono={CircleDashed}
-                    acento="text-slate-700"
-                    bordeClase="border-slate-300"
-                    fondoIcono="bg-slate-100"
-                    colorIcono="text-slate-600"
-                    colorBarra="bg-slate-500"
+                    acento="text-sindatos-texto"
+                    bordeClase="border-sindatos-borde"
+                    fondoIcono="bg-sindatos-fondo"
+                    colorIcono="text-sindatos-icono"
+                    colorBarra="bg-sindatos-icono"
                     punteado={conteo.SIN_DATOS > 0}
                   />
 
@@ -611,11 +611,11 @@ export default function DashboardPage() {
                       conCampanaEnCurso === 1 ? "campaña en curso" : "campañas en curso"
                     }`}
                     icono={CheckCircle2}
-                    acento="text-[#006B4F]"
-                    bordeClase="border-[#E4EAE6]"
-                    fondoIcono="bg-[#E8F5EF]"
-                    colorIcono="text-[#006B4F]"
-                    colorBarra="bg-[#006B4F]"
+                    acento="text-marca"
+                    bordeClase="border-borde"
+                    fondoIcono="bg-marca-suave"
+                    colorIcono="text-marca"
+                    colorBarra="bg-marca"
                   />
 
                   <TarjetaKpiEstado
@@ -630,11 +630,11 @@ export default function DashboardPage() {
                         : "Sin avisos preventivos"
                     }
                     icono={AlertTriangle}
-                    acento="text-amber-700"
-                    bordeClase="border-[#E4EAE6]"
-                    fondoIcono="bg-amber-50"
-                    colorIcono="text-amber-600"
-                    colorBarra="bg-amber-500"
+                    acento="text-atencion-icono"
+                    bordeClase="border-borde"
+                    fondoIcono="bg-atencion-fondo"
+                    colorIcono="text-atencion-icono"
+                    colorBarra="bg-atencion-icono"
                   />
 
                   <TarjetaKpiEstado
@@ -649,11 +649,11 @@ export default function DashboardPage() {
                         : "Sin incidencias críticas"
                     }
                     icono={OctagonAlert}
-                    acento="text-red-700"
-                    bordeClase="border-[#E4EAE6]"
-                    fondoIcono="bg-red-50"
-                    colorIcono="text-red-600"
-                    colorBarra="bg-red-600"
+                    acento="text-critico-borde"
+                    bordeClase="border-borde"
+                    fondoIcono="bg-critico-fondo"
+                    colorIcono="text-critico-borde"
+                    colorBarra="bg-critico-borde"
                   />
                 </div>
 
@@ -672,11 +672,11 @@ export default function DashboardPage() {
                 <div>
                   <h2
                     id="mis-parcelas-heading"
-                    className="text-lg font-bold text-[#17211D]"
+                    className="text-lg font-bold text-tinta"
                   >
                     Mis Parcelas
                   </h2>
-                  <p className="text-xs text-[#68736D]">
+                  <p className="text-xs text-tinta-suave">
                     Mostrando {parcelasFiltradas.length} de {parcelas.length} parcelas activas.
                     Selecciona una para actualizar el detalle inferior.
                   </p>
@@ -690,7 +690,7 @@ export default function DashboardPage() {
                         setFiltroFinca("TODAS");
                         setFiltroCampana("TODAS");
                       }}
-                      className="min-h-10 rounded-lg border border-[#E4EAE6] bg-white px-3 text-xs font-semibold text-[#17211D] hover:bg-[#E8F5EF]"
+                      className="min-h-10 rounded-control border border-borde bg-white px-3 text-sm font-semibold text-tinta hover:bg-marca-suave"
                     >
                       Limpiar filtros
                     </button>
@@ -699,7 +699,7 @@ export default function DashboardPage() {
                     type="button"
                     aria-label="Desplazar parcelas a la izquierda"
                     onClick={() => desplazarCarrusel("izq")}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#E4EAE6] bg-white text-[#17211D] hover:bg-[#E8F5EF]"
+                    className="flex h-10 w-10 items-center justify-center rounded-control border border-borde bg-white text-tinta hover:bg-marca-suave"
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden />
                   </button>
@@ -707,7 +707,7 @@ export default function DashboardPage() {
                     type="button"
                     aria-label="Desplazar parcelas a la derecha"
                     onClick={() => desplazarCarrusel("der")}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#E4EAE6] bg-white text-[#17211D] hover:bg-[#E8F5EF]"
+                    className="flex h-10 w-10 items-center justify-center rounded-control border border-borde bg-white text-tinta hover:bg-marca-suave"
                   >
                     <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
@@ -715,7 +715,7 @@ export default function DashboardPage() {
               </div>
 
               {parcelasFiltradas.length === 0 ? (
-                <div className="rounded-xl border-2 border-dashed border-stone-300 bg-white p-6 text-center text-sm text-[#68736D]">
+                <div className="rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-white p-6 text-center text-sm text-tinta-suave">
                   Ninguna parcela coincide con los filtros actuales.
                 </div>
               ) : (
@@ -735,18 +735,18 @@ export default function DashboardPage() {
                         role="tab"
                         aria-selected={seleccionada}
                         onClick={() => setElegidaId(parcela.parcelaId)}
-                        className={`group flex w-64 shrink-0 snap-start flex-col overflow-hidden rounded-xl bg-white text-left shadow-xs transition-all ${
+                        className={`group flex w-64 shrink-0 snap-start flex-col overflow-hidden rounded-tarjeta bg-white text-left shadow-xs transition-all ${
                           seleccionada
-                            ? "border-2 border-[#006B4F] ring-2 ring-[#E8F5EF]"
-                            : "border border-[#E4EAE6] hover:border-[#006B4F]/50"
+                            ? "border-2 border-marca ring-2 ring-marca-suave"
+                            : "border border-borde hover:border-marca/50"
                         }`}
                       >
                         {/* Cabecera visual representativa del lote */}
                         <div
                           className={`relative flex h-20 w-full items-end justify-between px-4 py-3 ${
                             seleccionada
-                              ? "bg-gradient-to-br from-[#006B4F] to-[#044D39] text-white"
-                              : "bg-gradient-to-br from-[#E8F5EF] to-[#D4EBE0] text-[#006B4F]"
+                              ? "bg-gradient-to-br from-marca to-marca-hover text-white"
+                              : "bg-marca-suave text-marca"
                           }`}
                         >
                           <div className="flex items-center gap-1.5 text-xs font-semibold">
@@ -765,17 +765,17 @@ export default function DashboardPage() {
 
                         <div className="flex flex-1 flex-col justify-between gap-2 p-4">
                           <div>
-                            <p className="truncate text-base font-bold text-[#17211D]">
+                            <p className="truncate text-base font-bold text-tinta">
                               {parcela.nombre}
                             </p>
-                            <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-[#68736D]">
+                            <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-tinta-suave">
                               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
                               {parcela.ubicacion || "Sin ubicación"}
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-between border-t border-[#E4EAE6] pt-2.5 text-xs">
-                            <span className="font-bold text-[#17211D]">
+                          <div className="flex items-center justify-between border-t border-borde pt-2.5 text-xs">
+                            <span className="font-bold text-tinta">
                               {parcela.hectareas} ha
                             </span>
                             <EstadoBadge estado={parcela.estado} tamano="sm" />
@@ -794,15 +794,15 @@ export default function DashboardPage() {
                 id="panel-parcela"
                 role="tabpanel"
                 aria-labelledby={`pestana-${elegida.parcelaId}`}
-                className="rounded-xl border border-[#E4EAE6] bg-white p-5 shadow-xs sm:p-6"
+                className="rounded-tarjeta border border-borde bg-white p-5 shadow-xs sm:p-6"
               >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E4EAE6] pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde pb-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wide text-[#006B4F]">
+                      <p className="text-xs font-bold uppercase tracking-wide text-marca">
                         Parcela seleccionada
                       </p>
-                      <h2 className="text-xl font-bold text-[#17211D]">{elegida.nombre}</h2>
+                      <h2 className="text-xl font-bold text-tinta">{elegida.nombre}</h2>
                     </div>
                     <EstadoBadge estado={elegida.estado} tamano="md" />
                   </div>
@@ -812,7 +812,7 @@ export default function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => setMostrarModalActividad(true)}
-                        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                       >
                         <Plus className="h-4 w-4 shrink-0" aria-hidden />
                         Registrar actividad
@@ -820,7 +820,7 @@ export default function DashboardPage() {
                     ) : (
                       <Link
                         href={`/panel/parcelas/${elegida.parcelaId}`}
-                        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                       >
                         <Plus className="h-4 w-4 shrink-0" aria-hidden />
                         Registrar actividad
@@ -829,7 +829,7 @@ export default function DashboardPage() {
 
                     <Link
                       href={`/panel/parcelas/${elegida.parcelaId}`}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3.5 text-sm font-semibold text-[#17211D] hover:bg-[#E8F5EF] hover:text-[#006B4F]"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-borde bg-fondo-suave px-3.5 text-sm font-semibold text-tinta hover:bg-marca-suave hover:text-marca"
                     >
                       Ver detalle
                       <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
@@ -839,23 +839,23 @@ export default function DashboardPage() {
 
                 <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
                   {/* COLUMNA 1: INFORMACIÓN GENERAL */}
-                  <div className="space-y-3 rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4">
-                    <h3 className="text-sm font-bold text-[#17211D]">Información general</h3>
+                  <div className="space-y-3 rounded-tarjeta border border-borde bg-fondo-suave p-4">
+                    <h3 className="text-sm font-bold text-tinta">Información general</h3>
 
                     <dl className="space-y-3 text-sm">
                       <div className="flex items-start gap-2.5">
-                        <Ruler className="mt-0.5 h-4 w-4 shrink-0 text-[#006B4F]" aria-hidden />
+                        <Ruler className="mt-0.5 h-4 w-4 shrink-0 text-marca" aria-hidden />
                         <div>
-                          <dt className="text-xs text-[#68736D]">Superficie</dt>
-                          <dd className="font-bold text-[#17211D]">{elegida.hectareas} ha</dd>
+                          <dt className="text-xs text-tinta-suave">Superficie</dt>
+                          <dd className="font-bold text-tinta">{elegida.hectareas} ha</dd>
                         </div>
                       </div>
 
                       <div className="flex items-start gap-2.5">
-                        <Sprout className="mt-0.5 h-4 w-4 shrink-0 text-[#006B4F]" aria-hidden />
+                        <Sprout className="mt-0.5 h-4 w-4 shrink-0 text-marca" aria-hidden />
                         <div>
-                          <dt className="text-xs text-[#68736D]">Cultivo</dt>
-                          <dd className="font-bold text-[#17211D]">
+                          <dt className="text-xs text-tinta-suave">Cultivo</dt>
+                          <dd className="font-bold text-tinta">
                             {elegida.cultivoActual ?? "Sin campaña activa"}
                           </dd>
                         </div>
@@ -863,12 +863,12 @@ export default function DashboardPage() {
 
                       <div className="flex items-start gap-2.5">
                         <CalendarRange
-                          className="mt-0.5 h-4 w-4 shrink-0 text-[#006B4F]"
+                          className="mt-0.5 h-4 w-4 shrink-0 text-marca"
                           aria-hidden
                         />
                         <div>
-                          <dt className="text-xs text-[#68736D]">Campaña</dt>
-                          <dd className="font-bold text-[#17211D]">
+                          <dt className="text-xs text-tinta-suave">Campaña</dt>
+                          <dd className="font-bold text-tinta">
                             {elegida.campanaActual
                               ? `${elegida.campanaActual.temporada} (${
                                   ESTADO_CAMPANA_LABEL[elegida.campanaActual.estado]
@@ -879,10 +879,10 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="flex items-start gap-2.5">
-                        <Tag className="mt-0.5 h-4 w-4 shrink-0 text-[#006B4F]" aria-hidden />
+                        <Tag className="mt-0.5 h-4 w-4 shrink-0 text-marca" aria-hidden />
                         <div>
-                          <dt className="text-xs text-[#68736D]">Variedad / semilla</dt>
-                          <dd className="font-bold text-[#17211D]">
+                          <dt className="text-xs text-tinta-suave">Variedad / semilla</dt>
+                          <dd className="font-bold text-tinta">
                             {cargandoDetalle
                               ? "Consultando..."
                               : detalleActivo?.registroCosecha?.variedad?.trim() ||
@@ -894,10 +894,10 @@ export default function DashboardPage() {
                   </div>
 
                   {/* COLUMNA 2: ESTADO DE DATOS (Suelo, Labores, Clima) */}
-                  <div className="space-y-3 rounded-xl border border-[#E4EAE6] bg-white p-4">
+                  <div className="space-y-3 rounded-tarjeta border border-borde bg-white p-4">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-bold text-[#17211D]">Estado de datos</h3>
-                      <span className="text-xs font-medium text-[#68736D]">
+                      <h3 className="text-sm font-bold text-tinta">Estado de datos</h3>
+                      <span className="text-xs font-medium text-tinta-suave">
                         {elegida.areas.length - elegida.areasSinDatos} de {elegida.areas.length}{" "}
                         activas
                       </span>
@@ -917,12 +917,12 @@ export default function DashboardPage() {
                           <Link
                             key={area.id}
                             href={`/panel/parcelas/${elegida.parcelaId}`}
-                            className="block rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] p-3 transition-colors hover:border-[#006B4F]/50"
+                            className="block rounded-control border border-borde bg-fondo-suave p-3 transition-colors hover:border-marca/50"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#17211D]">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-tinta">
                                 <Icono
-                                  className="h-4 w-4 text-[#006B4F]"
+                                  className="h-4 w-4 text-marca"
                                   aria-hidden
                                 />
                                 {nombreCorto}
@@ -935,18 +935,18 @@ export default function DashboardPage() {
                               )}
                             </div>
 
-                            <div className="mt-2 flex items-center justify-between text-xs text-[#68736D]">
+                            <div className="mt-2 flex items-center justify-between text-xs text-tinta-suave">
                               <span>
                                 {area.conDato} de {totalInd} datos registrados
                               </span>
-                              <span className="font-semibold text-[#17211D]">{pct}%</span>
+                              <span className="font-semibold text-tinta">{pct}%</span>
                             </div>
 
-                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white ring-1 ring-[#E4EAE6]">
+                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white ring-1 ring-borde">
                               <div
                                 className={`h-full rounded-full ${
                                   soloRegistrada
-                                    ? "bg-[#006B4F]"
+                                    ? "bg-marca"
                                     : COLOR_BARRA_AREA[area.estado]
                                 }`}
                                 style={{ width: `${area.conDato > 0 ? Math.max(8, pct) : 0}%` }}
@@ -959,21 +959,21 @@ export default function DashboardPage() {
                   </div>
 
                   {/* COLUMNA 3: ESTIMACIÓN DE RENDIMIENTO */}
-                  <div className="flex flex-col justify-between rounded-xl border border-[#006B4F]/30 bg-[#E8F5EF]/55 p-4">
+                  <div className="flex flex-col justify-between rounded-tarjeta border border-marca/30 bg-marca-suave/55 p-4">
                     <div>
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h3 className="flex items-center gap-1.5 text-sm font-bold text-[#17211D]">
-                          <LineChart className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                        <h3 className="flex items-center gap-1.5 text-sm font-bold text-tinta">
+                          <LineChart className="h-4 w-4 text-marca" aria-hidden />
                           Estimación de rendimiento
                         </h3>
                         {bloqueModelo ? (
-                          <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#006B4F] ring-1 ring-[#006B4F]/30">
+                          <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-marca ring-1 ring-marca/30">
                             {bloqueModelo.estado === "oficial"
                               ? `Modelo ${bloqueModelo.version_modelo ?? ""}`
                               : `Experimental ${bloqueModelo.version_modelo ?? ""}`}
                           </span>
                         ) : valorEstimadoTnHa !== null ? (
-                          <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#17211D] ring-1 ring-[#E4EAE6]">
+                          <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-tinta ring-1 ring-borde">
                             Línea base
                           </span>
                         ) : (
@@ -983,32 +983,32 @@ export default function DashboardPage() {
 
                       <div className="mt-4">
                         {cargandoDetalle ? (
-                          <p className="text-sm text-[#68736D]">Calculando estimación...</p>
+                          <p className="text-sm text-tinta-suave">Calculando estimación...</p>
                         ) : valorEstimadoTnHa !== null ? (
                           <>
-                            <p className="text-3xl font-extrabold tracking-tight text-[#17211D]">
+                            <p className="text-3xl font-extrabold tracking-tight text-tinta">
                               {valorEstimadoTnHa.toFixed(2)}{" "}
-                              <span className="text-base font-bold text-[#68736D]">t/ha</span>
+                              <span className="text-base font-bold text-tinta-suave">t/ha</span>
                             </p>
-                            <p className="mt-1 text-xs font-semibold text-[#006B4F]">
+                            <p className="mt-1 text-xs font-semibold text-marca">
                               {produccionEstimadaTn !== null
                                 ? `${produccionEstimadaTn.toFixed(2)} toneladas totales proyectadas`
                                 : `${elegida.hectareas} ha registradas`}
                             </p>
-                            <p className="mt-1 text-xs text-[#68736D]">
+                            <p className="mt-1 text-xs text-tinta-suave">
                               Referencia: {campanasReferencia}{" "}
                               {campanasReferencia === 1 ? "campaña histórica" : "campañas históricas"}
                             </p>
                           </>
                         ) : (
-                          <p className="text-sm font-semibold text-[#17211D]">
+                          <p className="text-sm font-semibold text-tinta">
                             Estimación aún no disponible
                           </p>
                         )}
                       </div>
 
                       {mensajeContextualEstimacion && (
-                        <div className="mt-4 rounded-lg border border-[#E4EAE6] bg-white/90 p-3 text-xs text-[#68736D]">
+                        <div className="mt-4 rounded-control border border-borde bg-white/90 p-3 text-xs text-tinta-suave">
                           {mensajeContextualEstimacion}
                         </div>
                       )}
@@ -1017,7 +1017,7 @@ export default function DashboardPage() {
                     <div className="mt-4 pt-2">
                       <Link
                         href={`/panel/parcelas/${elegida.parcelaId}?tab=estimacion`}
-                        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-white px-3 text-xs font-bold text-[#006B4F] ring-1 ring-[#006B4F]/30 hover:bg-[#006B4F] hover:text-white"
+                        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-control bg-white px-3 text-sm font-bold text-marca ring-1 ring-marca/30 hover:bg-marca hover:text-white"
                       >
                         Ver estimación completa
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -1035,34 +1035,34 @@ export default function DashboardPage() {
                 className="grid grid-cols-1 gap-4 lg:grid-cols-2"
               >
                 {/* Bloque 1: Último registro de labor */}
-                <article className="flex flex-col justify-between rounded-xl border border-[#E4EAE6] bg-white p-5 shadow-xs">
+                <article className="flex flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 shadow-xs">
                   <div>
                     <div className="flex items-center justify-between gap-2">
-                      <h2 className="flex items-center gap-2 text-base font-bold text-[#17211D]">
-                        <History className="h-5 w-5 text-[#006B4F]" aria-hidden />
+                      <h2 className="flex items-center gap-2 text-base font-bold text-tinta">
+                        <History className="h-5 w-5 text-marca" aria-hidden />
                         Último registro de labor
                       </h2>
-                      <span className="text-xs font-medium text-[#68736D]">
+                      <span className="text-xs font-medium text-tinta-suave">
                         {elegida.nombre}
                       </span>
                     </div>
 
                     {cargandoDetalle ? (
-                      <p className="mt-4 text-sm text-[#68736D]">Cargando última labor...</p>
+                      <p className="mt-4 text-sm text-tinta-suave">Cargando última labor...</p>
                     ) : detalleActivo?.ultimaActividad ? (
-                      <div className="mt-4 rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4">
+                      <div className="mt-4 rounded-tarjeta border border-borde bg-fondo-suave p-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="rounded-md bg-[#E8F5EF] px-2.5 py-1 text-xs font-bold text-[#006B4F]">
+                          <span className="rounded-control bg-marca-suave px-2.5 py-1 text-xs font-bold text-marca">
                             {TIPO_ACTIVIDAD_LABEL[detalleActivo.ultimaActividad.tipo]}
                           </span>
-                          <span className="text-xs font-semibold text-[#68736D]">
+                          <span className="text-xs font-semibold text-tinta-suave">
                             {formatearFecha(detalleActivo.ultimaActividad.fecha)}
                           </span>
                         </div>
-                        <p className="mt-2 text-sm font-medium text-[#17211D]">
+                        <p className="mt-2 text-sm font-medium text-tinta">
                           {detalleActivo.ultimaActividad.descripcion}
                         </p>
-                        <p className="mt-1 text-xs text-[#68736D]">
+                        <p className="mt-1 text-xs text-tinta-suave">
                           Total en la campaña: {detalleActivo.totalActividadesVigentes}{" "}
                           {detalleActivo.totalActividadesVigentes === 1
                             ? "labor registrada"
@@ -1070,17 +1070,17 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     ) : elegida.ultimoRegistroLabor ? (
-                      <div className="mt-4 rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4 text-sm">
-                        <p className="font-semibold text-[#17211D]">
+                      <div className="mt-4 rounded-tarjeta border border-borde bg-fondo-suave p-4 text-sm">
+                        <p className="font-semibold text-tinta">
                           Última actividad: {formatearFecha(elegida.ultimoRegistroLabor)}
                         </p>
-                        <p className="mt-1 text-xs text-[#68736D]">
+                        <p className="mt-1 text-xs text-tinta-suave">
                           Parcela: {elegida.nombre}
                         </p>
                       </div>
                     ) : (
-                      <div className="mt-4 rounded-xl border border-dashed border-stone-300 bg-[#F8FAF9] p-4 text-sm text-[#68736D]">
-                        <p className="font-medium text-[#17211D]">
+                      <div className="mt-4 rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-4 text-sm text-tinta-suave">
+                        <p className="font-medium text-tinta">
                           Sin labores registradas en {elegida.nombre}.
                         </p>
                         {resumen.ultimaCosecha && (
@@ -1095,9 +1095,9 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between border-t border-[#E4EAE6] pt-3 text-xs text-[#68736D]">
+                  <div className="mt-4 flex items-center justify-between border-t border-borde pt-3 text-xs text-tinta-suave">
                     <span className="inline-flex items-center gap-1.5">
-                      <Tractor className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                      <Tractor className="h-4 w-4 text-marca" aria-hidden />
                       {resumen.campanasEnCurso}{" "}
                       {resumen.campanasEnCurso === 1
                         ? "campaña en curso"
@@ -1106,7 +1106,7 @@ export default function DashboardPage() {
                     </span>
                     <Link
                       href={`/panel/parcelas/${elegida.parcelaId}`}
-                      className="font-semibold text-[#006B4F] hover:underline"
+                      className="inline-flex min-h-11 items-center font-semibold text-marca hover:underline"
                     >
                       Ir a bitácora
                     </Link>
@@ -1114,10 +1114,10 @@ export default function DashboardPage() {
                 </article>
 
                 {/* Bloque 2: Próximas acciones */}
-                <article className="flex flex-col justify-between rounded-xl border border-[#E4EAE6] bg-white p-5 shadow-xs">
+                <article className="flex flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 shadow-xs">
                   <div>
-                    <h2 className="flex items-center gap-2 text-base font-bold text-[#17211D]">
-                      <ClipboardCheck className="h-5 w-5 text-[#006B4F]" aria-hidden />
+                    <h2 className="flex items-center gap-2 text-base font-bold text-tinta">
+                      <ClipboardCheck className="h-5 w-5 text-marca" aria-hidden />
                       Próximas acciones
                     </h2>
 
@@ -1126,12 +1126,12 @@ export default function DashboardPage() {
                         {accionesPendientes.slice(0, 3).map((accion) => (
                           <li
                             key={accion.texto}
-                            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3 py-2.5 text-xs"
+                            className="flex flex-wrap items-center justify-between gap-2 rounded-control border border-borde bg-fondo-suave px-3 py-2.5 text-xs"
                           >
-                            <span className="font-medium text-[#17211D]">{accion.texto}</span>
+                            <span className="font-medium text-tinta">{accion.texto}</span>
                             <Link
                               href={accion.href}
-                              className="shrink-0 font-bold text-[#006B4F] hover:underline"
+                              className="inline-flex min-h-11 shrink-0 items-center font-bold text-marca hover:underline"
                             >
                               {accion.accionEtiqueta} →
                             </Link>
@@ -1139,22 +1139,22 @@ export default function DashboardPage() {
                         ))}
                       </ul>
                     ) : (
-                      <div className="mt-3 rounded-lg border border-[#006B4F]/30 bg-[#E8F5EF] px-3.5 py-3 text-xs font-medium text-[#006B4F]">
+                      <div className="mt-3 rounded-control border border-marca/30 bg-marca-suave px-3.5 py-3 text-xs font-medium text-marca">
                         Los datos clave de {elegida.nombre} están completos.
                       </div>
                     )}
 
                     {resumen.proximasCosechas.length > 0 && (
-                      <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#E4EAE6] bg-white px-3 py-2 text-xs">
-                        <span className="inline-flex items-center gap-1.5 text-[#68736D]">
-                          <CalendarClock className="h-3.5 w-3.5 text-[#006B4F]" aria-hidden />
+                      <div className="mt-3 flex items-center justify-between gap-2 rounded-control border border-borde bg-white px-3 py-2 text-xs">
+                        <span className="inline-flex items-center gap-1.5 text-tinta-suave">
+                          <CalendarClock className="h-3.5 w-3.5 text-marca" aria-hidden />
                           Próxima cosecha:
-                          <strong className="text-[#17211D]">
+                          <strong className="text-tinta">
                             {resumen.proximasCosechas[0].parcelaNombre} (
                             {resumen.proximasCosechas[0].cultivoNombre})
                           </strong>
                         </span>
-                        <span className="font-semibold text-[#17211D]">
+                        <span className="font-semibold text-tinta">
                           {formatearFecha(resumen.proximasCosechas[0].fechaFin)}
                         </span>
                       </div>
@@ -1164,7 +1164,7 @@ export default function DashboardPage() {
                   <div className="mt-4 pt-2">
                     <Link
                       href={`/panel/parcelas/${elegida.parcelaId}`}
-                      className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                      className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                     >
                       <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
                       Ver detalle de la parcela

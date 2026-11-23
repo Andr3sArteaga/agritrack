@@ -34,13 +34,13 @@ function GrupoCamposSuelo({
   onChange: (id: CampoId, valor: string) => void;
 }) {
   return (
-    <fieldset className="space-y-3 rounded-lg border border-stone-200 bg-stone-50/70 p-3.5">
-      <legend className="px-1 text-sm font-bold text-stone-900">{titulo}</legend>
+    <fieldset className="space-y-3 rounded-control border border-borde bg-fondo-suave/70 p-3.5">
+      <legend className="px-1 text-sm font-bold text-tinta">{titulo}</legend>
       <div className="grid gap-3 sm:grid-cols-3">
         {campos.map((campo) => (
           <div key={campo.id}>
-            <label htmlFor={`suelo-${campo.id}`} className="block text-sm font-bold text-stone-800">
-              {campo.nombre} <span className="font-normal text-stone-600">({campo.unidad})</span>
+            <label htmlFor={`suelo-${campo.id}`} className="block text-sm font-bold text-tinta">
+              {campo.nombre} <span className="font-normal text-tinta-suave">({campo.unidad})</span>
             </label>
             <input
               id={`suelo-${campo.id}`}
@@ -52,7 +52,7 @@ function GrupoCamposSuelo({
               placeholder={`Ej. ${campo.ejemplo}`}
               value={valores[campo.id]}
               onChange={(e) => onChange(campo.id, e.target.value)}
-              className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 bg-white px-3 text-base"
+              className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave bg-white px-3 text-base"
             />
           </div>
         ))}
@@ -114,13 +114,13 @@ export function SueloForm({
   return (
     <Modal titulo="Agregar datos de suelo" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
-        <p className="text-base text-stone-700">
+        <p className="text-base text-tinta-suave">
           Anota solo lo que tengas: los valores del informe del laboratorio, la humedad medida en
           el campo, o ambos. Lo demás déjalo vacío.
         </p>
 
         <div>
-          <label htmlFor="suelo-fecha" className="block text-base font-bold text-stone-800">
+          <label htmlFor="suelo-fecha" className="block text-base font-bold text-tinta">
             Fecha de la medición
           </label>
           <input
@@ -130,7 +130,7 @@ export function SueloForm({
             max={hoy()}
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
-            className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base"
+            className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave px-3 text-base"
           />
         </div>
 
@@ -149,8 +149,8 @@ export function SueloForm({
         />
 
         <div>
-          <label htmlFor="suelo-notas" className="block text-base font-bold text-stone-800">
-            Nota <span className="font-normal text-stone-600">(opcional)</span>
+          <label htmlFor="suelo-notas" className="block text-base font-bold text-tinta">
+            Nota <span className="font-normal text-tinta-suave">(opcional)</span>
           </label>
           <input
             id="suelo-notas"
@@ -158,7 +158,7 @@ export function SueloForm({
             placeholder="Ej. Muestra tomada a 20 cm"
             value={notas}
             onChange={(e) => setNotas(e.target.value)}
-            className="mt-1 min-h-11 w-full rounded-md border-2 border-stone-400 px-3 text-base"
+            className="mt-1 min-h-11 w-full rounded-control border-2 border-tinta-suave px-3 text-base"
           />
         </div>
 

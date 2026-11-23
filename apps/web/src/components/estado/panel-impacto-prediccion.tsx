@@ -73,7 +73,7 @@ export function PanelImpactoPrediccion({
     return (
       <div
         aria-live="polite"
-        className="rounded-lg border-2 border-dashed border-sindatos-borde bg-sindatos-fondo p-3 text-sm text-sindatos-texto"
+        className="rounded-control border-2 border-dashed border-sindatos-borde bg-sindatos-fondo p-3 text-sm text-sindatos-texto"
       >
         {cargando ? "Calculando impacto en el modelo..." : "Completa los datos para ver el impacto."}
       </div>
@@ -93,7 +93,7 @@ export function PanelImpactoPrediccion({
     <section
       aria-live="polite"
       aria-label="Análisis de impacto en tiempo real"
-      className={`space-y-3 rounded-lg border-2 border-l-[10px] p-3 sm:p-4 ${estilo.caja} ${
+      className={`space-y-3 rounded-control border-2 border-l-[10px] p-3 sm:p-4 ${estilo.caja} ${
         estilo.punteado ? "border-dashed [border-left-style:solid]" : ""
       }`}
     >
@@ -107,12 +107,12 @@ export function PanelImpactoPrediccion({
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {cargando && (
-            <span className="rounded-full border border-stone-300 bg-white px-2 py-0.5 text-xs font-medium text-stone-700">
+            <span className="rounded-full border border-borde bg-white px-2 py-0.5 text-xs font-medium text-tinta-suave">
               Actualizando...
             </span>
           )}
           {impacto.version_modelo && (
-            <span className="rounded-full border border-stone-300 bg-white px-2 py-0.5 text-xs font-semibold text-stone-800">
+            <span className="rounded-full border border-borde bg-white px-2 py-0.5 text-xs font-semibold text-tinta">
               Modelo {impacto.version_modelo}
             </span>
           )}
@@ -122,21 +122,21 @@ export function PanelImpactoPrediccion({
 
       {(impacto.estimado_t_ha !== null || impacto.referencia_t_ha !== null) && (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="rounded-md border border-stone-300/80 bg-white/90 px-3 py-2 text-stone-900">
-            <p className="text-xs font-medium text-stone-600">Rendimiento estimado</p>
+          <div className="rounded-control border border-borde/80 bg-white/90 px-3 py-2 text-tinta">
+            <p className="text-xs font-medium text-tinta-suave">Rendimiento estimado</p>
             <p className="text-base font-bold">
               {impacto.estimado_t_ha !== null ? `${impacto.estimado_t_ha.toFixed(2)} t/ha` : "Sin datos"}
             </p>
           </div>
-          <div className="rounded-md border border-stone-300/80 bg-white/90 px-3 py-2 text-stone-900">
-            <p className="text-xs font-medium text-stone-600">Diferencia ({etiquetaRef})</p>
+          <div className="rounded-control border border-borde/80 bg-white/90 px-3 py-2 text-tinta">
+            <p className="text-xs font-medium text-tinta-suave">Diferencia ({etiquetaRef})</p>
             <p className="text-base font-bold">{formatoDelta(impacto.diferencia_t_ha)}</p>
             {impacto.referencia_t_ha !== null && (
-              <p className="text-xs text-stone-600">Ref: {impacto.referencia_t_ha.toFixed(2)} t/ha</p>
+              <p className="text-xs text-tinta-suave">Ref: {impacto.referencia_t_ha.toFixed(2)} t/ha</p>
             )}
           </div>
-          <div className="rounded-md border border-stone-300/80 bg-white/90 px-3 py-2 text-stone-900">
-            <p className="text-xs font-medium text-stone-600">Producción total estimada</p>
+          <div className="rounded-control border border-borde/80 bg-white/90 px-3 py-2 text-tinta">
+            <p className="text-xs font-medium text-tinta-suave">Producción total estimada</p>
             <p className="text-base font-bold">
               {impacto.produccion_estimada_tn !== null
                 ? `${impacto.produccion_estimada_tn.toFixed(2)} t`
@@ -158,12 +158,12 @@ export function PanelImpactoPrediccion({
               return (
                 <li
                   key={factor.variable}
-                  className="rounded-md border border-stone-300/80 bg-white/90 px-3 py-2 text-sm text-stone-900"
+                  className="rounded-control border border-borde/80 bg-white/90 px-3 py-2 text-sm text-tinta"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-semibold">
                       {factor.etiqueta}:{" "}
-                      <span className="font-normal text-stone-700">{factor.valorIngresado}</span>
+                      <span className="font-normal text-tinta-suave">{factor.valorIngresado}</span>
                     </span>
                     <span
                       className={`inline-flex items-center gap-1 rounded-full border-2 px-2 py-0.5 text-xs font-bold ${estFactor.chip} ${
@@ -175,7 +175,7 @@ export function PanelImpactoPrediccion({
                       {factor.delta_t_ha !== 0 && ` (${formatoDelta(factor.delta_t_ha)})`}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-stone-700">{factor.detalle}</p>
+                  <p className="mt-1 text-xs text-tinta-suave">{factor.detalle}</p>
                 </li>
               );
             })}

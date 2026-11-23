@@ -298,19 +298,19 @@ export function ActividadForm({
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {corrigiendo && (
-          <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <p className="rounded-control border border-atencion-borde/40 bg-atencion-fondo px-3 py-2 text-sm text-atencion-texto">
             El historial es inmutable: se creará un nuevo registro que corrige a la actividad #
             {corrigiendo.secuencia}.
           </p>
         )}
 
-        <fieldset className="space-y-3 rounded-xl border border-[#E4EAE6] bg-[#F8FAF9] p-4">
-          <legend className="px-1 text-sm font-bold text-[#17211D]">
+        <fieldset className="space-y-3 rounded-tarjeta border border-borde bg-fondo-suave p-4">
+          <legend className="px-1 text-sm font-bold text-tinta">
             1. Tipo de actividad y fecha
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label htmlFor="act-tipo" className="block text-sm font-bold text-[#17211D]">
+              <label htmlFor="act-tipo" className="block text-sm font-bold text-tinta">
                 Tipo de actividad
               </label>
               <select
@@ -319,7 +319,7 @@ export function ActividadForm({
                 disabled={!!corrigiendo}
                 value={tipo}
                 onChange={(e) => alCambiarTipo(e.target.value as TipoActividad)}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-[#17211D] disabled:bg-stone-100"
+                className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 text-sm text-tinta disabled:bg-fondo"
               >
                 {TIPOS.map((t) => (
                   <option key={t} value={t}>
@@ -329,7 +329,7 @@ export function ActividadForm({
               </select>
             </div>
             <div>
-              <label htmlFor="act-fecha" className="block text-sm font-bold text-[#17211D]">
+              <label htmlFor="act-fecha" className="block text-sm font-bold text-tinta">
                 Fecha de realización
               </label>
               <input
@@ -338,12 +338,12 @@ export function ActividadForm({
                 type="date"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-[#17211D]"
+                className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 text-sm text-tinta"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="act-descripcion" className="block text-sm font-bold text-[#17211D]">
+            <label htmlFor="act-descripcion" className="block text-sm font-bold text-tinta">
               Descripción de la labor / observación
             </label>
             <textarea
@@ -353,21 +353,21 @@ export function ActividadForm({
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+              className="mt-1 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
             />
           </div>
         </fieldset>
 
         {tipo === "SIEMBRA" && !corrigiendo && (
-          <fieldset className="space-y-3 rounded-xl border border-[#006B4F]/30 bg-[#E8F5EF]/60 p-4">
-            <legend className="px-1 text-sm font-bold text-[#006B4F]">
+          <fieldset className="space-y-3 rounded-tarjeta border border-marca/30 bg-marca-suave/60 p-4">
+            <legend className="px-1 text-sm font-bold text-marca">
               2. Variables agronómicas que alimentan al modelo predictivo
             </legend>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label
                   htmlFor="act-ha-sembradas"
-                  className="block text-sm font-bold text-[#17211D]"
+                  className="block text-sm font-bold text-tinta"
                 >
                   Superficie sembrada (ha)
                 </label>
@@ -378,11 +378,11 @@ export function ActividadForm({
                   min="0.01"
                   value={haSembradas}
                   onChange={(e) => setHaSembradas(e.target.value)}
-                  className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+                  className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
                 />
               </div>
               <div>
-                <label htmlFor="act-variedad" className="block text-sm font-bold text-[#17211D]">
+                <label htmlFor="act-variedad" className="block text-sm font-bold text-tinta">
                   Variedad o semilla
                 </label>
                 <input
@@ -391,13 +391,13 @@ export function ActividadForm({
                   placeholder="Ej. 6410 o MUNASQA"
                   value={variedad}
                   onChange={(e) => setVariedad(e.target.value)}
-                  className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+                  className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
                 />
               </div>
             </div>
             {impacto && impacto.variedadesConocidas.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                <span className="self-center text-xs font-medium text-[#68736D]">
+                <span className="self-center text-xs font-medium text-tinta-suave">
                   Variedades conocidas:
                 </span>
                 {impacto.variedadesConocidas.map((opcion) => {
@@ -407,10 +407,10 @@ export function ActividadForm({
                       key={opcion}
                       type="button"
                       onClick={() => setVariedad(opcion)}
-                      className={`min-h-11 rounded-lg border px-2.5 text-xs font-semibold ${
+                      className={`min-h-11 rounded-control border px-2.5 text-xs font-semibold ${
                         activa
-                          ? "border-[#006B4F] bg-[#006B4F] text-white"
-                          : "border-[#E4EAE6] bg-white text-[#17211D] hover:bg-[#E8F5EF]"
+                          ? "border-marca bg-marca text-white"
+                          : "border-borde bg-white text-tinta hover:bg-marca-suave"
                       }`}
                     >
                       {opcion}
@@ -423,8 +423,8 @@ export function ActividadForm({
         )}
 
         {tipo === "COSECHA" && (
-          <div className="rounded-xl border border-[#006B4F]/30 bg-[#E8F5EF]/50 p-4">
-            <label htmlFor="act-rendimiento" className="block text-sm font-bold text-[#17211D]">
+          <div className="rounded-tarjeta border border-marca/30 bg-marca-suave/50 p-4">
+            <label htmlFor="act-rendimiento" className="block text-sm font-bold text-tinta">
               Rendimiento cosechado (t/ha)
             </label>
             <input
@@ -436,7 +436,7 @@ export function ActividadForm({
               placeholder="Ej. 3.40"
               value={rendimientoTnHa}
               onChange={(e) => setRendimientoTnHa(e.target.value)}
-              className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+              className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
             />
           </div>
         )}
@@ -447,13 +447,13 @@ export function ActividadForm({
           error={errorImpacto}
         />
 
-        <fieldset className="space-y-3 rounded-xl border border-[#E4EAE6] bg-white p-4">
-          <legend className="px-1 text-xs font-bold uppercase tracking-wide text-[#68736D]">
+        <fieldset className="space-y-3 rounded-tarjeta border border-borde bg-white p-4">
+          <legend className="px-1 text-xs font-bold uppercase tracking-wide text-tinta-suave">
             {configCampos.seccionDetalle}
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label htmlFor="act-insumo" className="block text-xs font-bold text-[#17211D]">
+              <label htmlFor="act-insumo" className="block text-xs font-bold text-tinta">
                 {configCampos.labelInsumo}
               </label>
               <input
@@ -461,11 +461,11 @@ export function ActividadForm({
                 placeholder={configCampos.placeholderInsumo}
                 value={insumo}
                 onChange={(e) => setInsumo(e.target.value)}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+                className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
               />
             </div>
             <div>
-              <label htmlFor="act-cantidad" className="block text-xs font-bold text-[#17211D]">
+              <label htmlFor="act-cantidad" className="block text-xs font-bold text-tinta">
                 {configCampos.labelCantidad}
               </label>
               <input
@@ -475,11 +475,11 @@ export function ActividadForm({
                 placeholder={configCampos.placeholderCantidad}
                 value={cantidad}
                 onChange={(e) => setCantidad(e.target.value)}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+                className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
               />
             </div>
             <div>
-              <label htmlFor="act-unidad" className="block text-xs font-bold text-[#17211D]">
+              <label htmlFor="act-unidad" className="block text-xs font-bold text-tinta">
                 {configCampos.labelUnidad}
               </label>
               <input
@@ -487,12 +487,12 @@ export function ActividadForm({
                 placeholder={configCampos.placeholderUnidad}
                 value={unidad}
                 onChange={(e) => setUnidad(e.target.value)}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+                className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="act-maquinaria" className="block text-xs font-bold text-[#17211D]">
+            <label htmlFor="act-maquinaria" className="block text-xs font-bold text-tinta">
               {configCampos.labelMaquinaria}
             </label>
             <input
@@ -500,10 +500,10 @@ export function ActividadForm({
               placeholder={configCampos.placeholderMaquinaria}
               value={maquinaria}
               onChange={(e) => setMaquinaria(e.target.value)}
-              className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-[#17211D]"
+              className="mt-1 min-h-11 w-full rounded-control border border-borde bg-white px-3 py-2 text-sm text-tinta"
             />
           </div>
-          <label className="flex min-h-11 items-center gap-2 text-sm text-[#17211D]">
+          <label className="flex min-h-11 items-center gap-2 text-sm text-tinta">
             <input
               type="checkbox"
               checked={tercerizado}
@@ -515,7 +515,7 @@ export function ActividadForm({
 
         {corrigiendo && (
           <div>
-            <label htmlFor="act-motivo" className="block text-sm font-bold text-[#17211D]">
+            <label htmlFor="act-motivo" className="block text-sm font-bold text-tinta">
               Motivo de la corrección
             </label>
             <textarea
@@ -524,12 +524,12 @@ export function ActividadForm({
               value={motivoCorreccion}
               onChange={(e) => setMotivoCorreccion(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-[#17211D]"
+              className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm text-tinta"
             />
           </div>
         )}
 
-        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+        {error && <p className="text-sm font-medium text-critico-borde">{error}</p>}
 
         <AccionesModal
           onCancelar={onClose}

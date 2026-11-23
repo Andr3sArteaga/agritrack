@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { CheckCircle2, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { Advertencia } from "@/components/estado/advertencia";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CLASE_CAMPO } from "@/components/ui/field";
+import { Tag } from "@/components/ui/tag";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { ROL_LABEL, type Usuario } from "@/lib/types";
@@ -84,50 +88,43 @@ export default function MiPerfilPage() {
       )}
 
       {guardadoExito && (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-2xl border border-[#00a859]/30 bg-[#E8F5EF] p-4 text-sm text-[#004b36]"
-        >
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#00a859]" aria-hidden />
-          <p className="font-medium">{guardadoExito}</p>
-        </div>
+        <Advertencia tipo="BIEN" titulo="Listo" rol="status">
+          {guardadoExito}
+        </Advertencia>
       )}
 
       {cargando && !perfil ? (
-        <div className="rounded-2xl border border-[#E4EAE6] bg-white p-8 text-center text-sm text-[#68736D]">
-          Cargando perfil...
-        </div>
+        <p className="text-tinta-suave">Cargando perfil...</p>
       ) : (
-        <div className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E4EAE6] pb-5">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8F5EF] text-[#006B4F]">
+        <Card className="p-5 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-borde pb-5">
+            <div className="flex min-w-0 items-center gap-3.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-marca-suave text-marca">
                 <UserRound className="h-6 w-6" aria-hidden />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-[#17211D]">
+                <h2 className="text-lg font-bold text-tinta">
                   {perfil?.nombre ?? usuario?.nombre}{" "}
                   {perfil?.apellido ?? usuario?.apellido ?? ""}
                 </h2>
-                <p className="flex items-center gap-1.5 text-sm text-[#68736D]">
-                  <Mail className="h-3.5 w-3.5 text-[#006B4F]" aria-hidden />
+                <p className="flex items-center gap-1.5 break-all text-sm text-tinta-suave">
+                  <Mail className="h-3.5 w-3.5 text-marca" aria-hidden />
                   {perfil?.email ?? usuario?.email}
                 </p>
               </div>
             </div>
 
             {rolActual && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F5EF] px-3.5 py-1.5 text-xs font-bold text-[#006B4F]">
-                <ShieldCheck className="h-4 w-4 text-[#00a859]" aria-hidden />
+              <Tag tono="marca" icono={ShieldCheck}>
                 Rol actual: {ROL_LABEL[rolActual]}
-              </span>
+              </Tag>
             )}
           </div>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="perfil-nombre" className="block text-sm font-semibold text-[#17211D]">
+                <label htmlFor="perfil-nombre" className="block text-sm font-semibold text-tinta">
                   Nombre
                 </label>
                 <input
@@ -136,12 +133,12 @@ export default function MiPerfilPage() {
                   required
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="mt-1.5 min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+                  className={`${CLASE_CAMPO} mt-1.5`}
                 />
               </div>
 
               <div>
-                <label htmlFor="perfil-apellido" className="block text-sm font-semibold text-[#17211D]">
+                <label htmlFor="perfil-apellido" className="block text-sm font-semibold text-tinta">
                   Apellido
                 </label>
                 <input
@@ -150,14 +147,14 @@ export default function MiPerfilPage() {
                   value={apellido}
                   onChange={(e) => setApellido(e.target.value)}
                   placeholder="Sin registrar"
-                  className="mt-1.5 min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+                  className={`${CLASE_CAMPO} mt-1.5`}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="perfil-email" className="block text-sm font-semibold text-[#17211D]">
+                <label htmlFor="perfil-email" className="block text-sm font-semibold text-tinta">
                   Correo electrónico
                 </label>
                 <input
@@ -165,17 +162,17 @@ export default function MiPerfilPage() {
                   type="email"
                   disabled
                   value={perfil?.email ?? usuario?.email ?? ""}
-                  className="mt-1.5 min-h-11 w-full cursor-not-allowed rounded-2xl border border-[#E4EAE6] bg-stone-100 px-4 text-base text-[#68736D]"
+                  className={`${CLASE_CAMPO} mt-1.5 disabled:cursor-not-allowed disabled:bg-fondo disabled:text-tinta-suave`}
                 />
               </div>
 
               <div>
-                <label htmlFor="perfil-telefono" className="block text-sm font-semibold text-[#17211D]">
+                <label htmlFor="perfil-telefono" className="block text-sm font-semibold text-tinta">
                   Número de teléfono
                 </label>
                 <div className="relative mt-1.5">
                   <Phone
-                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#68736D]"
+                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-tinta-suave"
                     aria-hidden
                   />
                   <input
@@ -184,14 +181,14 @@ export default function MiPerfilPage() {
                     value={telefono}
                     onChange={(e) => setTelefono(e.target.value)}
                     placeholder="+591 70000000"
-                    className="min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] pl-10 pr-4 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+                    className={`${CLASE_CAMPO} pl-10`}
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="perfil-rol" className="block text-sm font-semibold text-[#17211D]">
+              <label htmlFor="perfil-rol" className="block text-sm font-semibold text-tinta">
                 Rol actual
               </label>
               <input
@@ -199,21 +196,17 @@ export default function MiPerfilPage() {
                 type="text"
                 disabled
                 value={rolActual ? ROL_LABEL[rolActual] : ""}
-                className="mt-1.5 min-h-11 w-full cursor-not-allowed rounded-2xl border border-[#E4EAE6] bg-stone-100 px-4 text-base text-[#68736D]"
+                className={`${CLASE_CAMPO} mt-1.5 disabled:cursor-not-allowed disabled:bg-fondo disabled:text-tinta-suave`}
               />
             </div>
 
             <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={guardando}
-                className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#004b36] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#00a859] disabled:cursor-not-allowed disabled:opacity-60"
-              >
+              <Button type="submit" disabled={guardando}>
                 {guardando ? "Guardando..." : "Guardar cambios"}
-              </button>
+              </Button>
             </div>
           </form>
-        </div>
+        </Card>
       )}
     </div>
   );

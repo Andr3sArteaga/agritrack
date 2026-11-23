@@ -18,7 +18,13 @@ const ICONO_ACTIVIDAD: Record<TipoActividad, LucideIcon> = {
   COSECHA: Wheat,
 };
 
-export function IconoActividad({ tipo }: { tipo: TipoActividad }) {
+export function IconoActividad({
+  tipo,
+  className = "h-4 w-4 shrink-0 text-stone-400",
+}: {
+  tipo: TipoActividad;
+  className?: string;
+}) {
   const Icono = ICONO_ACTIVIDAD[tipo];
-  return <Icono className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />;
+  return <Icono className={className} aria-hidden />;
 }

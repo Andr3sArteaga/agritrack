@@ -1,0 +1,74 @@
+/*
+ * Tokens de diseño de AgriTrack: unica fuente de colores, radios, sombras y tipografia.
+ * Documentacion: docs/tokens-diseno.md. No escribir colores a mano en los componentes.
+ * Tailwind 4 genera las clases a partir de estos nombres (bg-marca, rounded-tarjeta, shadow-tarjeta...).
+ */
+@theme {
+  /* Marca */
+  --color-marca: #006b4f; /* principal, enlaces, activo (6,5:1 sobre blanco) */
+  --color-marca-hover: #00553e;
+  --color-marca-vivo: #00a859; /* solo iconos y acentos: 3,1:1, nunca texto */
+  --color-marca-suave: #e8f5ef;
+  /* Parte publica: franjas y botones oscuros, y el fondo del mapa de preventa. */
+  --color-marca-oscuro: #004b36; /* 9,6:1 con texto blanco */
+  --color-marca-noche: #003b2a;
+  --color-noche: #071712;
+
+  /* Texto, bordes y superficies */
+  --color-tinta: #17211d;
+  --color-tinta-suave: #68736d; /* 4,9:1 sobre blanco, 4,5:1 sobre fondo */
+  --color-borde: #e4eae6;
+  --color-superficie: #ffffff;
+  --color-fondo: #f4f6f5;
+  --color-fondo-suave: #f8faf9;
+
+  /* Estados: siempre con color + icono + palabra (EstadoBadge). */
+  --color-bien-fondo: #ecfdf5;
+  --color-bien-borde: #047857;
+  --color-bien-texto: #064e3b;
+  --color-bien-icono: #047857;
+  --color-atencion-fondo: #fffbeb;
+  --color-atencion-borde: #b45309;
+  --color-atencion-texto: #78350f;
+  --color-atencion-icono: #b45309;
+  --color-critico-fondo: #fef2f2;
+  --color-critico-borde: #b91c1c;
+  --color-critico-texto: #7f1d1d;
+  --color-critico-icono: #b91c1c;
+  --color-sindatos-fondo: #f1f5f9;
+  --color-sindatos-borde: #475569;
+  --color-sindatos-texto: #1e293b;
+  --color-sindatos-icono: #475569;
+  --color-pend-fondo: #eef2ff;
+  --color-pend-borde: #4338ca;
+  --color-pend-texto: #312e81;
+  --color-pend-icono: #4338ca;
+
+  /* Cultivos (solo CropChip: nunca para estados). Pares fondo/texto con contraste AA. */
+  --color-cultivo-verde-fondo: #e8f5ef;
+  --color-cultivo-verde-texto: #0b5d3b;
+  --color-cultivo-amarillo-fondo: #fdf6d8;
+  --color-cultivo-amarillo-texto: #6b5100;
+  --color-cultivo-naranja-fondo: #fff0e3;
+  --color-cultivo-naranja-texto: #8a3c00;
+  --color-cultivo-morado-fondo: #f3ecfb;
+  --color-cultivo-morado-texto: #5b2b8c;
+  --color-cultivo-rojo-fondo: #fdecec;
+  --color-cultivo-rojo-texto: #8f1d1d;
+  --color-cultivo-azul-fondo: #e9f2fd;
+  --color-cultivo-azul-texto: #1d4f8f;
+
+  /* Radios: solo tres (mas rounded-full de Tailwind). */
+  --radius-control: 10px;
+  --radius-tarjeta: 16px;
+
+  /* Sombras: solo dos. */
+  --shadow-tarjeta: 0 1px 2px rgb(23 33 29 / 0.04), 0 1px 3px rgb(23 33 29 / 0.06);
+  --shadow-flotante: 0 8px 24px rgb(23 33 29 / 0.12), 0 2px 6px rgb(23 33 29 / 0.08);
+}
+
+/* La fuente la carga next/font (layout.tsx) en la variable --font-inter. */
+@theme inline {
+  --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
+  --font-mono: Consolas, Menlo, monospace;
+}

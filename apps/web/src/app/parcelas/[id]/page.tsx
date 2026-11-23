@@ -20,12 +20,11 @@ import { notFound } from "next/navigation";
 import { Advertencia } from "@/components/estado/advertencia";
 import { EstadoBadge } from "@/components/estado/estado-badge";
 import { EstadoVacio } from "@/components/estado/estado-vacio";
-import { IconoActividad } from "@/components/icono-actividad";
 import { LandingNavbar } from "@/components/publico/landing-navbar";
-import { formatearFecha } from "@/lib/format";
+import { ActivityItem } from "@/components/ui/activity-item";
+import { CropChip } from "@/components/ui/crop-chip";
 import { puedePublicarse, TEXTOS } from "@/lib/textos";
 import type { DetalleParcelaPublico } from "@/lib/types";
-import { TIPO_ACTIVIDAD_LABEL } from "@/lib/types";
 import { GaleriaFotosCliente } from "./galeria-fotos-cliente";
 import { MiniMapaCliente } from "./mini-mapa-cliente";
 import { RendimientoChart } from "./rendimiento-chart";
@@ -64,7 +63,7 @@ export default async function ParcelaDetallePage(
   const publicarAdvertencia = puedePublicarse(TEXTOS.MENOS_DE_TRES_CAMPANAS);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8faf9] text-[#17211D]">
+    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
       <LandingNavbar />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
@@ -72,7 +71,7 @@ export default async function ParcelaDetallePage(
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/parcelas"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#E4EAE6] bg-white px-4 text-sm font-semibold text-[#17211D] shadow-xs transition-colors hover:border-[#00a859] hover:text-[#006B4F]"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-borde bg-superficie px-4 text-sm font-semibold text-tinta shadow-tarjeta transition-colors hover:border-marca-vivo hover:text-marca"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Volver al catálogo de parcelas
@@ -80,44 +79,40 @@ export default async function ParcelaDetallePage(
 
           <Link
             href="/#parcelas-preventa"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-[#68736D] transition-colors hover:text-[#006B4F]"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-tinta-suave transition-colors hover:text-marca"
           >
             Inicio
           </Link>
         </div>
 
         {/* Encabezado principal unificado */}
-        <section className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs sm:p-8">
+        <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00a859]/12 px-3 py-1 text-xs font-bold text-[#004b36]">
-                  <Sprout className="h-3.5 w-3.5 text-[#00a859]" aria-hidden />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-vivo/12 px-3 py-1 text-xs font-bold text-marca-oscuro">
+                  <Sprout className="h-3.5 w-3.5 text-marca-vivo" aria-hidden />
                   {parcela.temporadaActual ?? "Campaña actual"}
                 </span>
-                {parcela.cultivoActual && (
-                  <span className="rounded-full bg-[#f8faf9] px-3 py-1 text-xs font-semibold text-stone-700 ring-1 ring-stone-200">
-                    {parcela.cultivoActual}
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#E8F5EF] px-3 py-1 text-xs font-semibold text-[#006B4F]">
+                <CropChip cultivo={parcela.cultivoActual} />
+                <span className="inline-flex items-center gap-1 rounded-full bg-marca-suave px-3 py-1 text-xs font-semibold text-marca">
                   <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                   Disponible para preventa
                 </span>
               </div>
 
-              <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+              <h1 className="mt-4 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
                 {parcela.nombre}
               </h1>
-              <p className="mt-2 flex items-center gap-2 text-base text-[#68736D]">
-                <MapPin className="h-4 w-4 shrink-0 text-[#00a859]" aria-hidden />
+              <p className="mt-2 flex items-center gap-2 text-base text-tinta-suave">
+                <MapPin className="h-4 w-4 shrink-0 text-marca-vivo" aria-hidden />
                 {parcela.ubicacionTexto}
               </p>
             </div>
 
-            <div className="shrink-0 rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 py-3.5">
+            <div className="shrink-0 rounded-tarjeta border border-borde bg-fondo-suave px-4 py-3.5">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-sm font-semibold text-[#17211D]">
+                <span className="text-sm font-semibold text-tinta">
                   Registros protegidos contra cambios:
                 </span>
                 <EstadoBadge
@@ -130,8 +125,8 @@ export default async function ParcelaDetallePage(
                   }
                 />
               </div>
-              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#68736D]">
-                <ShieldCheck className="h-4 w-4 shrink-0 text-[#00a859]" aria-hidden />
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-tinta-suave">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-marca-vivo" aria-hidden />
                 Verificados con cadena SHA-256
               </p>
             </div>
@@ -139,53 +134,53 @@ export default async function ParcelaDetallePage(
 
           {/* 3 tarjetas resumen fáciles de leer */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] p-5">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#68736D]">
-                <Ruler className="h-4 w-4 text-[#00a859]" aria-hidden />
+            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tinta-suave">
+                <Ruler className="h-4 w-4 text-marca-vivo" aria-hidden />
                 Superficie total
               </p>
-              <p className="mt-2 text-2xl font-bold text-[#17211D]">
+              <p className="mt-2 text-2xl font-bold text-tinta">
                 {parcela.hectareas} ha
               </p>
-              <p className="mt-1 text-xs text-[#68736D]">
+              <p className="mt-1 text-xs text-tinta-suave">
                 Área medida sobre polígono georreferenciado
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] p-5">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#68736D]">
-                <Sprout className="h-4 w-4 text-[#00a859]" aria-hidden />
+            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tinta-suave">
+                <Sprout className="h-4 w-4 text-marca-vivo" aria-hidden />
                 Cultivo actual
               </p>
-              <p className="mt-2 text-2xl font-bold text-[#17211D]">
+              <p className="mt-2 text-2xl font-bold text-tinta">
                 {parcela.cultivoActual ?? "Sin campaña activa"}
               </p>
-              <p className="mt-1 text-xs text-[#68736D]">
+              <p className="mt-1 text-xs text-tinta-suave">
                 {parcela.temporadaActual ?? "Sin temporada asignada"}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] p-5">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#68736D]">
-                <TrendingUp className="h-4 w-4 text-[#00a859]" aria-hidden />
+            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tinta-suave">
+                <TrendingUp className="h-4 w-4 text-marca-vivo" aria-hidden />
                 {TEXTOS.LINEA_BASE_ETIQUETA.texto}
               </p>
               {parcela.rendimientoEstimadoTnHa === null ? (
                 <div className="mt-2">
                   <EstadoBadge estado="SIN_DATOS" />
-                  <p className="mt-1.5 text-xs text-[#68736D]">
+                  <p className="mt-1.5 text-xs text-tinta-suave">
                     Sin cosechas previas para promediar
                   </p>
                 </div>
               ) : (
                 <>
-                  <p className="mt-2 text-2xl font-bold text-[#006B4F]">
+                  <p className="mt-2 text-2xl font-bold text-marca">
                     {parcela.rendimientoEstimadoTnHa}{" "}
-                    <span className="text-base font-semibold text-[#17211D]">
+                    <span className="text-base font-semibold text-tinta">
                       t/ha
                     </span>
                   </p>
-                  <p className="mt-1 text-xs text-[#68736D]">
+                  <p className="mt-1 text-xs text-tinta-suave">
                     {parcela.produccionEstimadaTotalTn !== null
                       ? `≈ ${parcela.produccionEstimadaTotalTn} t en total · promedio histórico`
                       : TEXTOS.PRODUCCION_SIN_ESTIMACION.texto}
@@ -210,16 +205,16 @@ export default async function ParcelaDetallePage(
           {/* Columna izquierda */}
           <div className="space-y-6 lg:col-span-7">
             {/* Mapa */}
-            <section className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs">
-              <h2 className="flex items-center gap-2.5 text-lg font-bold text-[#17211D]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00a859]/12 text-[#006B4F]">
+            <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
+              <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
+                <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
                   <MapPinned className="h-5 w-5" aria-hidden />
                 </span>
                 Dónde está la parcela (polígono georreferenciado)
               </h2>
 
               {parcela.poligono ? (
-                <div className="mt-4 overflow-hidden rounded-2xl border border-[#E4EAE6]">
+                <div className="mt-4 overflow-hidden rounded-tarjeta border border-borde">
                   <MiniMapaCliente poligono={parcela.poligono} />
                 </div>
               ) : (
@@ -235,9 +230,9 @@ export default async function ParcelaDetallePage(
 
             {/* Fotos */}
             {parcela.fotos.length > 0 && (
-              <section className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs">
-                <h2 className="flex items-center gap-2.5 text-lg font-bold text-[#17211D]">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00a859]/12 text-[#006B4F]">
+              <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
+                <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
                     <Camera className="h-5 w-5" aria-hidden />
                   </span>
                   Fotos de campo ({parcela.fotos.length})
@@ -251,9 +246,9 @@ export default async function ParcelaDetallePage(
             )}
 
             {/* Historico de rendimiento */}
-            <section className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs">
-              <h2 className="flex items-center gap-2.5 text-lg font-bold text-[#17211D]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00a859]/12 text-[#006B4F]">
+            <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
+              <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
+                <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
                   <LineChart className="h-5 w-5" aria-hidden />
                 </span>
                 Histórico de rendimiento (campañas anteriores)
@@ -268,9 +263,9 @@ export default async function ParcelaDetallePage(
           {/* Columna derecha */}
           <div className="space-y-6 lg:col-span-5">
             {/* Historial de cuidado */}
-            <section className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs">
-              <h2 className="flex items-center gap-2.5 text-lg font-bold text-[#17211D]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00a859]/12 text-[#006B4F]">
+            <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
+              <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
+                <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
                   <ListChecks className="h-5 w-5" aria-hidden />
                 </span>
                 Historial de cuidado (campaña actual)
@@ -282,19 +277,10 @@ export default async function ParcelaDetallePage(
                     <p>Las labores de la campaña actual aparecerán aquí.</p>
                   </EstadoVacio>
                 ) : (
-                  <ol className="space-y-4 border-l-2 border-[#00a859]/35 pl-4">
+                  <ol className="divide-y divide-borde">
                     {parcela.historialCuidado.map((item, index) => (
-                      <li key={index} className="rounded-2xl bg-[#f8faf9] p-3.5">
-                        <p className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#17211D]">
-                          <IconoActividad tipo={item.tipo} />
-                          <span>{TIPO_ACTIVIDAD_LABEL[item.tipo]}</span>
-                          <span className="font-normal text-[#68736D]">
-                            · {formatearFecha(item.fecha)}
-                          </span>
-                        </p>
-                        <p className="mt-1 text-sm text-[#68736D]">
-                          {item.descripcion}
-                        </p>
+                      <li key={index}>
+                        <ActivityItem tipo={item.tipo} fecha={item.fecha} descripcion={item.descripcion} />
                       </li>
                     ))}
                   </ol>
@@ -303,14 +289,14 @@ export default async function ParcelaDetallePage(
             </section>
 
             {/* Tarjeta de contacto directo */}
-            <section className="rounded-3xl bg-[#004b36] p-6 text-white shadow-xl sm:p-7">
-              <span className="inline-flex rounded-full bg-[#00a859]/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#00a859]">
+            <section className="rounded-tarjeta bg-marca-oscuro p-6 text-white shadow-xl sm:p-7">
+              <span className="inline-flex rounded-full bg-marca-vivo/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca-suave">
                 CONTACTO DIRECTO
               </span>
               <h2 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">
                 ¿Te interesa esta parcela? Contáctate con AgroAn
               </h2>
-              <p className="mt-2 text-sm text-emerald-100/85">
+              <p className="mt-2 text-sm text-marca-suave/85">
                 Comunícate directamente con nuestro equipo para recibir más
                 información técnica o coordinar una visita en campo.
               </p>
@@ -318,9 +304,9 @@ export default async function ParcelaDetallePage(
               {tieneContacto ? (
                 <div className="mt-5 space-y-3">
                   {contacto.nombre && (
-                    <div className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm">
+                    <div className="flex items-center gap-3 rounded-tarjeta bg-white/10 px-4 py-3 text-sm">
                       <Building2
-                        className="h-4 w-4 shrink-0 text-[#00a859]"
+                        className="h-4 w-4 shrink-0 text-marca-vivo"
                         aria-hidden
                       />
                       <span>
@@ -332,10 +318,10 @@ export default async function ParcelaDetallePage(
                   {contacto.telefono && (
                     <a
                       href={`tel:${contacto.telefono.replace(/\s+/g, "")}`}
-                      className="flex min-h-11 items-center gap-3 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+                      className="flex min-h-11 items-center gap-3 rounded-tarjeta bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
                     >
                       <Phone
-                        className="h-4 w-4 shrink-0 text-[#00a859]"
+                        className="h-4 w-4 shrink-0 text-marca-vivo"
                         aria-hidden
                       />
                       {contacto.telefono}
@@ -345,10 +331,10 @@ export default async function ParcelaDetallePage(
                   {contacto.email && (
                     <a
                       href={`mailto:${contacto.email}`}
-                      className="flex min-h-11 items-center gap-3 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+                      className="flex min-h-11 items-center gap-3 rounded-tarjeta bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
                     >
                       <Mail
-                        className="h-4 w-4 shrink-0 text-[#00a859]"
+                        className="h-4 w-4 shrink-0 text-marca-vivo"
                         aria-hidden
                       />
                       {contacto.email}
@@ -360,10 +346,10 @@ export default async function ParcelaDetallePage(
                       href={whatsappHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-[#004b36] shadow-md transition-transform hover:-translate-y-0.5 hover:bg-[#E8F5EF]"
+                      className="mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-superficie px-6 text-sm font-bold text-marca-oscuro shadow-md transition-transform hover:-translate-y-0.5 hover:bg-marca-suave"
                     >
                       <MessageCircle
-                        className="h-5 w-5 text-[#00a859]"
+                        className="h-5 w-5 text-marca-vivo"
                         aria-hidden
                       />
                       Consultar por WhatsApp
@@ -371,7 +357,7 @@ export default async function ParcelaDetallePage(
                   )}
                 </div>
               ) : (
-                <div className="mt-4 rounded-2xl border border-white/15 bg-white/10 p-4 text-sm text-emerald-100">
+                <div className="mt-4 rounded-tarjeta border border-white/15 bg-white/10 p-4 text-sm text-marca-suave">
                   Todavía no hay datos de contacto configurados para esta parcela.
                 </div>
               )}
@@ -380,24 +366,24 @@ export default async function ParcelaDetallePage(
         </div>
       </main>
 
-      <footer className="border-t border-[#E4EAE6] bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-[#68736D] sm:flex-row sm:px-6">
-          <Link href="/#inicio" className="inline-flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#004b36] text-[#00a859]">
+      <footer className="border-t border-borde bg-superficie">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-tinta-suave sm:flex-row sm:px-6">
+          <Link href="/#inicio" className="inline-flex min-h-11 items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
               <Sprout className="h-4 w-4" aria-hidden />
             </span>
-            <span className="font-bold text-[#17211D]">AgriTrack</span>
+            <span className="font-bold text-tinta">AgriTrack</span>
             <span>· AgroAn</span>
           </Link>
 
           <div className="flex flex-wrap items-center gap-5 font-medium">
-            <Link href="/#inicio" className="hover:text-[#00a859]">
+            <Link href="/#inicio" className="inline-flex min-h-11 items-center hover:text-marca">
               Inicio
             </Link>
-            <Link href="/parcelas" className="hover:text-[#00a859]">
+            <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-marca">
               Catálogo completo
             </Link>
-            <Link href="/login" className="hover:text-[#00a859]">
+            <Link href="/login" className="inline-flex min-h-11 items-center hover:text-marca">
               Acceder al panel
             </Link>
           </div>

@@ -146,7 +146,7 @@ export default async function LandingPage() {
   )}`;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8faf9] text-[#17211D]">
+    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
       {/* A. NAVBAR STICKY */}
       <LandingNavbar />
 
@@ -154,15 +154,15 @@ export default async function LandingPage() {
         {/* B. HERO SECTION */}
         <section
           id="inicio"
-          className="relative overflow-hidden bg-[#004b36] pb-28 pt-12 text-white sm:pb-36 sm:pt-16 lg:pt-20"
+          className="relative overflow-hidden bg-marca-oscuro pb-28 pt-12 text-white sm:pb-36 sm:pt-16 lg:pt-20"
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#00a859]/20 blur-3xl"
+            className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-marca-vivo/20 blur-3xl"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-[#00a859]/15 blur-3xl"
+            className="pointer-events-none absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-marca-vivo/15 blur-3xl"
           />
 
           <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-12">
@@ -170,11 +170,11 @@ export default async function LandingPage() {
             <div className="lg:col-span-6">
               <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
                 Encuentra tu próxima{" "}
-                <span className="text-[#00a859]">producción</span> de forma
+                <span className="text-marca-vivo">producción</span> de forma
                 rápida y sencilla
               </h1>
 
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-emerald-100/90 sm:text-lg">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-marca-suave/90 sm:text-lg">
                 Supervisa campañas reales en Santa Cruz con trazabilidad de
                 labores, monitoreo en campo y estimación de rendimiento
                 basada en datos antes de cerrar acuerdos.
@@ -183,7 +183,7 @@ export default async function LandingPage() {
               <div className="mt-8 flex flex-wrap items-center gap-3.5">
                 <a
                   href="#parcelas-preventa"
-                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#00a859] px-6 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-all hover:bg-[#00bf65] sm:text-base"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-marca-vivo px-6 text-sm font-semibold text-noche shadow-lg shadow-black/20 transition-all hover:bg-marca-vivo/90 sm:text-base"
                 >
                   Ver parcelas disponibles
                   <ArrowRight className="h-4 w-4" aria-hidden />
@@ -200,10 +200,10 @@ export default async function LandingPage() {
                 {HERO_BENEFICIOS.map((beneficio) => (
                   <li
                     key={beneficio}
-                    className="flex items-start gap-2 text-xs font-medium text-emerald-50/90 sm:text-sm"
+                    className="flex items-start gap-2 text-xs font-medium text-marca-suave/90 sm:text-sm"
                   >
                     <CheckCircle2
-                      className="mt-0.5 h-4 w-4 shrink-0 text-[#00a859]"
+                      className="mt-0.5 h-4 w-4 shrink-0 text-marca-vivo"
                       aria-hidden
                     />
                     <span>{beneficio}</span>
@@ -215,7 +215,7 @@ export default async function LandingPage() {
             {/* Hero Derecha: Dos semicírculos opuestos alineados en la base */}
             <div className="lg:col-span-6">
               <div className="mx-auto flex max-w-lg items-end justify-center gap-3 sm:gap-4">
-                <div className="h-72 w-36 overflow-hidden rounded-l-full rounded-r-none bg-[#003b2a] shadow-2xl sm:h-[420px] sm:w-[210px]">
+                <div className="h-72 w-36 overflow-hidden rounded-l-full rounded-r-none bg-marca-noche shadow-2xl sm:h-[420px] sm:w-[210px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/assets/hero-1.jpg"
@@ -224,7 +224,7 @@ export default async function LandingPage() {
                   />
                 </div>
 
-                <div className="h-64 w-36 overflow-hidden rounded-l-none rounded-r-full border border-white/15 bg-[#003b2a] shadow-2xl sm:h-[375px] sm:w-[205px]">
+                <div className="h-64 w-36 overflow-hidden rounded-l-none rounded-r-full border border-white/15 bg-marca-noche shadow-2xl sm:h-[375px] sm:w-[205px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/assets/hero-2.jpg"
@@ -242,8 +242,8 @@ export default async function LandingPage() {
           aria-label="Transparencia total"
           className="relative z-10 -mt-16 mx-auto max-w-7xl px-4 sm:-mt-20 sm:px-6"
         >
-          <div className="grid items-center gap-6 overflow-hidden rounded-3xl border border-[#00a859]/30 bg-[#003828] p-5 text-white shadow-2xl sm:p-8 lg:grid-cols-12">
-            <div className="overflow-hidden rounded-2xl border border-white/10 lg:col-span-5">
+          <div className="grid items-center gap-6 overflow-hidden rounded-tarjeta border border-marca-vivo/30 bg-marca-noche p-5 text-white shadow-2xl sm:p-8 lg:grid-cols-12">
+            <div className="overflow-hidden rounded-tarjeta border border-white/10 lg:col-span-5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/assets/banner-field.jpg"
@@ -253,14 +253,14 @@ export default async function LandingPage() {
             </div>
 
             <div className="lg:col-span-7 lg:pl-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00a859]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#00a859]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-vivo/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca-suave">
                 <Award className="h-3.5 w-3.5" aria-hidden />
                 Respaldo técnico real
               </span>
               <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
                 Transparencia total en cada hectárea sembrada
               </h2>
-              <p className="mt-2.5 text-sm leading-relaxed text-emerald-100/85 sm:text-base">
+              <p className="mt-2.5 text-sm leading-relaxed text-marca-suave/85 sm:text-base">
                 Consulta con claridad qué se sembró, cuándo se aplicaron insumos,
                 cómo evolucionó el clima y qué cosechas históricas respaldan la
                 proyección de cada lote disponible para preventa.
@@ -268,15 +268,15 @@ export default async function LandingPage() {
 
               <div className="mt-5 flex flex-wrap gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
-                  <ShieldCheck className="h-4 w-4 text-[#00a859]" aria-hidden />
+                  <ShieldCheck className="h-4 w-4 text-marca-vivo" aria-hidden />
                   Cadena SHA-256 verificable
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
-                  <DatabaseZap className="h-4 w-4 text-[#00a859]" aria-hidden />
+                  <DatabaseZap className="h-4 w-4 text-marca-vivo" aria-hidden />
                   Histórico multi-campaña
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
-                  <MapPin className="h-4 w-4 text-[#00a859]" aria-hidden />
+                  <MapPin className="h-4 w-4 text-marca-vivo" aria-hidden />
                   Polígonos georreferenciados
                 </span>
               </div>
@@ -288,7 +288,7 @@ export default async function LandingPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
             <div className="lg:col-span-6">
-              <div className="relative overflow-hidden rounded-[2rem] border border-[#E4EAE6] bg-white shadow-lg">
+              <div className="relative overflow-hidden rounded-tarjeta border border-borde bg-superficie shadow-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/assets/team.jpg"
@@ -299,19 +299,19 @@ export default async function LandingPage() {
             </div>
 
             <div className="lg:col-span-6">
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#00a859]/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+              <span className="inline-flex items-center gap-2 rounded-full bg-marca-vivo/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
                 Sobre AgroAn
               </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
                 Quiénes somos
               </h2>
-              <p className="mt-4 text-base leading-relaxed text-[#17211D]/90">
+              <p className="mt-4 text-base leading-relaxed text-tinta/90">
                 Somos una empresa agrícola ubicada en{" "}
                 <strong>Pailón Sur, Santa Cruz</strong>, dedicada a la producción
                 extensiva de granos estratégicos con enfoque en eficiencia
                 operativa y trazabilidad digital.
               </p>
-              <p className="mt-3 text-base leading-relaxed text-[#68736D]">
+              <p className="mt-3 text-base leading-relaxed text-tinta-suave">
                 A través de <strong>AgriTrack</strong> ordenamos cada labor de
                 campo, protegemos la autenticidad de nuestros registros y
                 brindamos información confiable a compradores e inversionistas
@@ -322,16 +322,16 @@ export default async function LandingPage() {
         </section>
 
         {/* E. SECCIÓN "CÓMO FUNCIONA AGRITRACK" */}
-        <section id="como-funciona" className="bg-white py-16 sm:py-24">
+        <section id="como-funciona" className="bg-superficie py-16 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex rounded-full bg-[#00a859]/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+              <span className="inline-flex rounded-full bg-marca-vivo/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
                 Metodología verificable
               </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
                 Cómo funciona AgriTrack
               </h2>
-              <p className="mt-3 text-base text-[#68736D]">
+              <p className="mt-3 text-base text-tinta-suave">
                 Del monitoreo diario en campo a una preventa transparente con
                 respaldo técnico en tres pasos simples.
               </p>
@@ -342,15 +342,15 @@ export default async function LandingPage() {
               {CARACTERISTICAS_FUNCIONA.map(({ icono: Icono, titulo, descripcion }) => (
                 <article
                   key={titulo}
-                  className="rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#00a859]/50 hover:shadow-md"
+                  className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta transition-all hover:-translate-y-0.5 hover:border-marca-vivo/50 hover:shadow-md"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00a859]/12 text-[#00a859]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca-vivo">
                     <Icono className="h-6 w-6" aria-hidden />
                   </div>
-                  <h3 className="mt-4 text-lg font-bold text-[#17211D]">
+                  <h3 className="mt-4 text-lg font-bold text-tinta">
                     {titulo}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#68736D]">
+                  <p className="mt-2 text-sm leading-relaxed text-tinta-suave">
                     {descripcion}
                   </p>
                 </article>
@@ -358,34 +358,34 @@ export default async function LandingPage() {
             </div>
 
             {/* Fila 2: Línea de Tiempo Horizontal con puntos circulares (estilo referencia) */}
-            <div className="mt-12 rounded-3xl border border-[#E4EAE6] bg-white p-6 shadow-xs sm:p-8">
+            <div className="mt-12 rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8">
               <div className="relative grid gap-6 md:grid-cols-3">
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute left-[16.66%] right-[16.66%] top-16 z-10 hidden border-t-2 border-dashed border-[#006B4F]/25 md:block"
+                  className="pointer-events-none absolute left-[16.66%] right-[16.66%] top-16 z-10 hidden border-t-2 border-dashed border-marca/25 md:block"
                 />
 
                 {PASOS_TIMELINE.map(
                   ({ numero, paso, titulo, descripcion, icono: Icono }) => (
                     <div
                       key={numero}
-                      className="relative z-0 flex flex-col items-center rounded-2xl bg-[#F8FAF9] px-6 py-8 text-center"
+                      className="relative z-0 flex flex-col items-center rounded-tarjeta bg-fondo-suave px-6 py-8 text-center"
                     >
-                      <div className="relative z-20 flex h-16 w-16 items-center justify-center rounded-full bg-[#006B4F] text-xl font-bold text-white ring-4 ring-white shadow-xs">
+                      <div className="relative z-20 flex h-16 w-16 items-center justify-center rounded-full bg-marca text-xl font-bold text-white ring-4 ring-white shadow-tarjeta">
                         <span>{numero}</span>
-                        <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#D1FAE5] text-[#006B4F] ring-2 ring-white">
+                        <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-marca-suave text-marca ring-2 ring-white">
                           <Icono className="h-3.5 w-3.5" aria-hidden />
                         </span>
                       </div>
 
-                      <span className="mt-4 inline-flex rounded-full bg-[#DCFCE7] px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#006B4F]">
+                      <span className="mt-4 inline-flex rounded-full bg-marca-suave px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-marca">
                         {paso}
                       </span>
 
-                      <h3 className="mt-3 text-base font-bold text-[#17211D]">
+                      <h3 className="mt-3 text-base font-bold text-tinta">
                         {titulo}
                       </h3>
-                      <p className="mt-1.5 max-w-xs text-sm text-[#68736D]">
+                      <p className="mt-1.5 max-w-xs text-sm text-tinta-suave">
                         {descripcion}
                       </p>
                     </div>
@@ -400,16 +400,16 @@ export default async function LandingPage() {
         <LandingPreventaSeccion parcelasReales={parcelas} />
 
         {/* G. SECCIÓN "POR QUÉ CONFIAR" */}
-        <section className="bg-white py-16 sm:py-24">
+        <section className="bg-superficie py-16 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="max-w-2xl">
-              <span className="inline-flex rounded-full bg-[#00a859]/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+              <span className="inline-flex rounded-full bg-marca-vivo/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
                 Garantía operativa
               </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
                 Por qué confiar en AgriTrack
               </h2>
-              <p className="mt-2 text-base text-[#68736D]">
+              <p className="mt-2 text-base text-tinta-suave">
                 Diseñado junto al equipo de campo para evitar información
                 fragmentada y ofrecer evidencia concreta en cada campaña.
               </p>
@@ -419,15 +419,15 @@ export default async function LandingPage() {
               {PILARES_CONFIANZA.map(({ icono: Icono, titulo, descripcion }) => (
                 <article
                   key={titulo}
-                  className="rounded-3xl border border-[#E4EAE6] bg-[#f8faf9] p-7"
+                  className="rounded-tarjeta border border-borde bg-fondo-suave p-7"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004b36] text-[#00a859]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
                     <Icono className="h-6 w-6" aria-hidden />
                   </div>
-                  <h3 className="mt-5 text-lg font-bold text-[#17211D]">
+                  <h3 className="mt-5 text-lg font-bold text-tinta">
                     {titulo}
                   </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-[#68736D]">
+                  <p className="mt-2.5 text-sm leading-relaxed text-tinta-suave">
                     {descripcion}
                   </p>
                 </article>
@@ -437,23 +437,23 @@ export default async function LandingPage() {
         </section>
 
         {/* H. CTA INFERIOR */}
-        <section className="bg-white pb-16 sm:pb-20">
+        <section className="bg-superficie pb-16 sm:pb-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-[#004b36] p-7 text-white shadow-xl sm:p-10 lg:flex-row lg:items-center">
+            <div className="flex flex-col items-start justify-between gap-6 rounded-tarjeta bg-marca-oscuro p-7 text-white shadow-xl sm:p-10 lg:flex-row lg:items-center">
               <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#00a859] text-white shadow-md">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-tarjeta bg-marca-vivo text-white shadow-md">
                   <MessageCircle className="h-7 w-7" aria-hidden />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
                     ¿Te interesa una parcela? Hablemos
                   </h2>
-                  <p className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-emerald-100/90 sm:text-base">
+                  <p className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-marca-suave/90 sm:text-base">
                     <span className="inline-flex items-center gap-1.5 font-semibold text-white">
-                      <Phone className="h-4 w-4 text-[#00a859]" aria-hidden />
+                      <Phone className="h-4 w-4 text-marca-vivo" aria-hidden />
                       {TELEFONO_CONTACTO}
                     </span>
-                    <span className="hidden text-emerald-200/50 sm:inline">
+                    <span className="hidden text-marca-suave/50 sm:inline">
                       ·
                     </span>
                     <span>
@@ -467,9 +467,9 @@ export default async function LandingPage() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-[#004b36] shadow-md transition-transform hover:-translate-y-0.5 hover:bg-[#E8F5EF] sm:w-auto sm:text-base"
+                className="inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-superficie px-7 text-sm font-bold text-marca-oscuro shadow-md transition-transform hover:-translate-y-0.5 hover:bg-marca-suave sm:w-auto sm:text-base"
               >
-                <MessageCircle className="h-5 w-5 text-[#00a859]" aria-hidden />
+                <MessageCircle className="h-5 w-5 text-marca-vivo" aria-hidden />
                 Contactar por WhatsApp
               </a>
             </div>
@@ -478,20 +478,20 @@ export default async function LandingPage() {
       </main>
 
       {/* FOOTER MINIMALISTA */}
-      <footer className="border-t border-[#E4EAE6] bg-white">
+      <footer className="border-t border-borde bg-superficie">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <div className="grid gap-8 md:grid-cols-3 md:items-start">
             {/* Izquierda: Logo */}
             <div>
-              <Link href="#inicio" className="inline-flex items-center gap-2.5">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#004b36] text-[#00a859]">
+              <Link href="#inicio" className="inline-flex min-h-11 items-center gap-2.5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
                   <Sprout className="h-5 w-5" aria-hidden />
                 </span>
-                <span className="text-lg font-bold text-[#17211D]">
+                <span className="text-lg font-bold text-tinta">
                   AgriTrack
                 </span>
               </Link>
-              <p className="mt-3 max-w-xs text-sm text-[#68736D]">
+              <p className="mt-3 max-w-xs text-sm text-tinta-suave">
                 Gestión agrícola inteligente, trazabilidad verificable y preventa
                 transparente para AgroAn.
               </p>
@@ -499,27 +499,27 @@ export default async function LandingPage() {
 
             {/* Centro: Enlaces útiles */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#68736D]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
                 Enlaces útiles
               </p>
-              <ul className="mt-3 space-y-2 text-sm font-medium text-[#17211D]">
+              <ul className="mt-3 space-y-2 text-sm font-medium text-tinta">
                 <li>
-                  <a href="#inicio" className="hover:text-[#00a859]">
+                  <a href="#inicio" className="inline-flex min-h-11 items-center hover:text-marca">
                     Inicio
                   </a>
                 </li>
                 <li>
-                  <a href="#parcelas-preventa" className="hover:text-[#00a859]">
+                  <a href="#parcelas-preventa" className="inline-flex min-h-11 items-center hover:text-marca">
                     Parcelas de preventa
                   </a>
                 </li>
                 <li>
-                  <Link href="/parcelas" className="hover:text-[#00a859]">
+                  <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-marca">
                     Catálogo público completo
                   </Link>
                 </li>
                 <li>
-                  <Link href="/login" className="hover:text-[#00a859]">
+                  <Link href="/login" className="inline-flex min-h-11 items-center hover:text-marca">
                     Acceder al panel
                   </Link>
                 </li>
@@ -528,37 +528,37 @@ export default async function LandingPage() {
 
             {/* Derecha: Contacto */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#68736D]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
                 Contacto directo
               </p>
-              <ul className="mt-3 space-y-2.5 text-sm text-[#17211D]">
+              <ul className="mt-3 space-y-2.5 text-sm text-tinta">
                 <li className="flex items-center gap-2">
                   <MapPin
-                    className="h-4 w-4 shrink-0 text-[#00a859]"
+                    className="h-4 w-4 shrink-0 text-marca-vivo"
                     aria-hidden
                   />
                   Pailón Sur, Santa Cruz, Bolivia
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone
-                    className="h-4 w-4 shrink-0 text-[#00a859]"
+                    className="h-4 w-4 shrink-0 text-marca-vivo"
                     aria-hidden
                   />
                   <a
                     href={`tel:${TELEFONO_CONTACTO.replace(/\s+/g, "")}`}
-                    className="hover:text-[#00a859]"
+                    className="inline-flex min-h-11 items-center hover:text-marca"
                   >
                     {TELEFONO_CONTACTO}
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail
-                    className="h-4 w-4 shrink-0 text-[#00a859]"
+                    className="h-4 w-4 shrink-0 text-marca-vivo"
                     aria-hidden
                   />
                   <a
                     href={`mailto:${EMAIL_CONTACTO}`}
-                    className="hover:text-[#00a859]"
+                    className="inline-flex min-h-11 items-center hover:text-marca"
                   >
                     {EMAIL_CONTACTO}
                   </a>
@@ -567,7 +567,7 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-8 border-t border-stone-100 pt-6 text-center text-xs text-[#68736D]">
+          <div className="mt-8 border-t border-fondo pt-6 text-center text-xs text-tinta-suave">
             AgroAn © {new Date().getFullYear()} · AgriTrack. Todos los derechos
             reservados.
           </div>

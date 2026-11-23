@@ -14,8 +14,12 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { Badge } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
+import { Advertencia } from "@/components/estado/advertencia";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CLASE_CAMPO } from "@/components/ui/field";
+import { Tag } from "@/components/ui/tag";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { TIPO_CONTACTO_LABEL, type Contacto, type TipoContacto } from "@/lib/types";
@@ -38,6 +42,8 @@ const ICONO_TIPO: Record<TipoContacto, LucideIcon> = {
   SERVICIOS: Wrench,
   OTRO: Ellipsis,
 };
+
+const SinDato = () => <span className="text-sm text-sindatos-texto">Sin datos</span>;
 
 export default function ContactosPage() {
   const { usuario } = useAuth();
@@ -76,35 +82,36 @@ export default function ContactosPage() {
           descripcion="Compradores, transportistas y proveedores"
         />
         {puedeEditar && (
-          <button
+          <Button
             onClick={() => setMostrarForm(true)}
             title="Agregar un contacto nuevo a la agenda"
-            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+            icono={Plus}
           >
-            <Plus className="h-4 w-4" aria-hidden />
             Nuevo contacto
-          </button>
+          </Button>
         )}
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <div className="relative min-w-[240px] flex-1">
+        <div className="relative min-w-0 flex-1 basis-60">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tinta-suave"
             aria-hidden
           />
           <input
+            type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, empresa, teléfono o email..."
             aria-label="Buscar contactos"
-            className="w-full rounded-md border border-stone-300 py-2 pl-9 pr-3 text-sm"
+            className={`${CLASE_CAMPO} pl-9`}
           />
         </div>
         <select
           value={tipo}
           onChange={(e) => setTipo(e.target.value as TipoContacto | "")}
-          className="rounded-md border border-stone-300 px-3 py-2 text-sm"
+          aria-label="Filtrar por tipo de contacto"
+          className={`${CLASE_CAMPO} sm:w-auto`}
         >
           <option value="">Todos los tipos</option>
           {TIPOS.map((t) => (
@@ -115,15 +122,21 @@ export default function ContactosPage() {
         </select>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <Advertencia tipo="CRITICO" titulo="No se pudieron cargar los contactos" rol="alert">
+          {error}
+        </Advertencia>
+      )}
       {cargando ? (
-        <p className="text-stone-500">Cargando...</p>
+        <p className="text-tinta-suave">Cargando...</p>
       ) : contactos.length === 0 ? (
-        <p className="text-sm text-stone-500">No se encontraron contactos.</p>
+        <Advertencia tipo="SIN_DATOS" titulo="Sin datos">
+          No se encontraron contactos.
+        </Advertencia>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
+        <Card className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-stone-50 text-left text-stone-500">
+            <thead className="bg-fondo-suave text-left text-tinta-suave">
               <tr>
                 <th className="px-4 py-3 font-medium">Nombre</th>
                 <th className="px-4 py-3 font-medium">Tipo</th>
@@ -132,25 +145,23 @@ export default function ContactosPage() {
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100">
+            <tbody className="divide-y divide-fondo">
               {contactos.map((contacto) => (
                 <tr key={contacto.id}>
-                  <td className="px-4 py-3 font-medium text-stone-900">{contacto.nombre}</td>
+                  <td className="px-4 py-3 font-medium text-tinta">{contacto.nombre}</td>
                   <td className="px-4 py-3">
-                    <Badge tono="gris" icono={ICONO_TIPO[contacto.tipo]}>
-                      {TIPO_CONTACTO_LABEL[contacto.tipo]}
-                    </Badge>
+                    <Tag icono={ICONO_TIPO[contacto.tipo]}>{TIPO_CONTACTO_LABEL[contacto.tipo]}</Tag>
                   </td>
-                  <td className="px-4 py-3 text-stone-600">{contacto.empresa ?? "—"}</td>
-                  <td className="px-4 py-3 text-stone-600">
-                    {[contacto.telefono, contacto.email].filter(Boolean).join(" · ") || "—"}
+                  <td className="px-4 py-3 text-tinta-suave">{contacto.empresa ?? <SinDato />}</td>
+                  <td className="px-4 py-3 text-tinta-suave">
+                    {[contacto.telefono, contacto.email].filter(Boolean).join(" · ") || <SinDato />}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-1 text-right">
                     {puedeEditar && (
                       <button
                         onClick={() => setEditando(contacto)}
                         title="Editar los datos del contacto"
-                        className="inline-flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
+                        className="inline-flex min-h-11 items-center gap-1 text-sm text-tinta-suave hover:text-tinta"
                       >
                         <Pencil className="h-4 w-4" aria-hidden />
                         Editar
@@ -161,7 +172,7 @@ export default function ContactosPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
 
       {mostrarForm && (

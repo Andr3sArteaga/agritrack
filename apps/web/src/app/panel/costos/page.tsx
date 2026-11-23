@@ -17,11 +17,11 @@ import {
 } from "lucide-react";
 import { BadgeEstadoGasto } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
-import { TarjetaMetrica } from "@/components/tarjeta-metrica";
+import { StatCard } from "@/components/ui/stat-card";
 import { api, apiErrorMessage } from "@/lib/api";
 import { cargarIdsDemo } from "@/lib/prediccion";
 import { useAuth } from "@/lib/auth-context";
-import { formatearBs, formatearFecha } from "@/lib/format";
+import { formatearBs, formatearBsONulo, formatearFecha } from "@/lib/format";
 import {
   CATEGORIA_GASTO_LABEL,
   ESTADO_CAMPANA_LABEL,
@@ -167,12 +167,15 @@ export default function CostosPage() {
       />
 
       <div>
-        <label className="block text-sm font-medium text-stone-700">Campaña</label>
+        <label htmlFor="costos-campana" className="block text-sm font-medium text-tinta-suave">
+          Campaña
+        </label>
         <select
+          id="costos-campana"
           value={campanaId}
           onChange={(e) => seleccionarCampana(e.target.value)}
           disabled={campanas.length === 0}
-          className="mt-1 w-full max-w-xl rounded-md border border-stone-300 bg-white px-3 py-2 text-sm"
+          className="mt-1 min-h-11 w-full max-w-xl rounded-control border border-borde bg-white px-3 py-2 text-sm"
         >
           {campanas.map((campana) => (
             <option key={campana.id} value={campana.id}>
@@ -182,32 +185,32 @@ export default function CostosPage() {
         </select>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-critico-borde">{error}</p>}
       {!error && campanas.length === 0 && !cargando && (
-        <p className="text-sm text-stone-500">No hay campañas registradas.</p>
+        <p className="text-sm text-tinta-suave">No hay campañas registradas.</p>
       )}
-      {cargando && <p className="text-stone-500">Cargando...</p>}
+      {cargando && <p className="text-tinta-suave">Cargando...</p>}
 
       {!cargando && detalle && resumen && campanaActual && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <TarjetaMetrica
+            <StatCard
               icono={CircleCheck}
               etiqueta="Total gastado (pagado)"
-              valor={formatearBs(resumen.gastado)}
+              valor={formatearBsONulo(resumen.gastado)}
               ayuda="Suma de los gastos ya pagados, sin contar los anulados. Es el gasto real de la campaña."
             />
-            <TarjetaMetrica
+            <StatCard
               icono={Clock}
               etiqueta="Total comprometido"
-              valor={formatearBs(resumen.comprometido)}
+              valor={formatearBsONulo(resumen.comprometido)}
               nota="Aparte; no entra en el gasto real"
               ayuda="Gastos acordados que todavía no se pagaron. No se restan del presupuesto hasta que se paguen."
             />
-            <TarjetaMetrica
+            <StatCard
               icono={Wallet}
               etiqueta="Presupuesto"
-              valor={formatearBs(resumen.presupuesto)}
+              valor={formatearBsONulo(resumen.presupuesto)}
               nota={resumen.presupuesto === null ? "Sin presupuesto definido" : undefined}
               ayuda="Monto total que se planificó gastar en esta campaña."
               accion={
@@ -218,18 +221,18 @@ export default function CostosPage() {
                       ? "Cambiar el presupuesto de la campaña"
                       : "Definir el presupuesto de la campaña"
                   }
-                  className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                  className="-my-3 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-marca hover:text-marca-hover"
                 >
                   <Pencil className="h-3.5 w-3.5" aria-hidden />
                   {detalle.presupuesto ? "Cambiar" : "Definir"}
                 </button>
               }
             />
-            <TarjetaMetrica
+            <StatCard
               icono={PiggyBank}
               ayuda="Lo que sobró del presupuesto: presupuesto menos lo ya pagado. Si es negativo, se gastó más de lo planificado."
               etiqueta="Ahorro (presupuesto − gastado)"
-              valor={formatearBs(resumen.ahorro)}
+              valor={formatearBsONulo(resumen.ahorro)}
               tono={
                 resumen.ahorro === null
                   ? undefined
@@ -243,18 +246,18 @@ export default function CostosPage() {
                   : undefined
               }
             />
-            <TarjetaMetrica
+            <StatCard
               icono={Ruler}
               etiqueta="Costo por hectárea"
-              valor={formatearBs(resumen.costoPorHa)}
+              valor={formatearBsONulo(resumen.costoPorHa)}
               nota={`${detalle.hectareas} ha`}
               ayuda="Gasto real dividido entre las hectáreas de la parcela."
             />
-            <TarjetaMetrica
+            <StatCard
               icono={Scale}
               ayuda="Gasto real dividido entre las toneladas cosechadas. Solo se calcula cuando ya hay producción registrada."
               etiqueta="Costo por tonelada"
-              valor={formatearBs(resumen.costoPorTonelada)}
+              valor={formatearBsONulo(resumen.costoPorTonelada)}
               nota={
                 resumen.costoPorTonelada === null
                   ? "Sin producción real registrada"
@@ -264,14 +267,14 @@ export default function CostosPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-              <Receipt className="h-5 w-5 text-emerald-700" aria-hidden />
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-tinta">
+              <Receipt className="h-5 w-5 text-marca" aria-hidden />
               Gastos
             </h2>
             <button
               onClick={() => setFormGasto({ gasto: null })}
               title="Registrar un gasto nuevo en esta campaña"
-              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 py-2 text-sm font-semibold text-white hover:bg-marca-hover"
             >
               <Plus className="h-4 w-4" aria-hidden />
               Registrar gasto
@@ -279,11 +282,11 @@ export default function CostosPage() {
           </div>
 
           {detalle.gastos.length === 0 ? (
-            <p className="text-sm text-stone-500">Esta campaña todavía no tiene gastos.</p>
+            <p className="text-sm text-tinta-suave">Esta campaña todavía no tiene gastos.</p>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
+            <div className="overflow-x-auto rounded-control border border-borde bg-white">
               <table className="w-full text-sm">
-                <thead className="bg-stone-50 text-left text-stone-500">
+                <thead className="bg-fondo-suave text-left text-tinta-suave">
                   <tr>
                     <th className="px-4 py-3 font-medium">Fecha</th>
                     <th className="px-4 py-3 font-medium">Categoría</th>
@@ -293,9 +296,9 @@ export default function CostosPage() {
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-fondo">
                   {detalle.gastos.map((gasto) => (
-                    <tr key={gasto.id} className={gasto.anulado ? "bg-stone-50 text-stone-400" : ""}>
+                    <tr key={gasto.id} className={gasto.anulado ? "bg-fondo-suave text-tinta-suave" : ""}>
                       <td className="whitespace-nowrap px-4 py-3">{formatearFecha(gasto.fecha)}</td>
                       <td className="px-4 py-3">{CATEGORIA_GASTO_LABEL[gasto.categoria]}</td>
                       <td className="px-4 py-3">
@@ -303,7 +306,7 @@ export default function CostosPage() {
                           {gasto.descripcion}
                         </span>
                         {gasto.anulado && (
-                          <p className="text-xs italic text-red-500">
+                          <p className="text-xs italic text-critico-borde">
                             Motivo: {gasto.motivoAnulacion}
                           </p>
                         )}
@@ -313,18 +316,18 @@ export default function CostosPage() {
                       </td>
                       <td
                         className={`whitespace-nowrap px-4 py-3 text-right font-medium ${
-                          gasto.anulado ? "line-through" : "text-stone-900"
+                          gasto.anulado ? "line-through" : "text-tinta"
                         }`}
                       >
                         {formatearBs(gasto.monto)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right">
+                      <td className="whitespace-nowrap px-4 py-1 text-right">
                         {!gasto.anulado && (
                           <div className="flex justify-end gap-3">
                             <button
                               onClick={() => setFormGasto({ gasto })}
                               title="Editar descripción, fecha, estado o monto del gasto"
-                              className="inline-flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
+                              className="inline-flex min-h-11 items-center gap-1 text-sm text-tinta-suave hover:text-tinta"
                             >
                               <Pencil className="h-4 w-4" aria-hidden />
                               Editar
@@ -332,7 +335,7 @@ export default function CostosPage() {
                             <button
                               onClick={() => setGastoAAnular(gasto)}
                               title="Anular el gasto (no se borra: queda con su motivo)"
-                              className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800"
+                              className="inline-flex min-h-11 items-center gap-1 text-sm text-critico-borde hover:text-critico-texto"
                             >
                               <Ban className="h-4 w-4" aria-hidden />
                               Anular

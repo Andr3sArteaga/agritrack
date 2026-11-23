@@ -21,7 +21,7 @@ export function GaleriaFotosCliente({
         {fotos.map((foto, idx) => (
           <figure
             key={foto.id}
-            className="group overflow-hidden rounded-2xl border border-[#E4EAE6] bg-[#f8faf9]"
+            className="group overflow-hidden rounded-tarjeta border border-borde bg-fondo-suave"
           >
             <button
               type="button"
@@ -37,14 +37,14 @@ export function GaleriaFotosCliente({
                 className="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
               />
               <span
-                className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-xs transition-colors group-hover:bg-black/80"
+                className="absolute right-3 top-3 inline-flex size-11 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-xs transition-colors group-hover:bg-black/80"
                 aria-hidden
               >
                 <Maximize2 className="h-4 w-4" />
               </span>
             </button>
             {foto.descripcion && (
-              <figcaption className="border-t border-[#E4EAE6] px-3.5 py-2.5 text-xs font-medium text-[#68736D]">
+              <figcaption className="border-t border-borde px-3.5 py-2.5 text-xs font-medium text-tinta-suave">
                 {foto.descripcion}
               </figcaption>
             )}

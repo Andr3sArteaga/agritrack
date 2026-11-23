@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
 import { AccionesModal, Modal } from "@/components/modal";
+import { CLASE_CAMPO, Field } from "@/components/ui/field";
 import {
   CATEGORIA_GASTO_LABEL,
   ESTADO_GASTO_LABEL,
@@ -72,79 +73,94 @@ export function GastoForm({
     <Modal titulo={gasto ? "Editar gasto" : "Registrar gasto"} onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
         {montoBloqueado && (
-          <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <p className="rounded-control bg-atencion-fondo px-3 py-2 text-sm text-atencion-texto">
             Este gasto proviene de un insumo del catálogo: el monto y la
             categoría no se editan. Anúlalo y registra uno nuevo si es necesario.
           </p>
         )}
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-stone-700">Categoría</label>
-            <select
-              value={categoria}
-              disabled={montoBloqueado}
-              onChange={(e) => setCategoria(e.target.value as CategoriaGasto)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-100"
-            >
-              {CATEGORIAS.map((c) => (
-                <option key={c} value={c}>
-                  {CATEGORIA_GASTO_LABEL[c]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700">Estado</label>
-            <select
-              value={estado}
-              onChange={(e) => setEstado(e.target.value as EstadoGasto)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            >
-              {ESTADOS.map((s) => (
-                <option key={s} value={s}>
-                  {ESTADO_GASTO_LABEL[s]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Field etiqueta="Categoría">
+            {(props) => (
+              <select
+                {...props}
+                value={categoria}
+                disabled={montoBloqueado}
+                onChange={(e) => setCategoria(e.target.value as CategoriaGasto)}
+                className={`${CLASE_CAMPO} disabled:bg-fondo`}
+              >
+                {CATEGORIAS.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORIA_GASTO_LABEL[c]}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
+          <Field etiqueta="Estado">
+            {(props) => (
+              <select
+                {...props}
+                value={estado}
+                onChange={(e) => setEstado(e.target.value as EstadoGasto)}
+                className={CLASE_CAMPO}
+              >
+                {ESTADOS.map((s) => (
+                  <option key={s} value={s}>
+                    {ESTADO_GASTO_LABEL[s]}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-700">Descripción</label>
-          <input
-            required
-            minLength={3}
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
+        <Field etiqueta="Descripción">
+          {(props) => (
+            <input
+              {...props}
+              required
+              minLength={3}
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              className={CLASE_CAMPO}
+            />
+          )}
+        </Field>
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-stone-700">Fecha</label>
-            <input
-              required
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700">Monto (Bs)</label>
-            <input
-              required
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={monto}
-              disabled={montoBloqueado}
-              onChange={(e) => setMonto(e.target.value)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-100"
-            />
-          </div>
+          <Field etiqueta="Fecha">
+            {(props) => (
+              <input
+                {...props}
+                required
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                className={CLASE_CAMPO}
+              />
+            )}
+          </Field>
+          <Field etiqueta="Monto (Bs)">
+            {(props) => (
+              <input
+                {...props}
+                required
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0.01"
+                value={monto}
+                disabled={montoBloqueado}
+                onChange={(e) => setMonto(e.target.value)}
+                className={`${CLASE_CAMPO} disabled:bg-fondo`}
+              />
+            )}
+          </Field>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm font-medium text-critico-borde">
+            {error}
+          </p>
+        )}
 
         <AccionesModal onCancelar={onClose} etiqueta="Guardar" guardando={guardando} />
       </form>

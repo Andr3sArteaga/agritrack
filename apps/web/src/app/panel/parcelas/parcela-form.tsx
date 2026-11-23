@@ -8,7 +8,7 @@ import type { Parcela, PoligonoGeoJson } from "@/lib/types";
 
 const PoligonoEditor = dynamic(
   () => import("@/components/map/poligono-editor").then((m) => m.PoligonoEditor),
-  { ssr: false, loading: () => <p className="text-sm text-stone-500">Cargando mapa...</p> },
+  { ssr: false, loading: () => <p className="text-sm text-tinta-suave">Cargando mapa...</p> },
 );
 
 export function ParcelaForm({
@@ -81,20 +81,20 @@ export function ParcelaForm({
     <Modal titulo={parcela ? "Editar parcela" : "Nueva parcela"} onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700">Nombre</label>
+          <label className="block text-sm font-medium text-tinta-suave">Nombre</label>
           <input
             required
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700">
+          <label className="block text-sm font-medium text-tinta-suave">
             Contorno de la parcela
           </label>
-          <p className="mt-1 text-xs text-stone-500">
+          <p className="mt-1 text-xs text-tinta-suave">
             Dibuja el polígono haciendo clic en cada vértice. Puedes editar los
             vértices arrastrándolos o borrarlo y volver a dibujar.
           </p>
@@ -108,7 +108,7 @@ export function ParcelaForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700">
+          <label className="block text-sm font-medium text-tinta-suave">
             Hectáreas {poligono && "(calculadas del polígono)"}
           </label>
           <input
@@ -119,27 +119,27 @@ export function ParcelaForm({
             readOnly={!!poligono}
             value={hectareas}
             onChange={(e) => setHectareas(e.target.value)}
-            className={`mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${
-              poligono ? "bg-stone-100 text-stone-600" : ""
+            className={`mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm ${
+              poligono ? "bg-fondo text-tinta-suave" : ""
             }`}
           />
           {poligono && (
-            <p className="mt-1 text-xs font-medium text-emerald-700">
+            <p className="mt-1 text-xs font-medium text-marca">
               Área calculada: {hectareas} ha
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700">Ubicación</label>
+          <label className="block text-sm font-medium text-tinta-suave">Ubicación</label>
           <input
             required
             value={ubicacionTexto}
             onChange={(e) => setUbicacionTexto(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-control border border-borde px-3 py-2 text-sm"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-stone-700">
+        <label className="flex items-center gap-2 text-sm text-tinta-suave">
           <input
             type="checkbox"
             checked={disponibleParaPreventa}
@@ -148,7 +148,7 @@ export function ParcelaForm({
           Disponible para preventa
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-critico-borde">{error}</p>}
 
         <AccionesModal onCancelar={onClose} etiqueta="Guardar" guardando={guardando} />
       </form>

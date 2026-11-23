@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
 import { AccionesModal, Modal } from "@/components/modal";
+import { CLASE_CAMPO, Field } from "@/components/ui/field";
 import type { Presupuesto } from "@/lib/types";
 
 export function PresupuestoForm({
@@ -46,31 +47,38 @@ export function PresupuestoForm({
       onClose={onClose}
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-stone-700">
-            Presupuesto total (Bs)
-          </label>
-          <input
-            required
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={montoTotal}
-            onChange={(e) => setMontoTotal(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-700">Notas (opcional)</label>
-          <textarea
-            rows={2}
-            value={notas}
-            onChange={(e) => setNotas(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
+        <Field etiqueta="Presupuesto total (Bs)">
+          {(props) => (
+            <input
+              {...props}
+              required
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0.01"
+              value={montoTotal}
+              onChange={(e) => setMontoTotal(e.target.value)}
+              className={CLASE_CAMPO}
+            />
+          )}
+        </Field>
+        <Field etiqueta="Notas" opcional>
+          {(props) => (
+            <textarea
+              {...props}
+              rows={2}
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+              className={`${CLASE_CAMPO} py-2`}
+            />
+          )}
+        </Field>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm font-medium text-critico-borde">
+            {error}
+          </p>
+        )}
 
         <AccionesModal onCancelar={onClose} etiqueta="Guardar" guardando={guardando} />
       </form>

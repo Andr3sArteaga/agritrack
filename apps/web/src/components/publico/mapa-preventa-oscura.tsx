@@ -76,7 +76,7 @@ export function MapaPreventaOscura({
 }) {
   return (
     <div
-      className="relative isolate h-full w-full bg-[#071712]"
+      className="relative isolate h-full w-full bg-noche"
       style={{
         backgroundImage:
           "radial-gradient(circle at 20% 20%, rgba(0, 168, 89, 0.16), transparent 55%), linear-gradient(to right, rgba(0, 168, 89, 0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 168, 89, 0.06) 1px, transparent 1px)",
@@ -88,7 +88,7 @@ export function MapaPreventaOscura({
         zoom={13}
         scrollWheelZoom={scrollZoom}
         zoomControl={zoomControl}
-        style={{ height: "100%", width: "100%", background: "#071712" }}
+        style={{ height: "100%", width: "100%", background: "var(--color-noche)" }}
       >
         <TileLayer
           url={TILE_DARK_URL}
@@ -117,12 +117,12 @@ export function MapaPreventaOscura({
             >
               <Tooltip sticky direction="top" opacity={0.96}>
                 <div className="text-xs leading-snug">
-                  <p className="font-bold text-[#004b36]">{parcela.nombre}</p>
-                  <p className="text-stone-700">
+                  <p className="font-bold text-marca-oscuro">{parcela.nombre}</p>
+                  <p className="text-tinta-suave">
                     {parcela.cultivo} · {parcela.hectareas} ha
                   </p>
                   {parcela.rendimientoTnHa !== null && (
-                    <p className="font-semibold text-[#007a45]">
+                    <p className="font-semibold text-marca">
                       Est. {parcela.rendimientoTnHa} t/ha
                     </p>
                   )}

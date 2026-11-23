@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   Sprout,
+  Tag as IconoTag,
   TestTubes,
   Trash2,
 } from "lucide-react";
@@ -25,7 +26,12 @@ import {
   EstimacionComponente,
   type PuntoHistoricoRendimiento,
 } from "@/components/estado/estimacion-componente";
-import { IconoActividad } from "@/components/icono-actividad";
+import { ActivityItem } from "@/components/ui/activity-item";
+import { Button } from "@/components/ui/button";
+import { CropChip } from "@/components/ui/crop-chip";
+import { ParcelThumb } from "@/components/ui/parcel-thumb";
+import { RangeBar } from "@/components/ui/range-bar";
+import { Tag } from "@/components/ui/tag";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatearFecha } from "@/lib/format";
@@ -33,7 +39,6 @@ import { elegirCampanaActual } from "@/lib/parcelas";
 import type { RegistroCosechaCampana } from "@/lib/prediccion";
 import {
   ESTADO_CAMPANA_LABEL,
-  TIPO_ACTIVIDAD_LABEL,
   type Actividad,
   type AnalisisSuelo,
   type Campana,
@@ -83,7 +88,10 @@ function TarjetaCategoriaAmbiente({
   etiquetaRegistrar,
   onConsultar,
   onRegistrar,
+  children,
 }: {
+  /** Contenido extra entre la descripcion y los botones (ej. barras de valores). */
+  children?: React.ReactNode;
   titulo: string;
   descripcion: string;
   contador: string;
@@ -98,34 +106,35 @@ function TarjetaCategoriaAmbiente({
   const sinDatos = estado === "SIN_DATOS";
   return (
     <article
-      className={`flex flex-col justify-between gap-4 rounded-xl bg-white p-5 transition-colors ${
+      className={`flex flex-col justify-between gap-4 rounded-tarjeta bg-white p-5 transition-colors ${
         sinDatos
-          ? "border-2 border-dashed border-stone-300"
-          : "border border-[#E4EAE6]"
+          ? "border-2 border-dashed border-sindatos-borde"
+          : "border border-borde"
       }`}
     >
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E8F5EF] text-[#006B4F]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-marca-suave text-marca">
               <Icono className="h-5 w-5" aria-hidden />
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#17211D]">{titulo}</h3>
-              <p className="text-xs font-medium text-[#006B4F]">{contador}</p>
+              <h3 className="text-base font-bold text-tinta">{titulo}</h3>
+              <p className="text-xs font-medium text-marca">{contador}</p>
             </div>
           </div>
           <BadgeEstadoRegistro estado={estado} tamano="sm" />
         </div>
 
-        <p className="text-sm leading-relaxed text-[#68736D]">{descripcion}</p>
+        <p className="text-sm leading-relaxed text-tinta-suave">{descripcion}</p>
+        {children}
       </div>
 
-      <div className="flex flex-wrap gap-2 border-t border-[#E4EAE6] pt-3">
+      <div className="flex flex-wrap gap-2 border-t border-borde pt-3">
         <button
           type="button"
           onClick={onConsultar}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-3 text-xs font-semibold text-[#17211D] hover:bg-[#E8F5EF] hover:text-[#006B4F]"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-control border border-borde bg-fondo-suave px-3 text-sm font-semibold text-tinta hover:bg-marca-suave hover:text-marca"
         >
           <Eye className="h-4 w-4 shrink-0" aria-hidden />
           {etiquetaConsultar}
@@ -135,7 +144,7 @@ function TarjetaCategoriaAmbiente({
           <button
             type="button"
             onClick={onRegistrar}
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-[#006B4F] px-3.5 text-xs font-semibold text-white hover:bg-[#00553E]"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-control bg-marca px-3.5 text-sm font-semibold text-white hover:bg-marca-hover"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
             {etiquetaRegistrar}
@@ -471,10 +480,10 @@ function ParcelaPrivadaDetalleContenido() {
     }
   }
 
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (error) return <p className="text-critico-borde">{error}</p>;
   if (!parcela || !evaluacion) {
     return (
-      <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+      <div className="rounded-tarjeta border border-borde bg-white p-6 text-sm text-tinta-suave">
         Cargando detalle de la parcela...
       </div>
     );
@@ -487,14 +496,14 @@ function ParcelaPrivadaDetalleContenido() {
   const estadoProgresoPct = Math.round((evaluacion.completadas / 5) * 100);
 
   return (
-    <div className="-mx-4 -my-6 min-h-full bg-[#F8FAF9] px-4 py-6 text-[#17211D] md:-mx-8 md:-my-8 md:px-8 md:py-8">
+    <div className="text-tinta">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* A. ENCABEZADO ÚNICO DE LA PARCELA (Toda la identidad va solo aquí) */}
-        <header className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6">
+        <header className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/panel/parcelas"
-              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-[#68736D] hover:text-[#006B4F]"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-tinta-suave hover:text-marca"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               Volver a parcelas
@@ -505,9 +514,9 @@ function ParcelaPrivadaDetalleContenido() {
                 <button
                   type="button"
                   onClick={() => setModalMapa(true)}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-white px-3.5 text-xs font-semibold text-[#17211D] hover:bg-[#F8FAF9]"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-borde bg-white px-3.5 text-sm font-semibold text-tinta hover:bg-fondo-suave"
                 >
-                  <MapPin className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                  <MapPin className="h-4 w-4 text-marca" aria-hidden />
                   Ver mapa
                 </button>
               )}
@@ -516,15 +525,15 @@ function ParcelaPrivadaDetalleContenido() {
                   <button
                     type="button"
                     onClick={() => setModalEditarParcela(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-white px-3.5 text-xs font-semibold text-[#17211D] hover:bg-[#F8FAF9]"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-borde bg-white px-3.5 text-sm font-semibold text-tinta hover:bg-fondo-suave"
                   >
-                    <Pencil className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                    <Pencil className="h-4 w-4 text-marca" aria-hidden />
                     Editar parcela
                   </button>
                   <button
                     type="button"
                     onClick={() => setMostrarFormCampana(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-3.5 text-xs font-semibold text-white hover:bg-[#00553E]"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-3.5 text-sm font-semibold text-white hover:bg-marca-hover"
                   >
                     <Plus className="h-4 w-4" aria-hidden />
                     Nueva campaña
@@ -535,20 +544,21 @@ function ParcelaPrivadaDetalleContenido() {
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-[#17211D] sm:text-3xl">
+            <ParcelThumb poligono={parcela.poligono} tamano={48} />
+            <h1 className="text-[28px] font-semibold leading-tight text-tinta">
               {parcela.nombre}
             </h1>
             {parcela.disponibleParaPreventa && (
-              <span className="rounded-full border border-[#006B4F]/30 bg-[#E8F5EF] px-3 py-0.5 text-xs font-semibold text-[#006B4F]">
+              <Tag tono="marca" icono={IconoTag}>
                 Disponible para preventa
-              </span>
+              </Tag>
             )}
             {integridad && integridad.totalVerificadas > 0 && (
               <span
                 className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
                   integridad.valido
-                    ? "border-[#006B4F]/30 bg-[#E8F5EF] text-[#006B4F]"
-                    : "border-red-300 bg-red-50 text-red-700"
+                    ? "border-marca/30 bg-marca-suave text-marca"
+                    : "border-critico-borde/40 bg-critico-fondo text-critico-borde"
                 }`}
               >
                 {integridad.valido ? (
@@ -564,22 +574,22 @@ function ParcelaPrivadaDetalleContenido() {
           </div>
 
           {/* Grilla única de metadatos: nunca repetida en bloques inferiores */}
-          <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-[#E4EAE6] pt-4 sm:grid-cols-3 lg:grid-cols-6">
+          <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-borde pt-4 sm:grid-cols-3 lg:grid-cols-6">
             <div>
-              <dt className="text-xs font-medium text-[#68736D]">Ubicación</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+              <dt className="text-xs font-medium text-tinta-suave">Ubicación</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-tinta">
                 {parcela.ubicacionTexto || "Sin registrar"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium text-[#68736D]">Superficie total</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+              <dt className="text-xs font-medium text-tinta-suave">Superficie total</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-tinta">
                 {parcela.hectareas} ha
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium text-[#68736D]">Campaña activa</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+              <dt className="text-xs font-medium text-tinta-suave">Campaña activa</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-tinta">
                 {campanaSeleccionada ? (
                   <div className="flex flex-col gap-1">
                     {campanas.length > 1 ? (
@@ -587,7 +597,7 @@ function ParcelaPrivadaDetalleContenido() {
                         aria-label="Seleccionar campaña de la parcela"
                         value={campanaSeleccionada.id}
                         onChange={(e) => setCampanaManualId(e.target.value)}
-                        className="min-h-9 rounded-md border border-[#E4EAE6] bg-[#F8FAF9] px-2 py-1 text-xs font-semibold text-[#17211D]"
+                        className="min-h-11 rounded-control border border-borde bg-fondo-suave px-2 py-1 text-sm font-semibold text-tinta"
                       >
                         {campanas.map((c) => (
                           <option key={c.id} value={c.id}>
@@ -605,20 +615,22 @@ function ParcelaPrivadaDetalleContenido() {
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium text-[#68736D]">Cultivo actual</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
-                {campanaSeleccionada ? cultivoNombre(campanaSeleccionada.cultivoId) : "—"}
+              <dt className="text-xs font-medium text-tinta-suave">Cultivo actual</dt>
+              <dd className="mt-1">
+                <CropChip
+                  cultivo={campanaSeleccionada ? cultivoNombre(campanaSeleccionada.cultivoId) : null}
+                />
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium text-[#68736D]">Variedad / semilla</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+              <dt className="text-xs font-medium text-tinta-suave">Variedad / semilla</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-tinta">
                 {registroActivo?.variedad?.trim() || "Sin registrar"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium text-[#68736D]">Fecha de siembra</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-[#17211D]">
+              <dt className="text-xs font-medium text-tinta-suave">Fecha de siembra</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-tinta">
                 {registroActivo?.fechaSiembra
                   ? formatearFecha(registroActivo.fechaSiembra)
                   : "Sin registrar"}
@@ -628,18 +640,18 @@ function ParcelaPrivadaDetalleContenido() {
 
           {/* Barra compacta de gestión de estado de campaña (solo JEFE) */}
           {esJefe && campanaSeleccionada && (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E4EAE6] pt-3 text-xs">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-borde pt-3 text-xs">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium text-[#68736D]">Etapa de la campaña:</span>
+                <span className="font-medium text-tinta-suave">Etapa de la campaña:</span>
                 <BadgeEstadoCampana estado={campanaSeleccionada.estado} />
-                <span className="text-[#68736D]">· Cambiar a:</span>
+                <span className="text-tinta-suave">· Cambiar a:</span>
                 {ESTADOS_CAMPANA.map((estado) => (
                   <button
                     key={estado}
                     type="button"
                     disabled={estado === campanaSeleccionada.estado}
                     onClick={() => cambiarEstadoCampana(campanaSeleccionada, estado)}
-                    className="min-h-9 rounded-md border border-[#E4EAE6] bg-[#F8FAF9] px-2.5 text-xs font-medium text-[#17211D] hover:bg-[#E8F5EF] disabled:opacity-40"
+                    className="min-h-11 rounded-control border border-borde bg-fondo-suave px-2.5 text-sm font-medium text-tinta hover:bg-marca-suave disabled:opacity-40"
                   >
                     {ESTADO_CAMPANA_LABEL[estado]}
                   </button>
@@ -648,7 +660,7 @@ function ParcelaPrivadaDetalleContenido() {
               <button
                 type="button"
                 onClick={() => eliminarCampana(campanaSeleccionada)}
-                className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-medium text-red-600 hover:bg-red-50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-control px-2 text-sm font-medium text-critico-borde hover:bg-critico-fondo"
               >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden />
                 Eliminar campaña
@@ -661,7 +673,7 @@ function ParcelaPrivadaDetalleContenido() {
         <div
           role="tablist"
           aria-label="Vistas principales de la parcela"
-          className="grid grid-cols-1 gap-2 rounded-xl border border-[#E4EAE6] bg-white p-1.5 sm:grid-cols-2"
+          className="grid grid-cols-1 gap-2 rounded-tarjeta border border-borde bg-white p-1.5 sm:grid-cols-2"
         >
           <button
             id="tab-registro"
@@ -670,10 +682,10 @@ function ParcelaPrivadaDetalleContenido() {
             aria-selected={pestanaActiva === "registro"}
             aria-controls="panel-registro"
             onClick={() => setPestanaActiva("registro")}
-            className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold transition-colors sm:text-base ${
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-bold transition-colors sm:text-base ${
               pestanaActiva === "registro"
-                ? "bg-[#006B4F] text-white"
-                : "text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D]"
+                ? "bg-marca text-white"
+                : "text-tinta-suave hover:bg-fondo-suave hover:text-tinta"
             }`}
           >
             <ClipboardList className="h-5 w-5 shrink-0" aria-hidden />
@@ -687,10 +699,10 @@ function ParcelaPrivadaDetalleContenido() {
             aria-selected={pestanaActiva === "estimacion"}
             aria-controls="panel-estimacion"
             onClick={() => setPestanaActiva("estimacion")}
-            className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold transition-colors sm:text-base ${
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-bold transition-colors sm:text-base ${
               pestanaActiva === "estimacion"
-                ? "bg-[#006B4F] text-white"
-                : "text-[#68736D] hover:bg-[#F8FAF9] hover:text-[#17211D]"
+                ? "bg-marca text-white"
+                : "text-tinta-suave hover:bg-fondo-suave hover:text-tinta"
             }`}
           >
             <LineChart className="h-5 w-5 shrink-0" aria-hidden />
@@ -709,14 +721,14 @@ function ParcelaPrivadaDetalleContenido() {
             {/* D. ESTADO DEL REGISTRO (Resumen superior de completitud) */}
             <section
               aria-labelledby="heading-estado-registro"
-              className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6"
+              className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 id="heading-estado-registro" className="text-lg font-bold text-[#17211D]">
+                  <h2 id="heading-estado-registro" className="text-lg font-bold text-tinta">
                     Estado del registro
                   </h2>
-                  <p className="mt-0.5 text-sm text-[#68736D]">
+                  <p className="mt-0.5 text-sm text-tinta-suave">
                     {evaluacion.completadas} de 5 dimensiones completas para respaldo técnico y
                     estimación de rendimiento.
                   </p>
@@ -725,7 +737,7 @@ function ParcelaPrivadaDetalleContenido() {
                 <button
                   type="button"
                   onClick={() => setModalCompletitud(true)}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#006B4F]/40 bg-[#E8F5EF] px-4 text-xs font-bold text-[#006B4F] hover:bg-[#006B4F] hover:text-white"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-marca/40 bg-marca-suave px-4 text-sm font-bold text-marca hover:bg-marca hover:text-white"
                 >
                   <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
                   Ver qué información falta registrar
@@ -733,9 +745,9 @@ function ParcelaPrivadaDetalleContenido() {
                 </button>
               </div>
 
-              <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[#F8FAF9] ring-1 ring-[#E4EAE6]">
+              <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-fondo-suave ring-1 ring-borde">
                 <div
-                  className="h-full rounded-full bg-[#006B4F] transition-all duration-300"
+                  className="h-full rounded-full bg-marca transition-all duration-300"
                   style={{ width: `${Math.max(6, estadoProgresoPct)}%` }}
                 />
               </div>
@@ -746,19 +758,19 @@ function ParcelaPrivadaDetalleContenido() {
                     key={dim.id}
                     type="button"
                     onClick={() => setModalCompletitud(true)}
-                    className={`flex flex-col justify-between rounded-xl p-3 text-left transition-colors hover:border-[#006B4F]/50 ${
+                    className={`flex flex-col justify-between rounded-tarjeta p-3 text-left transition-colors hover:border-marca/50 ${
                       dim.estado === "SIN_DATOS"
-                        ? "border-2 border-dashed border-stone-300 bg-[#F8FAF9]"
-                        : "border border-[#E4EAE6] bg-white"
+                        ? "border-2 border-dashed border-sindatos-borde bg-fondo-suave"
+                        : "border border-borde bg-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className="text-xs font-bold text-[#17211D]">{dim.nombre}</span>
+                      <span className="text-xs font-bold text-tinta">{dim.nombre}</span>
                     </div>
                     <div className="mt-2 flex items-center justify-between gap-2">
                       <BadgeEstadoRegistro estado={dim.estado} tamano="sm" />
                     </div>
-                    <p className="mt-1.5 text-[11px] text-[#68736D]">{dim.resumen}</p>
+                    <p className="mt-1.5 text-xs text-tinta-suave">{dim.resumen}</p>
                   </button>
                 ))}
               </div>
@@ -768,10 +780,10 @@ function ParcelaPrivadaDetalleContenido() {
             <section aria-labelledby="heading-variables-ambiente" className="space-y-3">
               <div className="flex flex-wrap items-end justify-between gap-2">
                 <div>
-                  <h2 id="heading-variables-ambiente" className="text-lg font-bold text-[#17211D]">
+                  <h2 id="heading-variables-ambiente" className="text-lg font-bold text-tinta">
                     Variables del cultivo y ambiente
                   </h2>
-                  <p className="text-sm text-[#68736D]">
+                  <p className="text-sm text-tinta-suave">
                     Consulta el historial o carga nuevos registros por categoría.
                   </p>
                 </div>
@@ -789,7 +801,25 @@ function ParcelaPrivadaDetalleContenido() {
                   etiquetaRegistrar="Registrar suelo"
                   onConsultar={() => setModalCategoria("suelo")}
                   onRegistrar={() => setFormMonitoreo("suelo")}
-                />
+                >
+                  {/* Escala neutra: muestra el ultimo valor real, sin decir si es bueno o malo. */}
+                  <div className="space-y-4 pt-1">
+                    {(["ph", "humedad"] as const).map((campo) => {
+                      const ind = evaluacion.indicadoresSuelo.find((i) => i.campo === campo);
+                      return (
+                        <RangeBar
+                          key={campo}
+                          etiqueta={ind?.etiqueta ?? campo}
+                          valor={ind?.valor ?? null}
+                          min={0}
+                          max={campo === "ph" ? 14 : 100}
+                          unidad={campo === "ph" ? "" : "%"}
+                          fecha={ind?.fecha}
+                        />
+                      );
+                    })}
+                  </div>
+                </TarjetaCategoriaAmbiente>
 
                 <TarjetaCategoriaAmbiente
                   titulo="Clima"
@@ -846,18 +876,18 @@ function ParcelaPrivadaDetalleContenido() {
             {/* B. ACTIVIDADES AGRÍCOLAS (Línea de Tiempo Cronológica) */}
             <section
               aria-labelledby="heading-actividades"
-              className="rounded-xl border border-[#E4EAE6] bg-white p-5 sm:p-6"
+              className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2
                     id="heading-actividades"
-                    className="flex items-center gap-2 text-lg font-bold text-[#17211D]"
+                    className="flex items-center gap-2 text-lg font-bold text-tinta"
                   >
-                    <CalendarRange className="h-5 w-5 text-[#006B4F]" aria-hidden />
+                    <CalendarRange className="h-5 w-5 text-marca" aria-hidden />
                     Actividades agrícolas
                   </h2>
-                  <p className="mt-0.5 text-sm text-[#68736D]">
+                  <p className="mt-0.5 text-sm text-tinta-suave">
                     {campanaSeleccionada
                       ? `${actividadesVigentesCount} ${
                           actividadesVigentesCount === 1
@@ -872,7 +902,7 @@ function ParcelaPrivadaDetalleContenido() {
                   <button
                     type="button"
                     onClick={() => setModalActividad({ corrigiendo: null })}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                   >
                     <Plus className="h-4 w-4" aria-hidden />
                     Registrar actividad
@@ -881,11 +911,11 @@ function ParcelaPrivadaDetalleContenido() {
               </div>
 
               {!campanaSeleccionada ? (
-                <div className="mt-5 rounded-xl border-2 border-dashed border-stone-300 bg-[#F8FAF9] p-6 text-center">
-                  <p className="text-sm font-semibold text-[#17211D]">
+                <div className="mt-5 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center">
+                  <p className="text-sm font-semibold text-tinta">
                     No hay una campaña seleccionada todavía.
                   </p>
-                  <p className="mt-1 text-xs text-[#68736D]">
+                  <p className="mt-1 text-xs text-tinta-suave">
                     Crea una campaña agrícola para comenzar la bitácora de siembra, aplicaciones y
                     cosecha.
                   </p>
@@ -893,7 +923,7 @@ function ParcelaPrivadaDetalleContenido() {
                     <button
                       type="button"
                       onClick={() => setMostrarFormCampana(true)}
-                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
                       Crear primera campaña
@@ -901,13 +931,13 @@ function ParcelaPrivadaDetalleContenido() {
                   )}
                 </div>
               ) : cargandoActividades ? (
-                <p className="mt-4 text-sm text-[#68736D]">Cargando línea de tiempo...</p>
+                <p className="mt-4 text-sm text-tinta-suave">Cargando línea de tiempo...</p>
               ) : actividadesOrdenadas.length === 0 ? (
-                <div className="mt-5 rounded-xl border-2 border-dashed border-stone-300 bg-[#F8FAF9] p-6 text-center">
-                  <p className="text-sm font-semibold text-[#17211D]">
+                <div className="mt-5 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center">
+                  <p className="text-sm font-semibold text-tinta">
                     Todavía no hay actividades agrícolas registradas en esta campaña.
                   </p>
-                  <p className="mt-1 text-xs text-[#68736D]">
+                  <p className="mt-1 text-xs text-tinta-suave">
                     Registra siembra, fertilización, fumigación, mediciones de humedad o cosecha
                     para construir la trazabilidad.
                   </p>
@@ -915,7 +945,7 @@ function ParcelaPrivadaDetalleContenido() {
                     <button
                       type="button"
                       onClick={() => setModalActividad({ corrigiendo: null, tipoInicial: "SIEMBRA" })}
-                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
                       Registrar primera actividad
@@ -923,107 +953,58 @@ function ParcelaPrivadaDetalleContenido() {
                   )}
                 </div>
               ) : (
-                <ol className="relative mt-6 space-y-4 border-l-2 border-[#E4EAE6] pl-5">
+                <div className="mt-4 divide-y divide-borde">
                   {actividadesOrdenadas.map((act) => (
-                    <li key={act.id} className="relative">
-                      <span
-                        className={`absolute -left-[27px] top-4 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white ${
-                          act.vigente ? "bg-[#006B4F]" : "bg-stone-300"
-                        }`}
-                        aria-hidden
-                      />
-                      <div
-                        className={`rounded-xl border p-4 ${
-                          act.vigente
-                            ? "border-[#E4EAE6] bg-[#F8FAF9]/60"
-                            : "border-stone-200 bg-stone-50 opacity-70"
-                        }`}
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 rounded-md bg-[#E8F5EF] px-2.5 py-1 text-xs font-bold text-[#006B4F]">
-                              <IconoActividad tipo={act.tipo} />
-                              {TIPO_ACTIVIDAD_LABEL[act.tipo]}
-                            </span>
-                            <span className="text-xs font-semibold text-[#68736D]">
-                              #{act.secuencia} · {formatearFecha(act.fecha)}
-                            </span>
+                    <ActivityItem
+                      key={act.id}
+                      tipo={act.tipo}
+                      fecha={act.fecha}
+                      descripcion={act.descripcion}
+                      secuencia={act.secuencia}
+                      reemplazada={!act.vigente}
+                      acciones={
+                        act.vigente && puedeRegistrarActividad ? (
+                          <Button
+                            variante="secundario"
+                            icono={Pencil}
+                            onClick={() => setModalActividad({ corrigiendo: act })}
+                            title="Registrar corrección sin borrar el historial"
+                          >
+                            Corregir
+                          </Button>
+                        ) : undefined
+                      }
+                      etiquetas={
+                        (act.tipo === "COSECHA" && act.rendimientoTnHa !== null) ||
+                        act.insumo ||
+                        act.cantidad !== null ||
+                        act.maquinariaUtilizada ||
+                        act.tercerizado ? (
+                          <>
                             {act.tipo === "COSECHA" && act.rendimientoTnHa !== null && (
-                              <span className="rounded-md bg-white px-2 py-0.5 text-xs font-bold text-[#006B4F] ring-1 ring-[#006B4F]/30">
-                                {act.rendimientoTnHa} t/ha
-                              </span>
+                              <Tag tono="marca">{act.rendimientoTnHa} t/ha</Tag>
                             )}
-                            {!act.vigente && (
-                              <span className="rounded-md bg-stone-200 px-2 py-0.5 text-[11px] font-medium text-stone-700">
-                                Reemplazada por corrección
-                              </span>
-                            )}
-                          </div>
-
-                          {act.vigente && puedeRegistrarActividad && (
-                            <button
-                              type="button"
-                              onClick={() => setModalActividad({ corrigiendo: act })}
-                              title="Registrar corrección sin borrar el historial"
-                              className="inline-flex min-h-9 items-center gap-1 rounded-md border border-[#E4EAE6] bg-white px-2.5 text-xs font-semibold text-amber-800 hover:bg-amber-50"
-                            >
-                              <Pencil className="h-3.5 w-3.5" aria-hidden />
-                              Corregir
-                            </button>
-                          )}
-                        </div>
-
-                        <p
-                          className={`mt-2 text-sm ${
-                            act.vigente ? "text-[#17211D]" : "line-through text-stone-500"
-                          }`}
-                        >
-                          {act.descripcion}
-                        </p>
-
-                        {(act.insumo ||
-                          act.cantidad !== null ||
-                          act.maquinariaUtilizada ||
-                          act.tercerizado) && (
-                          <div className="mt-2.5 flex flex-wrap gap-2 text-xs text-[#68736D]">
-                            {act.insumo && (
-                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5">
-                                Insumo: <strong className="text-[#17211D]">{act.insumo}</strong>
-                              </span>
-                            )}
+                            {act.insumo && <Tag>Insumo: {act.insumo}</Tag>}
                             {act.cantidad !== null && (
-                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5">
-                                Cantidad:{" "}
-                                <strong className="text-[#17211D]">
-                                  {act.cantidad} {act.unidad ?? ""}
-                                </strong>
-                              </span>
+                              <Tag>
+                                Cantidad: {act.cantidad} {act.unidad ?? ""}
+                              </Tag>
                             )}
-                            {act.maquinariaUtilizada && (
-                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5">
-                                Equipo:{" "}
-                                <strong className="text-[#17211D]">{act.maquinariaUtilizada}</strong>
-                              </span>
-                            )}
-                            {act.tercerizado && (
-                              <span className="rounded-md border border-[#E4EAE6] bg-white px-2 py-0.5 font-medium text-[#17211D]">
-                                Servicio tercerizado
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {act.correccionDeId && (
-                          <p className="mt-2 text-xs font-medium text-amber-800">
-                            Corrige a #
-                            {actividades.find((x) => x.id === act.correccionDeId)?.secuencia ?? "?"}
-                            {act.motivoCorreccion ? `: ${act.motivoCorreccion}` : ""}
-                          </p>
-                        )}
-                      </div>
-                    </li>
+                            {act.maquinariaUtilizada && <Tag>Equipo: {act.maquinariaUtilizada}</Tag>}
+                            {act.tercerizado && <Tag>Servicio tercerizado</Tag>}
+                          </>
+                        ) : undefined
+                      }
+                      nota={
+                        act.correccionDeId
+                          ? `Corrige a #${
+                              actividades.find((x) => x.id === act.correccionDeId)?.secuencia ?? "?"
+                            }${act.motivoCorreccion ? `: ${act.motivoCorreccion}` : ""}`
+                          : undefined
+                      }
+                    />
                   ))}
-                </ol>
+                </div>
               )}
             </section>
 
@@ -1065,11 +1046,11 @@ function ParcelaPrivadaDetalleContenido() {
                 onIrATabRegistro={() => setPestanaActiva("registro")}
               />
             ) : (
-              <div className="space-y-3 rounded-xl border-2 border-dashed border-stone-300 bg-white p-6 text-center">
-                <p className="text-base font-bold text-[#17211D]">
+              <div className="space-y-3 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-white p-6 text-center">
+                <p className="text-base font-bold text-tinta">
                   Todavía no hay una campaña para estimar
                 </p>
-                <p className="text-sm text-[#68736D]">
+                <p className="text-sm text-tinta-suave">
                   Crea una campaña agrícola y registra las variables de siembra en la pestaña
                   Registro para consultar el rendimiento estimado y los factores influyentes.
                 </p>
@@ -1077,7 +1058,7 @@ function ParcelaPrivadaDetalleContenido() {
                   <button
                     type="button"
                     onClick={() => setPestanaActiva("registro")}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E4EAE6] bg-[#F8FAF9] px-4 text-sm font-semibold text-[#17211D] hover:bg-[#E8F5EF]"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-borde bg-fondo-suave px-4 text-sm font-semibold text-tinta hover:bg-marca-suave"
                   >
                     Ir a Registro
                   </button>
@@ -1085,7 +1066,7 @@ function ParcelaPrivadaDetalleContenido() {
                     <button
                       type="button"
                       onClick={() => setMostrarFormCampana(true)}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#006B4F] px-4 text-sm font-semibold text-white hover:bg-[#00553E]"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
                       Nueva campaña
@@ -1273,7 +1254,7 @@ export default function ParcelaPrivadaDetallePage() {
   return (
     <Suspense
       fallback={
-        <div className="rounded-xl border border-[#E4EAE6] bg-white p-6 text-sm text-[#68736D]">
+        <div className="rounded-tarjeta border border-borde bg-white p-6 text-sm text-tinta-suave">
           Cargando detalle de la parcela...
         </div>
       }

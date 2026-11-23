@@ -42,15 +42,16 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={tituloId}
-        className={`flex max-h-[90dvh] w-full ${ANCHO_MODAL[ancho]} flex-col rounded-xl border border-[#E4EAE6] bg-white shadow-xl`}
+        className={`flex max-h-[90dvh] w-full ${ANCHO_MODAL[ancho]} flex-col rounded-tarjeta border border-borde bg-superficie shadow-flotante`}
       >
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-stone-200 px-4 py-3 sm:px-6 sm:py-4">
-          <h2 id={tituloId} className="text-lg font-semibold text-stone-900">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-borde px-4 py-3 sm:px-6 sm:py-4">
+          <h2 id={tituloId} className="text-lg font-semibold text-tinta">
             {titulo}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+            className="-mr-2 grid size-11 shrink-0 place-items-center rounded-control text-tinta-suave hover:bg-fondo hover:text-tinta"
             aria-label="Cerrar"
             title="Cerrar"
           >
@@ -85,19 +86,19 @@ export function AccionesModal({
   peligro?: boolean;
 }) {
   return (
-    <div className="sticky bottom-0 -mx-4 mt-4 flex justify-end gap-2 border-t border-stone-200 bg-white px-4 py-3 sm:-mx-6 sm:px-6">
+    <div className="sticky bottom-0 -mx-4 mt-4 flex justify-end gap-2 border-t border-borde bg-superficie px-4 py-3 sm:-mx-6 sm:px-6">
       <button
         type="button"
         onClick={onCancelar}
-        className="rounded-md border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-100"
+        className="min-h-11 rounded-control border border-borde px-4 py-2 text-sm font-medium text-tinta hover:bg-fondo"
       >
         Cancelar
       </button>
       <button
         type="submit"
         disabled={guardando || deshabilitado}
-        className={`inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${
-          peligro ? "bg-red-600 hover:bg-red-700" : "bg-emerald-700 hover:bg-emerald-800"
+        className={`inline-flex min-h-11 items-center gap-1.5 rounded-control px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${
+          peligro ? "bg-critico-borde hover:bg-critico-texto" : "bg-marca hover:bg-marca-hover"
         }`}
       >
         {peligro ? (

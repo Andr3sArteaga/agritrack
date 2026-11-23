@@ -3,7 +3,7 @@ import type { TextoControlado } from "@/lib/textos";
 import { ESTILO_ESTADO } from "./estado-badge";
 import { EtiquetaRevision } from "./marcadores";
 
-type TipoAdvertencia = "ATENCION" | "CRITICO" | "SIN_DATOS" | "PENDIENTE";
+type TipoAdvertencia = "BIEN" | "ATENCION" | "CRITICO" | "SIN_DATOS" | "PENDIENTE";
 
 const ESTILO_PENDIENTE = {
   icono: ClipboardCheck,
@@ -25,8 +25,8 @@ export function Advertencia({
   tipo: TipoAdvertencia;
   titulo: string;
   texto?: TextoControlado;
-  /** "alert" para mensajes que el lector de pantalla debe leer de inmediato (errores). */
-  rol?: "note" | "alert";
+  /** "status" para confirmaciones; "alert" para mensajes que el lector de pantalla debe leer de inmediato (errores). */
+  rol?: "note" | "alert" | "status";
   children?: React.ReactNode;
 }) {
   const estilo = tipo === "PENDIENTE" ? ESTILO_PENDIENTE : ESTILO_ESTADO[tipo];

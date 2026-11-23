@@ -20,26 +20,26 @@ const DEFINICION_ESTADOS: {
   {
     estado: "BIEN",
     nombre: "Buen estado",
-    color: "#006B4F",
-    puntoClase: "bg-[#006B4F]",
+    color: "var(--color-bien-borde)",
+    puntoClase: "bg-bien-borde",
   },
   {
     estado: "ATENCION",
     nombre: "Atención",
-    color: "#D97706",
-    puntoClase: "bg-amber-600",
+    color: "var(--color-atencion-icono)",
+    puntoClase: "bg-atencion-icono",
   },
   {
     estado: "CRITICO",
     nombre: "Crítico",
-    color: "#DC2626",
-    puntoClase: "bg-red-600",
+    color: "var(--color-critico-icono)",
+    puntoClase: "bg-critico-borde",
   },
   {
     estado: "SIN_DATOS",
     nombre: "Sin datos",
-    color: "#64748B",
-    puntoClase: "bg-slate-500",
+    color: "var(--color-sindatos-icono)",
+    puntoClase: "bg-sindatos-icono",
   },
 ];
 
@@ -69,22 +69,22 @@ export function SaludOperativaChart({
   return (
     <section
       aria-labelledby="salud-operativa-heading"
-      className="flex h-full flex-col justify-between rounded-xl border border-[#E4EAE6] bg-white p-5 shadow-xs"
+      className="flex h-full flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 shadow-xs"
     >
       <div>
         <h2
           id="salud-operativa-heading"
-          className="text-base font-bold text-[#17211D]"
+          className="text-base font-bold text-tinta"
         >
           Salud Operativa Global
         </h2>
-        <p className="mt-0.5 text-xs text-[#68736D]">
+        <p className="mt-0.5 text-xs text-tinta-suave">
           Distribución de parcelas según su estado actual
         </p>
       </div>
 
       {total === 0 ? (
-        <div className="my-6 rounded-xl border border-dashed border-stone-300 bg-[#F8FAF9] p-6 text-center text-xs text-[#68736D]">
+        <div className="my-6 rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center text-xs text-tinta-suave">
           No hay parcelas que coincidan con los filtros seleccionados.
         </div>
       ) : (
@@ -101,7 +101,7 @@ export function SaludOperativaChart({
                   innerRadius={52}
                   outerRadius={76}
                   paddingAngle={datosGrafico.length > 1 ? 2 : 0}
-                  stroke="#FFFFFF"
+                  stroke="var(--color-superficie)"
                   strokeWidth={2}
                 >
                   {datosGrafico.map((entry) => (
@@ -115,7 +115,7 @@ export function SaludOperativaChart({
                   ]}
                   contentStyle={{
                     borderRadius: "10px",
-                    border: "1px solid #E4EAE6",
+                    border: "1px solid var(--color-borde)",
                     fontSize: "12px",
                   }}
                 />
@@ -123,10 +123,10 @@ export function SaludOperativaChart({
             </ResponsiveContainer>
 
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-2xl font-extrabold leading-none text-[#17211D]">
+              <span className="text-2xl font-extrabold leading-none text-tinta">
                 {total}
               </span>
-              <span className="mt-1 text-[11px] font-medium text-[#68736D]">
+              <span className="mt-1 text-xs font-medium text-tinta-suave">
                 {total === 1 ? "parcela" : "parcelas"}
               </span>
             </div>
@@ -140,16 +140,16 @@ export function SaludOperativaChart({
                   key={def.estado}
                   className="flex items-center justify-between gap-2"
                 >
-                  <span className="inline-flex items-center gap-2 font-medium text-[#17211D]">
+                  <span className="inline-flex items-center gap-2 font-medium text-tinta">
                     <span
                       className={`h-2.5 w-2.5 shrink-0 rounded-full ${def.puntoClase}`}
                       aria-hidden
                     />
                     {def.nombre}
                   </span>
-                  <span className="font-bold text-[#17211D]">
+                  <span className="font-bold text-tinta">
                     {seg.cantidad}{" "}
-                    <span className="font-normal text-[#68736D]">
+                    <span className="font-normal text-tinta-suave">
                       ({seg.porcentaje}%)
                     </span>
                   </span>
@@ -160,9 +160,9 @@ export function SaludOperativaChart({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between border-t border-[#E4EAE6] pt-3 text-xs">
-        <span className="text-[#68736D]">Superficie filtrada</span>
-        <span className="font-bold text-[#006B4F]">
+      <div className="mt-4 flex items-center justify-between border-t border-borde pt-3 text-xs">
+        <span className="text-tinta-suave">Superficie filtrada</span>
+        <span className="font-bold text-marca">
           {Math.round(hectareasTotales * 100) / 100} ha totales
         </span>
       </div>
