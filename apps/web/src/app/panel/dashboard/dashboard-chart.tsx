@@ -14,7 +14,7 @@ import type { HistoricoItem } from "@/lib/types";
 export function DashboardChart({ datos }: { datos: HistoricoItem[] }) {
   if (datos.length === 0) {
     return (
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-tinta-suave">
         Todavía no hay cosechas registradas para graficar el histórico.
       </p>
     );
@@ -29,7 +29,7 @@ export function DashboardChart({ datos }: { datos: HistoricoItem[] }) {
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={puntos} margin={{ top: 8, right: 16, left: 0, bottom: 40 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-borde)" />
           <XAxis
             dataKey="etiqueta"
             tick={{ fontSize: 11 }}
@@ -42,7 +42,7 @@ export function DashboardChart({ datos }: { datos: HistoricoItem[] }) {
           <Line
             type="monotone"
             dataKey="rendimientoTnHa"
-            stroke="#047857"
+            stroke="var(--color-marca)"
             strokeWidth={2}
             dot={{ r: 3 }}
           />
