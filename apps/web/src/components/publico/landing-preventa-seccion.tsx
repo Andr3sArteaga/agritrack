@@ -19,7 +19,8 @@ import { EstadoVacio } from "@/components/estado/estado-vacio";
 import { CropChip } from "@/components/ui/crop-chip";
 import { VisorImagen, type ImagenVisorItem } from "@/components/visor-imagen";
 import { urlApi } from "@/lib/api";
-import type { CatalogoParcela } from "@/lib/types";
+import type { CatalogoParcela, PoligonoGeoJson } from "@/lib/types";
+import { MapaPreventaCliente } from "./mapa-preventa-cliente";
 
 const FILTROS_CULTIVO = [
   "Todos",
@@ -42,6 +43,7 @@ interface TarjetaParcelaVista {
   fotoPortada: string | null;
   totalFotosPublicadas: number;
   hrefDetalle: string;
+  poligono: PoligonoGeoJson | null;
 }
 
 function normalizarTexto(texto: string): string {
@@ -77,6 +79,7 @@ function convertirCatalogoATarjeta(p: CatalogoParcela): TarjetaParcelaVista {
     fotoPortada: p.fotoPortada ? urlApi(p.fotoPortada) : null,
     totalFotosPublicadas: p.totalFotosPublicadas ?? (p.fotoPortada ? 1 : 0),
     hrefDetalle: `/parcelas/${p.id}`,
+    poligono: p.poligono ?? null,
   };
 }
 
@@ -110,6 +113,13 @@ export function LandingPreventaSeccion({
     : parcelasFiltradas.slice(0, 4);
 
   const TituloPrincipal = modoPaginaCompleta ? "h1" : "h2";
+  const conPoligono = baseParcelas.flatMap((p) =>
+    p.poligono
+      ? [{ id: p.id, nombre: p.nombre, cultivo: p.cultivo, hectareas: p.hectareas, poligono: p.poligono }]
+      : [],
+  );
+  const hectareasTotales =
+    Math.round(baseParcelas.reduce((total, p) => total + p.hectareas, 0) * 100) / 100;
 
   return (
     <section
@@ -147,6 +157,27 @@ export function LandingPreventaSeccion({
             : "Cuando AgroAn habilite parcelas para preventa desde el panel, aparecerán aquí con toda su información."}
         </p>
       </div>
+
+      {/* Catalogo completo: mapa de todas las parcelas, con sus conteos reales */}
+      {modoPaginaCompleta && hayReales && (
+        <div className="mt-8 rounded-tarjeta border border-borde bg-superficie p-3 shadow-tarjeta sm:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1 pb-3">
+            <p className="text-lg font-semibold text-tinta">Dónde están</p>
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-fondo px-3 py-1 text-sm font-medium text-tinta">
+                {baseParcelas.length} {baseParcelas.length === 1 ? "parcela" : "parcelas"}
+              </span>
+              <span className="rounded-full bg-fondo px-3 py-1 text-sm font-medium text-tinta">
+                {hectareasTotales} ha
+              </span>
+            </div>
+          </div>
+          <div className="h-64 overflow-hidden rounded-control sm:h-80">
+            <MapaPreventaCliente parcelas={conPoligono} />
+          </div>
+          <p className="px-1 pt-2 text-sm text-tinta-suave">Toca una parcela en el mapa para ver su detalle.</p>
+        </div>
+      )}
 
       <div
         role="group"

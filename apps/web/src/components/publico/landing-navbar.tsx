@@ -28,7 +28,7 @@ export function LandingNavbar({ sobreHero = false }: { sobreHero?: boolean }) {
             className="h-9 w-9 object-contain"
             priority
           />
-          <span className="text-lg font-bold tracking-tight">AgriTrack</span>
+          <span className="font-titulo text-[26px] leading-none">AgriTrack</span>
         </Link>
 
         <nav

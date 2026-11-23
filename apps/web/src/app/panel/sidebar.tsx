@@ -121,7 +121,7 @@ export function Sidebar({
             <span className="grid size-10 shrink-0 place-items-center rounded-control bg-marca">
               <Image src={logoWhite} alt="" className="h-6 w-6 object-contain" priority />
             </span>
-            <span className={TEXTO}>AgriTrack</span>
+            <span className={`${TEXTO} font-titulo text-[26px] font-normal leading-none tracking-normal`}>AgriTrack</span>
           </Link>
           <button
             onClick={onCerrar}

@@ -11,3 +11,12 @@ body {
   outline: 3px solid #1d4ed8;
   outline-offset: 2px;
 }
+
+/* Botones de zoom de Leaflet: 44 px para el dedo (traen 30 px). El CSS de Leaflet
+   se carga despues, por eso el selector lleva una clase mas. */
+.leaflet-container.leaflet-touch .leaflet-bar a,
+.leaflet-container .leaflet-bar a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+}

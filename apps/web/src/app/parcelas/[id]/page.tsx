@@ -21,6 +21,7 @@ import { Advertencia } from "@/components/estado/advertencia";
 import { EstadoBadge } from "@/components/estado/estado-badge";
 import { EstadoVacio } from "@/components/estado/estado-vacio";
 import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { PiePublico } from "@/components/publico/pie-publico";
 import { ActivityItem } from "@/components/ui/activity-item";
 import { CropChip } from "@/components/ui/crop-chip";
 import { puedePublicarse, TEXTOS } from "@/lib/textos";
@@ -366,29 +367,7 @@ export default async function ParcelaDetallePage(
         </div>
       </main>
 
-      <footer className="border-t border-borde bg-superficie">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-tinta-suave sm:flex-row sm:px-6">
-          <Link href="/#inicio" className="inline-flex min-h-11 items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
-              <Sprout className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="font-bold text-tinta">AgriTrack</span>
-            <span>· AgroAn</span>
-          </Link>
-
-          <div className="flex flex-wrap items-center gap-5 font-medium">
-            <Link href="/#inicio" className="inline-flex min-h-11 items-center hover:text-marca">
-              Inicio
-            </Link>
-            <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-marca">
-              Catálogo completo
-            </Link>
-            <Link href="/login" className="inline-flex min-h-11 items-center hover:text-marca">
-              Acceder al panel
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <PiePublico />
     </div>
   );
 }

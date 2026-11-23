@@ -45,7 +45,7 @@ export default function PanelLayout({ children }: LayoutProps<"/panel">) {
             className="h-7 w-7 object-contain"
             priority
           />
-          <span className="text-lg font-semibold text-marca">AgriTrack</span>
+          <span className="font-titulo text-[26px] leading-none text-marca-oscuro">AgriTrack</span>
         </div>
       </header>
       <Sidebar abierto={menuAbierto} onCerrar={() => setMenuAbierto(false)} />
