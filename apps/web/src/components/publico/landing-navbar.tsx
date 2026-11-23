@@ -16,7 +16,7 @@ export function LandingNavbar({ sobreHero = false }: { sobreHero?: boolean }) {
   return (
     // Flotante: el header no tiene fondo; la barra es la caja redondeada de adentro.
     <header className={`sticky top-0 z-[900] px-3 pt-3 sm:px-4 ${sobreHero ? "-mb-20" : ""}`}>
-      <div className="mx-auto max-w-7xl rounded-[32px] border border-white/10 bg-tinta shadow-flotante">
+      <div className="relative mx-auto max-w-7xl rounded-[32px] border border-white/10 bg-tinta shadow-flotante">
       <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-5 md:grid md:grid-cols-[1fr_auto_auto]">
         <Link
           href="/#inicio"
@@ -77,7 +77,8 @@ export function LandingNavbar({ sobreHero = false }: { sobreHero?: boolean }) {
       {menuAbierto && (
         <nav
           aria-label="Menú móvil"
-          className="border-t border-white/10 px-3 py-3 md:hidden"
+          // Panel flotante bajo la barra: no ocupa espacio, asi no empuja la pagina.
+          className="absolute inset-x-0 top-full mt-2 rounded-[24px] border border-white/10 bg-tinta p-2 shadow-flotante md:hidden"
         >
           <div className="flex flex-col gap-1 text-sm font-semibold text-marca-suave">
             <Link
