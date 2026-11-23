@@ -9,9 +9,9 @@ export function EncabezadoPublico({
   children?: React.ReactNode;
 }) {
   return (
-    <header className="border-b border-stone-200 bg-white">
+    <header className="border-b border-borde bg-superficie">
       <div className={`mx-auto flex ${ancho} flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6`}>
-        <Link href="/" className="text-2xl font-bold text-emerald-700">
+        <Link href="/" className="text-2xl font-bold text-marca">
           AgriTrack
         </Link>
         <nav className="flex flex-wrap items-center gap-2">{children}</nav>

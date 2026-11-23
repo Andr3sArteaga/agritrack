@@ -17,6 +17,9 @@ Tailwind 4 genera las clases a partir del nombre: `--color-marca` → `bg-marca`
 | `marca-hover` | `#00553E` | Hover del principal | — |
 | `marca-vivo` | `#00A859` | Íconos y acentos. **Nunca para texto** | 3,1:1 (no llega a AA) |
 | `marca-suave` | `#E8F5EF` | Fondo de activos y del ícono de `StatCard` | — |
+| `marca-oscuro` | `#004B36` | Parte pública: botones y franjas oscuras | 9,6:1 con texto blanco |
+| `marca-noche` | `#003B2A` | Parte pública: hover y fondos más oscuros | — |
+| `noche` | `#071712` | Fondo del mapa de preventa | — |
 | `tinta` | `#17211D` | Texto principal | 16:1 |
 | `tinta-suave` | `#68736D` | Texto secundario | 4,9:1 sobre blanco, 4,5:1 sobre `fondo` |
 | `borde` | `#E4EAE6` | Bordes y divisores | — |

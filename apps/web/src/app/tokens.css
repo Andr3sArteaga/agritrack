@@ -9,6 +9,10 @@
   --color-marca-hover: #00553e;
   --color-marca-vivo: #00a859; /* solo iconos y acentos: 3,1:1, nunca texto */
   --color-marca-suave: #e8f5ef;
+  /* Parte publica: franjas y botones oscuros, y el fondo del mapa de preventa. */
+  --color-marca-oscuro: #004b36; /* 9,6:1 con texto blanco */
+  --color-marca-noche: #003b2a;
+  --color-noche: #071712;
 
   /* Texto, bordes y superficies */
   --color-tinta: #17211d;
