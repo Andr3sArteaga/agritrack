@@ -16,7 +16,6 @@
   /* Portada clara: cielo del hero, fondo hueso y un unico acento lima (solo botones, texto tinta encima). */
   --color-cielo: #cfe6f2;
   --color-hueso: #f2f3ec;
-  --color-salvia: #d6d5c9; /* fondo de secciones de la portada; texto tinta 12:1 */
   --color-lima: #e6f35a; /* 15:1 con texto tinta; nunca para estados */
 
   /* Texto, bordes y superficies */

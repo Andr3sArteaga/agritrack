@@ -22,7 +22,6 @@ Tailwind 4 genera las clases a partir del nombre: `--color-marca` → `bg-marca`
 | `noche` | `#071712` | Fondo oscuro de la parte pública | — |
 | `cielo` | `#CFE6F2` | Degradado del hero de la portada | — |
 | `hueso` | `#F2F3EC` | Fondos claros de la portada | — |
-| `salvia` | `#D6D5C9` | Fondo de secciones de la portada (tarjetas de módulos) | 12:1 con `tinta` |
 | `lima` | `#E6F35A` | Único acento de la portada: botón redondo principal, siempre con texto `tinta`. **Nunca para estados** (se confunde con Atención) | 15:1 con `tinta` |
 
 ### Tipografías

@@ -12,6 +12,18 @@ body {
   outline-offset: 2px;
 }
 
+/* Entrada suave de contenido (carrusel de pasos de la portada). */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Botones de zoom de Leaflet: 44 px para el dedo (traen 30 px). El CSS de Leaflet
    se carga despues, por eso el selector lleva una clase mas. */
 .leaflet-container.leaflet-touch .leaflet-bar a,

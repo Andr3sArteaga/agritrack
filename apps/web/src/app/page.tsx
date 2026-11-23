@@ -2,28 +2,20 @@ import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
-  CloudRain,
-  FlaskConical,
   Leaf,
   ClipboardCheck,
-  Mail,
   MapPin,
-  MessageCircle,
-  Phone,
   ShieldCheck,
   Sprout,
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
+import { CarruselPasos, type PasoCompra } from "@/components/publico/carrusel-pasos";
 import { LandingNavbar } from "@/components/publico/landing-navbar";
 import { LandingPreventaSeccion } from "@/components/publico/landing-preventa-seccion";
 import { MapaPreventaCliente } from "@/components/publico/mapa-preventa-cliente";
+import { PiePublico } from "@/components/publico/pie-publico";
 import type { CatalogoParcela } from "@/lib/types";
-
-const TELEFONO_CONTACTO =
-  process.env.NEXT_PUBLIC_CONTACTO_TELEFONO ?? "+591 70000000";
-const EMAIL_CONTACTO =
-  process.env.NEXT_PUBLIC_CONTACTO_EMAIL ?? "contacto@agroan.com";
 
 async function obtenerParcelasPublicas(): Promise<CatalogoParcela[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -83,7 +75,7 @@ const MODULOS_PUBLICOS: {
 /** Escalon de cada tarjeta en pantalla grande, como en la referencia. */
 const ESCALON_TARJETA = ["lg:mt-0", "lg:mt-28", "lg:mt-10", "lg:mt-40"];
 
-const PASOS_COMPRA: { numero: string; titulo: string; descripcion: string }[] = [
+const PASOS_COMPRA: PasoCompra[] = [
   {
     numero: "01",
     titulo: "Ve las parcelas disponibles",
@@ -99,14 +91,6 @@ const PASOS_COMPRA: { numero: string; titulo: string; descripcion: string }[] = 
     titulo: "Contáctate con AgroAn",
     descripcion: "Resuelve tus dudas y acuerda la compra directamente con el equipo.",
   },
-];
-
-/** Iconos alrededor de la foto: lo que el equipo registra en el campo (decorativos). */
-const ICONOS_CAMPO: { icono: LucideIcon; posicion: string }[] = [
-  { icono: Sprout, posicion: "left-0 top-[62%] sm:left-[4%]" },
-  { icono: FlaskConical, posicion: "left-[6%] top-[22%] sm:left-[16%]" },
-  { icono: CloudRain, posicion: "right-[6%] top-[22%] sm:right-[16%]" },
-  { icono: ClipboardCheck, posicion: "right-0 top-[62%] sm:right-[4%]" },
 ];
 
 /** Icono en un circulo, dentro de una frase (decorativo: el texto ya dice lo mismo). */
@@ -130,10 +114,6 @@ export default async function LandingPage() {
   );
   const hectareasPublicadas =
     Math.round(parcelas.reduce((total, p) => total + p.hectareas, 0) * 100) / 100;
-  const whatsappNumero = TELEFONO_CONTACTO.replace(/[^0-9]/g, "");
-  const whatsappHref = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(
-    "Hola AgroAn, me interesa recibir información sobre las parcelas disponibles en AgriTrack.",
-  )}`;
 
   return (
     <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
@@ -245,17 +225,17 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* C2. LO QUE PUEDES REVISAR: 4 tarjetas escalonadas sobre fondo salvia */}
-        <section aria-labelledby="titulo-modulos" className="bg-salvia py-16 sm:py-24">
+        {/* C2. LO QUE PUEDES REVISAR: 4 tarjetas escalonadas sobre el verde de la marca */}
+        <section aria-labelledby="titulo-modulos" className="bg-marca-oscuro py-16 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
               <h2
                 id="titulo-modulos"
-                className="font-titulo text-4xl leading-[1.05] text-tinta sm:text-6xl lg:col-span-7"
+                className="font-titulo text-4xl leading-[1.05] text-white sm:text-6xl lg:col-span-7"
               >
                 Lo que puedes revisar de cada parcela
               </h2>
-              <p className="max-w-md text-base leading-relaxed text-tinta lg:col-span-4 lg:col-start-9">
+              <p className="max-w-md text-base leading-relaxed text-white/85 lg:col-span-4 lg:col-start-9">
                 Información real, cargada por el equipo de AgroAn en el campo. Si un dato todavía
                 no existe, lo verás como &ldquo;Sin datos&rdquo;.
               </p>
@@ -305,44 +285,13 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          {/* Foto con forma organica, sobre un arco verde a lima */}
+          {/* Carrusel circular (foto del equipo y los 3 pasos), sobre un arco verde a lima */}
           <div className="relative mx-auto mt-14 max-w-6xl px-4 pb-16 sm:mt-20 sm:px-6 sm:pb-24">
             <div
               aria-hidden
               className="absolute inset-x-[-30%] top-[38%] bottom-0 rounded-t-[50%] bg-linear-to-b from-marca-vivo/35 via-lima/30 to-superficie sm:inset-x-[-10%]"
             />
-            {/* Foto e iconos en su propia caja: los iconos se ubican respecto a la foto, no a los pasos */}
-            <div className="relative mx-auto max-w-3xl">
-              {ICONOS_CAMPO.map(({ icono: Icono, posicion }) => (
-                <span
-                  key={posicion}
-                  aria-hidden
-                  className={`absolute z-10 grid size-11 place-items-center rounded-control bg-superficie text-marca shadow-tarjeta sm:size-14 ${posicion}`}
-                >
-                  <Icono className="h-5 w-5 sm:h-6 sm:w-6" />
-                </span>
-              ))}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/team.jpg"
-                alt="Equipo de AgroAn en el campo"
-                className="relative mx-auto h-72 w-60 rounded-[32px_96px] object-cover shadow-flotante sm:h-[400px] sm:w-[360px] sm:rounded-[40px_140px]"
-              />
-            </div>
-
-            {/* Como comprar */}
-            <ol className="relative mt-14 grid gap-4 sm:mt-20 md:grid-cols-3">
-              {PASOS_COMPRA.map(({ numero, titulo, descripcion }) => (
-                <li
-                  key={numero}
-                  className="rounded-tarjeta border border-borde bg-superficie/90 p-6 backdrop-blur-sm"
-                >
-                  <span className="font-titulo text-5xl leading-none text-marca">{numero}</span>
-                  <h3 className="mt-4 text-lg font-semibold text-tinta">{titulo}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-tinta-suave">{descripcion}</p>
-                </li>
-              ))}
-            </ol>
+            <CarruselPasos pasos={PASOS_COMPRA} foto="/assets/team.jpg" alt="Equipo de AgroAn en el campo" />
           </div>
         </section>
 
@@ -353,106 +302,7 @@ export default async function LandingPage() {
 
       </main>
 
-      {/* H. CIERRE: marca grande, contacto y enlaces (solo los que existen) */}
-      <footer className="overflow-hidden bg-superficie">
-        <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 sm:pt-24">
-          <p
-            aria-hidden
-            className="select-none whitespace-nowrap pb-[0.18em] font-titulo text-[25vw] leading-[0.85] text-marca-oscuro xl:text-[23rem]"
-          >
-            AgriTrack
-          </p>
-
-          <div className="mt-10 grid gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <h2 className="font-titulo text-4xl leading-tight text-tinta sm:text-5xl">
-                ¿Te interesa una parcela?
-              </h2>
-              <p className="mt-3 max-w-sm text-base text-tinta-suave">
-                Habla directamente con el equipo de AgroAn en Santa Cruz, Bolivia.
-              </p>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro"
-              >
-                <MessageCircle className="h-5 w-5" aria-hidden />
-                Escribir por WhatsApp
-              </a>
-            </div>
-
-            <nav aria-label="Enlaces del pie" className="grid gap-8 sm:grid-cols-3 lg:col-span-7">
-              <div>
-                <p className="text-sm font-semibold text-tinta">Explora</p>
-                <ul className="mt-2 text-sm text-tinta-suave">
-                  <li>
-                    <a href="#inicio" className="inline-flex min-h-11 items-center hover:text-tinta">
-                      Inicio
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#parcelas-preventa" className="inline-flex min-h-11 items-center hover:text-tinta">
-                      Parcelas en preventa
-                    </a>
-                  </li>
-                  <li>
-                    <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-tinta">
-                      Catálogo completo
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-tinta">Equipo AgroAn</p>
-                <ul className="mt-2 text-sm text-tinta-suave">
-                  <li>
-                    <Link href="/login" className="inline-flex min-h-11 items-center hover:text-tinta">
-                      Acceder al panel
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/solicitar-acceso" className="inline-flex min-h-11 items-center hover:text-tinta">
-                      Solicitar acceso
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-tinta">Contacto</p>
-                <ul className="mt-2 text-sm text-tinta-suave">
-                  <li className="flex min-h-11 items-center gap-2">
-                    <MapPin className="h-4 w-4 shrink-0 text-marca" aria-hidden />
-                    Pailón Sur, Santa Cruz
-                  </li>
-                  <li>
-                    <a
-                      href={`tel:${TELEFONO_CONTACTO.replace(/\s+/g, "")}`}
-                      className="inline-flex min-h-11 items-center gap-2 hover:text-tinta"
-                    >
-                      <Phone className="h-4 w-4 shrink-0 text-marca" aria-hidden />
-                      {TELEFONO_CONTACTO}
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href={`mailto:${EMAIL_CONTACTO}`}
-                      className="inline-flex min-h-11 items-center gap-2 break-all hover:text-tinta"
-                    >
-                      <Mail className="h-4 w-4 shrink-0 text-marca" aria-hidden />
-                      {EMAIL_CONTACTO}
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </nav>
-          </div>
-
-          <p className="mt-12 border-t border-borde py-6 text-center text-sm text-tinta-suave">
-            AgroAn © {new Date().getFullYear()} · AgriTrack
-          </p>
-        </div>
-      </footer>
+      <PiePublico />
     </div>
   );
 }
