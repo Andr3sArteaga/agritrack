@@ -27,7 +27,7 @@ import { Ayuda } from "@/components/ayuda";
 import { Badge, BadgeEstadoCampana } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { IconoActividad } from "@/components/icono-actividad";
-import { TarjetaMetrica } from "@/components/tarjeta-metrica";
+import { StatCard } from "@/components/ui/stat-card";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -388,7 +388,7 @@ export default function ReporteCampanaPage() {
               </p>
             )}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <TarjetaMetrica
+              <StatCard
                 icono={Wheat}
                 etiqueta="Rendimiento"
                 valor={reporte.cosecha ? `${reporte.cosecha.rendimientoTnHa} t/ha` : "—"}
@@ -399,20 +399,20 @@ export default function ReporteCampanaPage() {
                 }
                 ayuda="Toneladas cosechadas por hectárea, según la cosecha registrada en el período."
               />
-              <TarjetaMetrica
+              <StatCard
                 icono={CircleCheck}
                 etiqueta="Total gastado (pagado)"
                 valor={formatearBs(reporte.costos.gastado)}
                 ayuda="Gastos ya pagados en el período, sin contar los anulados."
               />
-              <TarjetaMetrica
+              <StatCard
                 icono={Clock}
                 etiqueta="Total comprometido"
                 valor={formatearBs(reporte.costos.comprometido)}
                 nota="Aparte; no entra en el gasto real"
                 ayuda="Gastos acordados en el período que todavía no se pagaron."
               />
-              <TarjetaMetrica
+              <StatCard
                 icono={Wallet}
                 etiqueta="Presupuesto"
                 valor={formatearBs(reporte.costos.presupuesto)}
@@ -423,7 +423,7 @@ export default function ReporteCampanaPage() {
                 }
                 ayuda="Monto total que se planificó gastar en la campaña."
               />
-              <TarjetaMetrica
+              <StatCard
                 icono={PiggyBank}
                 etiqueta="Ahorro"
                 valor={formatearBs(reporte.costos.ahorro)}
@@ -436,14 +436,14 @@ export default function ReporteCampanaPage() {
                 }
                 ayuda="Presupuesto menos lo pagado. Si es negativo, se gastó más de lo planificado."
               />
-              <TarjetaMetrica
+              <StatCard
                 icono={Ruler}
                 etiqueta="Costo por hectárea"
                 valor={formatearBs(reporte.costos.costoPorHa)}
                 nota={`${reporte.parcela.hectareas} ha`}
                 ayuda="Gasto pagado dividido entre las hectáreas de la parcela."
               />
-              <TarjetaMetrica
+              <StatCard
                 icono={Scale}
                 etiqueta="Costo por tonelada"
                 valor={formatearBs(reporte.costos.costoPorTonelada)}

@@ -17,10 +17,10 @@ import {
 } from "@/lib/types";
 
 const TONOS = {
-  verde: "bg-emerald-100 text-emerald-800",
-  ambar: "bg-amber-100 text-amber-800",
-  gris: "bg-stone-200 text-stone-700",
-  rojo: "bg-red-100 text-red-800",
+  verde: "bg-marca-suave text-marca-hover",
+  ambar: "bg-atencion-fondo text-atencion-texto",
+  gris: "bg-borde text-tinta-suave",
+  rojo: "bg-critico-fondo text-critico-texto",
 } as const;
 
 export type TonoBadge = keyof typeof TONOS;

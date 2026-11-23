@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
 import { AccionesModal, Modal } from "@/components/modal";
+import { CLASE_CAMPO, Field } from "@/components/ui/field";
 import { formatearBs } from "@/lib/format";
 import type { Gasto } from "@/lib/types";
 
@@ -36,26 +37,30 @@ export function AnularGastoModal({
   return (
     <Modal titulo="Anular gasto" onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
-        <p className="text-sm text-stone-600">
+        <p className="text-sm text-tinta-suave">
           Vas a anular <span className="font-medium">{gasto.descripcion}</span> (
           {formatearBs(gasto.monto)}). No se borra: queda marcado como anulado
           con su motivo y deja de contar en los totales.
         </p>
-        <div>
-          <label className="block text-sm font-medium text-stone-700">
-            Motivo de la anulación
-          </label>
-          <textarea
-            required
-            minLength={5}
-            rows={3}
-            value={motivo}
-            onChange={(e) => setMotivo(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
+        <Field etiqueta="Motivo de la anulación" ayuda="Al menos 5 letras.">
+          {(props) => (
+            <textarea
+              {...props}
+              required
+              minLength={5}
+              rows={3}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+              className={`${CLASE_CAMPO} py-2`}
+            />
+          )}
+        </Field>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm font-medium text-critico-borde">
+            {error}
+          </p>
+        )}
 
         <AccionesModal onCancelar={onClose} etiqueta="Anular gasto" etiquetaGuardando="Anulando..." guardando={guardando} deshabilitado={motivo.trim().length < 5} peligro />
       </form>

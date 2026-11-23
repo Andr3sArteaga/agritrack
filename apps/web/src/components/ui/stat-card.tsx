@@ -13,7 +13,10 @@ export function StatCard({
   nota,
   ayuda,
   accion,
+  tono,
 }: {
+  /** Colorea el valor: positivo (ej. ahorro) o negativo (ej. sobrecosto). */
+  tono?: "positivo" | "negativo";
   icono: LucideIcon;
   etiqueta: string;
   /** null = no hay dato. */
@@ -37,7 +40,13 @@ export function StatCard({
       {valor === null ? (
         <p className="mt-3 text-lg font-semibold text-sindatos-texto">Sin datos</p>
       ) : (
-        <p className="mt-3 text-[28px] font-semibold leading-tight text-tinta">{valor}</p>
+        <p
+          className={`mt-3 text-[28px] font-semibold leading-tight ${
+            tono === "positivo" ? "text-marca" : tono === "negativo" ? "text-critico-borde" : "text-tinta"
+          }`}
+        >
+          {valor}
+        </p>
       )}
       {nota && <p className="mt-1 text-sm text-tinta-suave">{nota}</p>}
     </Card>
