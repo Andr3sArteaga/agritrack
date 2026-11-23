@@ -1,13 +1,10 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Award,
   BarChart3,
-  BrainCircuit,
-  Camera,
   CheckCircle2,
+  Leaf,
   ClipboardCheck,
-  DatabaseZap,
   Handshake,
   Lock,
   Mail,
@@ -15,7 +12,6 @@ import {
   MessageCircle,
   Phone,
   Search,
-  ShieldAlert,
   ShieldCheck,
   Sprout,
   TrendingUp,
@@ -53,36 +49,41 @@ const HERO_BENEFICIOS = [
   "Ubicación geográfica exacta por polígono",
 ];
 
-const CARACTERISTICAS_FUNCIONA: {
+/** Lo que un comprador puede revisar de cada parcela en la parte publica (todo existe hoy). */
+const MODULOS_PUBLICOS: {
   icono: LucideIcon;
   titulo: string;
   descripcion: string;
+  destacado?: boolean;
 }[] = [
   {
     icono: ClipboardCheck,
-    titulo: "Registro completo",
-    descripcion:
-      "Cada siembra, aplicación, monitoreo de suelo y lluvia diaria queda anotada con fecha y responsable.",
+    titulo: "Historial de labores",
+    descripcion: "Siembra, fumigación, riego y cosecha de la campaña actual, cada una con su fecha.",
   },
   {
-    icono: BrainCircuit,
-    titulo: "Inteligencia artificial",
+    icono: ShieldCheck,
+    titulo: "Registros protegidos",
     descripcion:
-      "El modelo Random Forest compara las variables de campaña frente al histórico real del cultivo.",
+      "Cada labor se encadena con una huella SHA-256: si alguien cambia un dato guardado, se nota.",
+    destacado: true,
   },
   {
-    icono: Camera,
-    titulo: "Validado con evidencias",
+    icono: MapPin,
+    titulo: "Ubicación exacta",
     descripcion:
-      "Bitácora fotográfica de campo, análisis de laboratorio y verificación criptográfica de integridad.",
+      "El contorno de cada parcela está dibujado sobre el mapa satelital, con su superficie en hectáreas.",
   },
   {
-    icono: ShieldAlert,
-    titulo: "Prevención de riesgos",
+    icono: TrendingUp,
+    titulo: "Promedio histórico",
     descripcion:
-      "Alertas tempranas por eventos climáticos adversos y seguimiento continuo de cada lote activo.",
+      "El rendimiento promedio (t/ha) de las campañas anteriores del cultivo, cuando existe.",
   },
 ];
+
+/** Escalon de cada tarjeta en pantalla grande, como en la referencia. */
+const ESCALON_TARJETA = ["lg:mt-0", "lg:mt-28", "lg:mt-10", "lg:mt-40"];
 
 const PASOS_TIMELINE: {
   numero: string;
@@ -138,6 +139,18 @@ const PILARES_CONFIANZA: {
       "Control estricto por roles operativos y publicación selectiva de lotes y fotografías autorizadas para preventa.",
   },
 ];
+
+/** Icono en un circulo, dentro de una frase (decorativo: el texto ya dice lo mismo). */
+function BurbujaIcono({ icono: Icono, fondo }: { icono: LucideIcon; fondo: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`ml-2 mr-0.5 inline-grid size-10 place-items-center rounded-full align-middle text-marca-oscuro sm:size-14 ${fondo}`}
+    >
+      <Icono className="h-5 w-5 sm:h-6 sm:w-6" />
+    </span>
+  );
+}
 
 export default async function LandingPage() {
   const parcelas = await obtenerParcelasPublicas();
@@ -236,49 +249,66 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* C. BANNER "TRANSPARENCIA TOTAL" SUPERPUESTO */}
-        <section
-          aria-label="Transparencia total"
-          className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6"
-        >
-          <div className="grid items-center gap-6 overflow-hidden rounded-tarjeta border border-marca-vivo/30 bg-marca-noche p-5 text-white shadow-2xl sm:p-8 lg:grid-cols-12">
-            <div className="overflow-hidden rounded-tarjeta border border-white/10 lg:col-span-5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/banner-field.jpg"
-                alt="Surcos de siembra agrícola monitoreados en Pailón Sur"
-                className="h-48 w-full object-cover sm:h-56"
-              />
+        {/* C. FRASE DE PRESENTACION con iconos dentro del texto */}
+        <section aria-label="Qué es AgriTrack" className="relative overflow-hidden bg-superficie py-20 sm:py-28">
+          <Sprout
+            aria-hidden
+            className="pointer-events-none absolute -left-10 top-10 h-56 w-56 text-fondo"
+            strokeWidth={1}
+          />
+          <Leaf
+            aria-hidden
+            className="pointer-events-none absolute -right-8 bottom-6 h-64 w-64 text-fondo"
+            strokeWidth={1}
+          />
+          <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
+            <span className="inline-flex rounded-full border border-marca/30 px-3.5 py-1 text-sm font-medium text-marca">
+              Sobre AgriTrack
+            </span>
+            <p className="mt-6 font-titulo text-3xl leading-snug text-marca-oscuro sm:text-5xl sm:leading-tight">
+              <span className="text-marca">AgriTrack ordena el trabajo de campo de AgroAn:</span>{" "}
+              registra cada labor
+              <BurbujaIcono icono={ClipboardCheck} fondo="bg-cielo" />, protege cada registro
+              <BurbujaIcono icono={ShieldCheck} fondo="bg-marca-suave" /> y muestra sus parcelas
+              tal como están
+              <BurbujaIcono icono={MapPin} fondo="bg-lima" />.
+            </p>
+          </div>
+        </section>
+
+        {/* C2. LO QUE PUEDES REVISAR: 4 tarjetas escalonadas sobre fondo salvia */}
+        <section aria-labelledby="titulo-modulos" className="bg-salvia py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+              <h2
+                id="titulo-modulos"
+                className="font-titulo text-4xl leading-[1.05] text-tinta sm:text-6xl lg:col-span-7"
+              >
+                Lo que puedes revisar de cada parcela
+              </h2>
+              <p className="max-w-md text-base leading-relaxed text-tinta lg:col-span-4 lg:col-start-9">
+                Información real, cargada por el equipo de AgroAn en el campo. Si un dato todavía
+                no existe, lo verás como &ldquo;Sin datos&rdquo;.
+              </p>
             </div>
 
-            <div className="lg:col-span-7 lg:pl-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-vivo/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca-suave">
-                <Award className="h-3.5 w-3.5" aria-hidden />
-                Respaldo técnico real
-              </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-                Transparencia total en cada hectárea sembrada
-              </h2>
-              <p className="mt-2.5 text-sm leading-relaxed text-marca-suave/85 sm:text-base">
-                Consulta con claridad qué se sembró, cuándo se aplicaron insumos,
-                cómo evolucionó el clima y qué cosechas históricas respaldan la
-                proyección de cada lote disponible para preventa.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
-                  <ShieldCheck className="h-4 w-4 text-marca-vivo" aria-hidden />
-                  Cadena SHA-256 verificable
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
-                  <DatabaseZap className="h-4 w-4 text-marca-vivo" aria-hidden />
-                  Histórico multi-campaña
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white">
-                  <MapPin className="h-4 w-4 text-marca-vivo" aria-hidden />
-                  Polígonos georreferenciados
-                </span>
-              </div>
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+              {MODULOS_PUBLICOS.map(({ icono: Icono, titulo, descripcion, destacado }, indice) => (
+                <article
+                  key={titulo}
+                  className={`flex min-h-72 flex-col justify-between p-6 pb-14 [clip-path:polygon(0_0,100%_0,100%_78%,78%_100%,0_100%)] ${
+                    destacado ? "bg-lima" : "bg-superficie"
+                  } ${ESCALON_TARJETA[indice]}`}
+                >
+                  <div>
+                    <span className="grid size-11 place-items-center rounded-full bg-tinta/5 text-tinta">
+                      <Icono className="h-5 w-5" aria-hidden />
+                    </span>
+                    <h3 className="mt-5 text-2xl font-semibold leading-tight text-tinta">{titulo}</h3>
+                  </div>
+                  <p className="mt-6 max-w-[16rem] text-sm leading-relaxed text-tinta">{descripcion}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -334,26 +364,6 @@ export default async function LandingPage() {
                 Del monitoreo diario en campo a una preventa transparente con
                 respaldo técnico en tres pasos simples.
               </p>
-            </div>
-
-            {/* Fila 1: 4 Tarjetas de Características */}
-            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {CARACTERISTICAS_FUNCIONA.map(({ icono: Icono, titulo, descripcion }) => (
-                <article
-                  key={titulo}
-                  className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta transition-all hover:-translate-y-0.5 hover:border-marca-vivo/50 hover:shadow-md"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca-vivo">
-                    <Icono className="h-6 w-6" aria-hidden />
-                  </div>
-                  <h3 className="mt-4 text-lg font-bold text-tinta">
-                    {titulo}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-tinta-suave">
-                    {descripcion}
-                  </p>
-                </article>
-              ))}
             </div>
 
             {/* Fila 2: Línea de Tiempo Horizontal con puntos circulares (estilo referencia) */}
