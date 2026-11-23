@@ -24,15 +24,21 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { Ayuda } from "@/components/ayuda";
-import { Badge, BadgeEstadoCampana } from "@/components/badge";
+import { BadgeEstadoCampana } from "@/components/badge";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
+import { Advertencia } from "@/components/estado/advertencia";
 import { IconoActividad } from "@/components/icono-actividad";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CropChip } from "@/components/ui/crop-chip";
+import { CLASE_CAMPO } from "@/components/ui/field";
 import { StatCard } from "@/components/ui/stat-card";
+import { Tag } from "@/components/ui/tag";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import {
   aFechaInput,
-  formatearBs,
+  formatearBsONulo,
   formatearFecha,
   formatearFechaHora,
 } from "@/lib/format";
@@ -206,7 +212,7 @@ export default function ReporteCampanaPage() {
     <div className="space-y-6">
       <Link
         href="/panel/reportes"
-        className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700"
+        className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-tinta-suave hover:text-tinta"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Volver a reportes
@@ -214,9 +220,11 @@ export default function ReporteCampanaPage() {
 
       {!reporte ? (
         cargando ? (
-          <p className="text-stone-500">Generando reporte...</p>
+          <p className="text-tinta-suave">Generando reporte...</p>
         ) : (
-          <p className="text-red-600">{error ?? "No se pudo generar el reporte"}</p>
+          <Advertencia tipo="CRITICO" titulo="No se pudo generar el reporte" rol="alert">
+            {error ?? "Vuelve a intentarlo en unos minutos."}
+          </Advertencia>
         )
       ) : (
         <>
@@ -228,38 +236,28 @@ export default function ReporteCampanaPage() {
             />
             <div className="flex flex-wrap items-center gap-2">
               <BadgeEstadoCampana estado={reporte.campana.estado} />
-              <button
-                type="button"
+              <Button
+                variante="secundario"
                 disabled={cargando || exportando !== null}
                 onClick={() => void exportarArchivo("pdf")}
-                className="inline-flex min-h-11 items-center gap-2 rounded-md border-2 border-stone-800 bg-stone-900 px-3.5 text-sm font-bold text-white hover:bg-stone-800 disabled:opacity-50"
+                icono={exportando === "pdf" ? Download : FileText}
               >
-                {exportando === "pdf" ? (
-                  <Download className="h-4 w-4 animate-bounce" aria-hidden />
-                ) : (
-                  <FileText className="h-4 w-4 shrink-0" aria-hidden />
-                )}
                 {exportando === "pdf" ? "Generando PDF..." : "Exportar PDF"}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variante="secundario"
                 disabled={cargando || exportando !== null}
                 onClick={() => void exportarArchivo("excel")}
-                className="inline-flex min-h-11 items-center gap-2 rounded-md border-2 border-emerald-800 bg-emerald-700 px-3.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+                icono={exportando === "excel" ? Download : FileSpreadsheet}
               >
-                {exportando === "excel" ? (
-                  <Download className="h-4 w-4 animate-bounce" aria-hidden />
-                ) : (
-                  <FileSpreadsheet className="h-4 w-4 shrink-0" aria-hidden />
-                )}
                 {exportando === "excel" ? "Generando Excel..." : "Exportar Excel"}
-              </button>
+              </Button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-700">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-tarjeta border border-borde bg-fondo-suave px-4 py-2.5 text-sm text-tinta-suave">
             <span>
-              <strong className="text-stone-900">Alcance de exportación actual:</strong>{" "}
+              <strong className="text-tinta">Alcance de exportación actual:</strong>{" "}
               {hayFiltroPendiente
                 ? `Fechas seleccionadas (${desde || "inicio"} – ${hasta || "fin"})`
                 : reporte.periodo.porDefecto
@@ -267,131 +265,129 @@ export default function ReporteCampanaPage() {
                   : `Período filtrado (${formatearFecha(reporte.periodo.desde)} – ${formatearFecha(reporte.periodo.hasta)})`}
             </span>
             {errorExportacion && (
-              <span role="alert" className="font-semibold text-red-700">
+              <span role="alert" className="font-semibold text-critico-borde">
                 {errorExportacion}
               </span>
             )}
           </div>
 
-          <section className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5">
-            <h2 className="flex items-center gap-2 font-semibold text-stone-900">
-              <CalendarRange className="h-5 w-5 text-emerald-700" aria-hidden />
+          <Card className="p-4 sm:p-5">
+            <h2 className="flex items-center gap-2 font-semibold text-tinta">
+              <CalendarRange className="h-5 w-5 text-marca" aria-hidden />
               Período del reporte
               <Ayuda texto="Las actividades y los gastos se filtran por este período. Sin cambiarlo, se usa la campaña completa." />
             </h2>
 
             <form onSubmit={aplicarPeriodo} className="mt-3 flex flex-wrap items-end gap-3">
-              <label className="text-sm text-stone-700">
+              <label className="w-full text-sm font-semibold text-tinta sm:w-44">
                 Desde
                 <input
                   type="date"
                   value={desde}
                   onChange={(e) => setDesde(e.target.value)}
-                  className="mt-1 block rounded-md border border-stone-300 px-3 py-2 text-sm"
+                  className={`${CLASE_CAMPO} mt-1.5 block font-normal`}
                 />
               </label>
-              <label className="text-sm text-stone-700">
+              <label className="w-full text-sm font-semibold text-tinta sm:w-44">
                 Hasta
                 <input
                   type="date"
                   value={hasta}
                   onChange={(e) => setHasta(e.target.value)}
-                  className="mt-1 block rounded-md border border-stone-300 px-3 py-2 text-sm"
+                  className={`${CLASE_CAMPO} mt-1.5 block font-normal`}
                 />
               </label>
-              <button
+              <Button
                 type="submit"
                 disabled={cargando}
                 title="Volver a generar el reporte con este período"
-                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+                icono={Search}
               >
-                <Search className="h-4 w-4" aria-hidden />
                 {cargando ? "Generando..." : "Aplicar"}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variante="secundario"
                 disabled={cargando || (reporte.periodo.porDefecto && !hayFiltroPendiente)}
                 onClick={() => void consultar({})}
                 title="Usar las fechas completas de la campaña"
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-stone-300 px-4 py-2 text-sm text-stone-700 hover:bg-stone-100 disabled:opacity-50"
+                icono={RotateCcw}
               >
-                <RotateCcw className="h-4 w-4" aria-hidden />
                 Campaña completa
-              </button>
+              </Button>
             </form>
 
-            {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+            {error && (
+              <div className="mt-3">
+                <Advertencia tipo="CRITICO" titulo="Revisa el período" rol="alert">
+                  {error}
+                </Advertencia>
+              </div>
+            )}
 
-            <dl className="mt-4 grid gap-x-6 gap-y-3 border-t border-stone-100 pt-4 text-sm sm:grid-cols-2">
+            <dl className="mt-4 grid gap-x-6 gap-y-3 border-t border-borde pt-4 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-stone-500">Período consultado</dt>
-                <dd className="mt-0.5 flex flex-wrap items-center gap-2 font-medium text-stone-900">
+                <dt className="text-tinta-suave">Período consultado</dt>
+                <dd className="mt-0.5 flex flex-wrap items-center gap-2 font-medium text-tinta">
                   {formatearFecha(reporte.periodo.desde)} – {formatearFecha(reporte.periodo.hasta)}
-                  <Badge
-                    tono={reporte.periodo.porDefecto ? "verde" : "ambar"}
-                    icono={CalendarRange}
-                    ayuda={
-                      reporte.periodo.porDefecto
-                        ? "Abarca desde el inicio hasta el fin de la campaña"
-                        : "Período elegido a mano: solo una parte de la campaña"
-                    }
-                  >
+                  <Tag tono={reporte.periodo.porDefecto ? "marca" : "neutro"} icono={CalendarRange}>
                     {reporte.periodo.porDefecto ? "Campaña completa" : "Período personalizado"}
-                  </Badge>
+                  </Tag>
                 </dd>
               </div>
               <div>
-                <dt className="text-stone-500">Fecha de generación</dt>
-                <dd className="mt-0.5 font-medium text-stone-900">
+                <dt className="text-tinta-suave">Fecha de generación</dt>
+                <dd className="mt-0.5 font-medium text-tinta">
                   {formatearFechaHora(reporte.generadoEn)}{" "}
-                  <span className="font-normal text-stone-500">(hora de Bolivia)</span>
+                  <span className="font-normal text-tinta-suave">(hora de Bolivia)</span>
                 </dd>
               </div>
             </dl>
-          </section>
+          </Card>
 
-          <section className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5">
-            <h2 className="flex items-center gap-2 font-semibold text-stone-900">
-              <Sprout className="h-5 w-5 text-emerald-700" aria-hidden />
+          <Card className="p-4 sm:p-5">
+            <h2 className="flex items-center gap-2 font-semibold text-tinta">
+              <Sprout className="h-5 w-5 text-marca" aria-hidden />
               Datos de la campaña
             </h2>
             <dl className="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <Dato etiqueta="Parcela">
                 <Link
                   href={`/panel/parcelas/${reporte.parcela.id}`}
-                  className="text-emerald-700 hover:underline"
+                  className="text-marca hover:underline"
                 >
                   {reporte.parcela.nombre}
                 </Link>
               </Dato>
               <Dato etiqueta="Superficie">{reporte.parcela.hectareas} ha</Dato>
               <Dato etiqueta="Ubicación">{reporte.parcela.ubicacionTexto}</Dato>
-              <Dato etiqueta="Cultivo">{reporte.cultivo.nombre}</Dato>
+              <Dato etiqueta="Cultivo">
+                <CropChip cultivo={reporte.cultivo.nombre} />
+              </Dato>
               <Dato etiqueta="Temporada">{reporte.campana.temporada}</Dato>
               <Dato etiqueta="Fechas de la campaña">
                 {formatearFecha(reporte.campana.fechaInicio)} –{" "}
                 {reporte.campana.fechaFin ? formatearFecha(reporte.campana.fechaFin) : "sin fecha de fin"}
               </Dato>
             </dl>
-          </section>
+          </Card>
 
           <section className="space-y-3">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-              <Wallet className="h-5 w-5 text-emerald-700" aria-hidden />
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-tinta">
+              <Wallet className="h-5 w-5 text-marca" aria-hidden />
               Rendimiento y costos del período
             </h2>
             {!reporte.periodo.porDefecto && (
-              <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              <Advertencia tipo="ATENCION" titulo="Período parcial">
                 Los gastos son solo los del período elegido; el presupuesto es el de toda la
                 campaña, así que el ahorro compara el presupuesto completo con lo pagado en este
                 período.
-              </p>
+              </Advertencia>
             )}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 icono={Wheat}
                 etiqueta="Rendimiento"
-                valor={reporte.cosecha ? `${reporte.cosecha.rendimientoTnHa} t/ha` : "—"}
+                valor={reporte.cosecha ? `${reporte.cosecha.rendimientoTnHa} t/ha` : null}
                 nota={
                   reporte.cosecha
                     ? `Cosecha del ${formatearFecha(reporte.cosecha.fecha)}`
@@ -402,20 +398,20 @@ export default function ReporteCampanaPage() {
               <StatCard
                 icono={CircleCheck}
                 etiqueta="Total gastado (pagado)"
-                valor={formatearBs(reporte.costos.gastado)}
+                valor={formatearBsONulo(reporte.costos.gastado)}
                 ayuda="Gastos ya pagados en el período, sin contar los anulados."
               />
               <StatCard
                 icono={Clock}
                 etiqueta="Total comprometido"
-                valor={formatearBs(reporte.costos.comprometido)}
+                valor={formatearBsONulo(reporte.costos.comprometido)}
                 nota="Aparte; no entra en el gasto real"
                 ayuda="Gastos acordados en el período que todavía no se pagaron."
               />
               <StatCard
                 icono={Wallet}
                 etiqueta="Presupuesto"
-                valor={formatearBs(reporte.costos.presupuesto)}
+                valor={formatearBsONulo(reporte.costos.presupuesto)}
                 nota={
                   reporte.costos.presupuesto === null
                     ? "Sin presupuesto definido"
@@ -426,7 +422,7 @@ export default function ReporteCampanaPage() {
               <StatCard
                 icono={PiggyBank}
                 etiqueta="Ahorro"
-                valor={formatearBs(reporte.costos.ahorro)}
+                valor={formatearBsONulo(reporte.costos.ahorro)}
                 tono={
                   reporte.costos.ahorro === null
                     ? undefined
@@ -439,14 +435,14 @@ export default function ReporteCampanaPage() {
               <StatCard
                 icono={Ruler}
                 etiqueta="Costo por hectárea"
-                valor={formatearBs(reporte.costos.costoPorHa)}
+                valor={formatearBsONulo(reporte.costos.costoPorHa)}
                 nota={`${reporte.parcela.hectareas} ha`}
                 ayuda="Gasto pagado dividido entre las hectáreas de la parcela."
               />
               <StatCard
                 icono={Scale}
                 etiqueta="Costo por tonelada"
-                valor={formatearBs(reporte.costos.costoPorTonelada)}
+                valor={formatearBsONulo(reporte.costos.costoPorTonelada)}
                 nota={
                   reporte.costos.costoPorTonelada === null
                     ? "Sin producción registrada en el período"
@@ -458,17 +454,19 @@ export default function ReporteCampanaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-              <ListChecks className="h-5 w-5 text-emerald-700" aria-hidden />
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-tinta">
+              <ListChecks className="h-5 w-5 text-marca" aria-hidden />
               Actividades del período ({reporte.actividades.length})
               <Ayuda texto="Solo las vigentes: si una labor se corrigió, aparece la corrección y no el registro original." />
             </h2>
             {reporte.actividades.length === 0 ? (
-              <p className="text-sm text-stone-500">No hay actividades registradas en este período.</p>
+              <Advertencia tipo="SIN_DATOS" titulo="Sin datos">
+                No hay actividades registradas en este período.
+              </Advertencia>
             ) : (
-              <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
+              <Card className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-stone-50 text-left text-stone-500">
+                  <thead className="bg-fondo-suave text-left text-tinta-suave">
                     <tr>
                       <th className="px-4 py-3 font-medium">Fecha</th>
                       <th className="px-4 py-3 font-medium">Labor</th>
@@ -477,7 +475,7 @@ export default function ReporteCampanaPage() {
                       <th className="px-4 py-3 text-right font-medium">Rendimiento</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100">
+                  <tbody className="divide-y divide-fondo">
                     {reporte.actividades.map((actividad) => (
                       <tr key={actividad.id}>
                         <td className="whitespace-nowrap px-4 py-3">{formatearFecha(actividad.fecha)}</td>
@@ -490,30 +488,30 @@ export default function ReporteCampanaPage() {
                         <td className="px-4 py-3">
                           {actividad.descripcion}
                           {actividad.insumo && (
-                            <p className="text-xs text-stone-500">
+                            <p className="text-xs text-tinta-suave">
                               {actividad.insumo}
                               {actividad.cantidad !== null &&
                                 ` · ${actividad.cantidad} ${actividad.unidad ?? ""}`}
                             </p>
                           )}
                           {actividad.correccionDeId && (
-                            <p className="text-xs text-amber-700">Corrección de un registro anterior</p>
+                            <p className="text-xs text-atencion-icono">Corrección de un registro anterior</p>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-stone-600">
+                        <td className="whitespace-nowrap px-4 py-3 text-tinta-suave">
                           {actividad.responsableNombre}
                           {actividad.tercerizado && (
-                            <span className="ml-1 text-xs text-stone-400">(tercerizado)</span>
+                            <span className="ml-1 text-xs text-tinta-suave">(tercerizado)</span>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-emerald-700">
+                        <td className="whitespace-nowrap px-4 py-3 text-right font-semibold text-tinta">
                           {actividad.rendimientoTnHa !== null ? `${actividad.rendimientoTnHa} t/ha` : ""}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </Card>
             )}
           </section>
         </>
@@ -525,8 +523,8 @@ export default function ReporteCampanaPage() {
 function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-stone-500">{etiqueta}</dt>
-      <dd className="mt-0.5 font-medium text-stone-900">{children}</dd>
+      <dt className="text-tinta-suave">{etiqueta}</dt>
+      <dd className="mt-0.5 font-medium text-tinta">{children}</dd>
     </div>
   );
 }

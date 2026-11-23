@@ -32,3 +32,7 @@ export function formatearBs(monto: number | null): string {
     maximumFractionDigits: 2,
   })}`;
 }
+
+/** Para StatCard: sin monto devuelve null y la tarjeta muestra "Sin datos". */
+export const formatearBsONulo = (monto: number | null): string | null =>
+  monto === null ? null : formatearBs(monto);

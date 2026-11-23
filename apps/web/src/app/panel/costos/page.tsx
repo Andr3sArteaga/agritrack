@@ -21,7 +21,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { api, apiErrorMessage } from "@/lib/api";
 import { cargarIdsDemo } from "@/lib/prediccion";
 import { useAuth } from "@/lib/auth-context";
-import { formatearBs, formatearFecha } from "@/lib/format";
+import { formatearBs, formatearBsONulo, formatearFecha } from "@/lib/format";
 import {
   CATEGORIA_GASTO_LABEL,
   ESTADO_CAMPANA_LABEL,
@@ -197,20 +197,20 @@ export default function CostosPage() {
             <StatCard
               icono={CircleCheck}
               etiqueta="Total gastado (pagado)"
-              valor={formatearBs(resumen.gastado)}
+              valor={formatearBsONulo(resumen.gastado)}
               ayuda="Suma de los gastos ya pagados, sin contar los anulados. Es el gasto real de la campaña."
             />
             <StatCard
               icono={Clock}
               etiqueta="Total comprometido"
-              valor={formatearBs(resumen.comprometido)}
+              valor={formatearBsONulo(resumen.comprometido)}
               nota="Aparte; no entra en el gasto real"
               ayuda="Gastos acordados que todavía no se pagaron. No se restan del presupuesto hasta que se paguen."
             />
             <StatCard
               icono={Wallet}
               etiqueta="Presupuesto"
-              valor={formatearBs(resumen.presupuesto)}
+              valor={formatearBsONulo(resumen.presupuesto)}
               nota={resumen.presupuesto === null ? "Sin presupuesto definido" : undefined}
               ayuda="Monto total que se planificó gastar en esta campaña."
               accion={
@@ -232,7 +232,7 @@ export default function CostosPage() {
               icono={PiggyBank}
               ayuda="Lo que sobró del presupuesto: presupuesto menos lo ya pagado. Si es negativo, se gastó más de lo planificado."
               etiqueta="Ahorro (presupuesto − gastado)"
-              valor={formatearBs(resumen.ahorro)}
+              valor={formatearBsONulo(resumen.ahorro)}
               tono={
                 resumen.ahorro === null
                   ? undefined
@@ -249,7 +249,7 @@ export default function CostosPage() {
             <StatCard
               icono={Ruler}
               etiqueta="Costo por hectárea"
-              valor={formatearBs(resumen.costoPorHa)}
+              valor={formatearBsONulo(resumen.costoPorHa)}
               nota={`${detalle.hectareas} ha`}
               ayuda="Gasto real dividido entre las hectáreas de la parcela."
             />
@@ -257,7 +257,7 @@ export default function CostosPage() {
               icono={Scale}
               ayuda="Gasto real dividido entre las toneladas cosechadas. Solo se calcula cuando ya hay producción registrada."
               etiqueta="Costo por tonelada"
-              valor={formatearBs(resumen.costoPorTonelada)}
+              valor={formatearBsONulo(resumen.costoPorTonelada)}
               nota={
                 resumen.costoPorTonelada === null
                   ? "Sin producción real registrada"

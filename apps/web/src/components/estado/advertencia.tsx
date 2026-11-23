@@ -3,7 +3,7 @@ import type { TextoControlado } from "@/lib/textos";
 import { ESTILO_ESTADO } from "./estado-badge";
 import { EtiquetaRevision } from "./marcadores";
 
-type TipoAdvertencia = "ATENCION" | "CRITICO" | "SIN_DATOS" | "PENDIENTE";
+type TipoAdvertencia = "BIEN" | "ATENCION" | "CRITICO" | "SIN_DATOS" | "PENDIENTE";
 
 const ESTILO_PENDIENTE = {
   icono: ClipboardCheck,
