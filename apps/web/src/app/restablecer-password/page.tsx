@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type FormEvent } from "react";
-import { CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, LockKeyhole } from "lucide-react";
 import { Advertencia } from "@/components/estado/advertencia";
-import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { PantallaCuenta, TarjetaCuenta } from "@/components/publico/pantalla-cuenta";
 import { api, apiErrorMessage } from "@/lib/api";
 import { CLASE_CAMPO } from "@/components/ui/field";
 
@@ -64,18 +64,11 @@ function RestablecerPasswordContenido() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-tarjeta border border-borde bg-superficie p-7 shadow-tarjeta sm:p-8">
-      <div className="text-center">
-        <span className="inline-block rounded-full bg-marca/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-          Seguridad
-        </span>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-tinta">
-          Nueva contraseña
-        </h1>
-        <p className="mt-1.5 text-sm text-tinta-suave">
-          Elige una nueva contraseña segura para tu cuenta.
-        </p>
-      </div>
+    <TarjetaCuenta
+      icono={LockKeyhole}
+      titulo="Nueva contraseña"
+      descripcion="Elige una nueva contraseña segura para tu cuenta."
+    >
 
       {exito ? (
         <div className="mt-7 space-y-5 text-center">
@@ -90,7 +83,7 @@ function RestablecerPasswordContenido() {
           </div>
           <Link
             href="/login"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro"
           >
             Ir a iniciar sesión
           </Link>
@@ -102,7 +95,7 @@ function RestablecerPasswordContenido() {
           </Advertencia>
           <Link
             href="/recuperar-password"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro"
           >
             Solicitar nuevo enlace
           </Link>
@@ -161,31 +154,28 @@ function RestablecerPasswordContenido() {
           <button
             type="submit"
             disabled={guardando}
-            className="min-h-12 w-full rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-12 w-full rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro disabled:cursor-not-allowed disabled:opacity-60"
           >
             {guardando ? "Guardando..." : "Guardar nueva contraseña"}
           </button>
         </form>
       )}
-    </div>
+    </TarjetaCuenta>
   );
 }
 
 export default function RestablecerPasswordPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
-      <LandingNavbar />
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+    <PantallaCuenta>
         <Suspense
           fallback={
-            <div className="w-full max-w-md rounded-tarjeta border border-borde bg-superficie p-8 text-center text-sm text-tinta-suave">
+            <div className="w-full max-w-md rounded-[28px] border border-white/80 bg-white/65 p-8 text-center text-sm text-tinta-suave backdrop-blur-xl">
               Cargando formulario...
             </div>
           }
         >
           <RestablecerPasswordContenido />
         </Suspense>
-      </main>
-    </div>
+    </PantallaCuenta>
   );
 }

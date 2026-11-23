@@ -53,7 +53,7 @@ export function LandingNavbar({ sobreHero = false }: { sobreHero?: boolean }) {
         <div className="flex items-center justify-end gap-2">
           <Link
             href="/login"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-marca-vivo px-5 text-sm font-bold text-noche shadow-sm transition-colors hover:bg-marca-vivo/90"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-marca px-5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-marca-hover"
           >
             Acceder
           </Link>

@@ -21,6 +21,7 @@ Tailwind 4 genera las clases a partir del nombre: `--color-marca` → `bg-marca`
 | `marca-noche` | `#003B2A` | Parte pública: hover y fondos más oscuros | — |
 | `noche` | `#071712` | Fondo oscuro de la parte pública | — |
 | `cielo` | `#CFE6F2` | Degradado del hero de la portada | — |
+| `cielo-intenso` | `#A7D3EE` | Parte de arriba del fondo de las pantallas de cuenta (ingresar, solicitar acceso, contraseña) | — |
 | `hueso` | `#F2F3EC` | Fondos claros de la portada | — |
 | `lima` | `#E6F35A` | Único acento de la portada: botón redondo principal, siempre con texto `tinta`. **Nunca para estados** (se confunde con Atención) | 15:1 con `tinta` |
 
