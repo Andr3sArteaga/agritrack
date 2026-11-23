@@ -131,27 +131,28 @@ export function LandingPreventaSeccion({
       )}
 
       {/* Cabecera + Filtros */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-marca-vivo/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-            <Compass className="h-3.5 w-3.5 text-marca-vivo" aria-hidden />
+      <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-7">
+          <span className="inline-flex items-center gap-2 rounded-full border border-marca/30 px-3.5 py-1 text-sm font-medium text-marca">
+            <Compass className="h-4 w-4" aria-hidden />
             Catálogo en vivo
           </span>
-          <TituloPrincipal className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
+          <TituloPrincipal className="mt-4 font-titulo text-4xl leading-[1.05] text-tinta sm:text-6xl">
             Parcelas disponibles para preventa
           </TituloPrincipal>
-          <p className="mt-2 max-w-2xl text-base text-tinta-suave">
-            {hayReales
-              ? "Explora los lotes habilitados, revisa su superficie y promedio histórico por cultivo, y consulta el detalle completo de cada parcela."
-              : "Cuando AgroAn habilite parcelas para preventa desde el panel, aparecerán automáticamente aquí con toda su información."}
-          </p>
         </div>
+        <p className="max-w-md text-base leading-relaxed text-tinta-suave lg:col-span-4 lg:col-start-9">
+          {hayReales
+            ? "Explora los lotes habilitados, revisa su superficie y el promedio histórico de su cultivo, y consulta el detalle completo de cada parcela."
+            : "Cuando AgroAn habilite parcelas para preventa desde el panel, aparecerán aquí con toda su información."}
+        </p>
+      </div>
 
-        <div
-          role="group"
-          aria-label="Filtrar parcelas por cultivo"
-          className="flex flex-wrap items-center gap-2"
-        >
+      <div
+        role="group"
+        aria-label="Filtrar parcelas por cultivo"
+        className="mt-8 flex flex-wrap items-center gap-2"
+      >
           {FILTROS_CULTIVO.map((cultivo) => {
             const activo = filtroCultivo === cultivo;
             return (
@@ -160,17 +161,16 @@ export function LandingPreventaSeccion({
                 type="button"
                 aria-pressed={activo}
                 onClick={() => setFiltroCultivo(cultivo)}
-                className={`min-h-11 rounded-full px-4 text-sm font-semibold transition-all ${
+                className={`min-h-11 rounded-full px-4 text-sm font-semibold transition-colors ${
                   activo
-                    ? "bg-marca-oscuro text-white shadow-sm"
-                    : "border border-marca-oscuro/15 bg-superficie text-tinta-suave hover:border-marca-vivo hover:text-marca-oscuro"
+                    ? "bg-tinta text-white"
+                    : "border border-borde bg-superficie text-tinta hover:border-tinta"
                 }`}
               >
                 {cultivo}
               </button>
             );
           })}
-        </div>
       </div>
 
       {/* Contenido principal */}
@@ -183,9 +183,9 @@ export function LandingPreventaSeccion({
       ) : (
         <div className="mt-10">
           {tarjetasVisibles.length === 0 ? (
-            <div className="flex min-h-[320px] flex-col items-center justify-center rounded-tarjeta border-2 border-dashed border-marca-vivo/35 bg-superficie p-8 text-center">
-              <Sprout className="h-10 w-10 text-marca-vivo" aria-hidden />
-              <p className="mt-3 text-lg font-bold text-marca-oscuro">
+            <div className="flex min-h-[320px] flex-col items-center justify-center rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-superficie p-8 text-center">
+              <Sprout className="h-10 w-10 text-marca" aria-hidden />
+              <p className="mt-3 text-lg font-bold text-tinta">
                 No hay parcelas disponibles con {filtroCultivo}
               </p>
               <p className="mt-1 text-sm text-tinta-suave">
@@ -195,7 +195,7 @@ export function LandingPreventaSeccion({
               <button
                 type="button"
                 onClick={() => setFiltroCultivo("Todos")}
-                className="mt-5 min-h-11 rounded-full bg-marca-oscuro px-6 text-sm font-semibold text-white hover:bg-marca-noche"
+                className="mt-5 min-h-11 rounded-full bg-tinta px-6 text-sm font-semibold text-white hover:bg-marca-oscuro"
               >
                 Ver todos los cultivos
               </button>
@@ -206,10 +206,10 @@ export function LandingPreventaSeccion({
                 {tarjetasVisibles.map((parcela) => (
                   <article
                     key={parcela.id}
-                    className="group flex flex-col overflow-hidden rounded-tarjeta border border-borde bg-superficie shadow-tarjeta transition-all hover:border-marca-vivo hover:shadow-md hover:shadow-marca-vivo/10"
+                    className="group flex flex-col rounded-tarjeta bg-superficie p-3 shadow-tarjeta transition-shadow hover:shadow-flotante"
                   >
-                    {parcela.fotoPortada && (
-                      <div className="relative h-44 w-full overflow-hidden bg-marca-suave">
+                    {parcela.fotoPortada ? (
+                      <div className="relative h-52 w-full overflow-hidden rounded-[20px_56px] bg-hueso">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={parcela.fotoPortada}
@@ -247,9 +247,16 @@ export function LandingPreventaSeccion({
                           </span>
                         )}
                       </div>
+                    ) : (
+                      <div className="grid h-52 w-full place-items-center rounded-[20px_56px] border-2 border-dashed border-sindatos-borde bg-sindatos-fondo text-center text-sm font-medium text-sindatos-texto">
+                        <span className="flex flex-col items-center gap-2">
+                          <Camera className="h-6 w-6" aria-hidden />
+                          Sin fotos
+                        </span>
+                      </div>
                     )}
 
-                    <div className="flex flex-1 flex-col justify-between p-6">
+                    <div className="flex flex-1 flex-col justify-between px-3 pb-3 pt-5">
                       <div>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           {parcela.temporada && (
@@ -269,7 +276,7 @@ export function LandingPreventaSeccion({
                           {parcela.ubicacion}
                         </p>
 
-                        <dl className="mt-5 grid grid-cols-3 gap-2 rounded-tarjeta bg-fondo-suave p-3.5 text-xs">
+                        <dl className="mt-5 grid grid-cols-3 gap-2 rounded-control bg-hueso p-3.5 text-xs">
                           <div>
                             <dt className="flex items-center gap-1 text-tinta-suave">
                               <Ruler className="h-3 w-3 shrink-0 text-marca-vivo" aria-hidden />
@@ -316,7 +323,7 @@ export function LandingPreventaSeccion({
 
                         <Link
                           href={parcela.hrefDetalle}
-                          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-marca-oscuro px-4 text-sm font-semibold text-white transition-colors hover:bg-marca-noche"
+                          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-tinta px-4 text-sm font-semibold text-white transition-colors hover:bg-marca-oscuro"
                         >
                           Ver detalles
                           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -331,11 +338,11 @@ export function LandingPreventaSeccion({
                 <div className="mt-8 flex justify-center sm:justify-start">
                   <Link
                     href="/parcelas"
-                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-marca-oscuro/20 bg-superficie px-6 text-sm font-semibold text-marca-oscuro shadow-tarjeta transition-colors hover:border-marca-vivo hover:bg-marca-suave"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full bg-tinta px-6 text-sm font-semibold text-white transition-colors hover:bg-marca-oscuro"
                   >
                     Ver catálogo completo ({baseParcelas.length}{" "}
                     {baseParcelas.length === 1 ? "parcela" : "parcelas"})
-                    <ArrowRight className="h-4 w-4 text-marca-vivo" aria-hidden />
+                    <ArrowRight className="h-4 w-4" aria-hidden />
                   </Link>
                 </div>
               )}

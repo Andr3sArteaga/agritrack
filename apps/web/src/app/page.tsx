@@ -1,13 +1,11 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  BarChart3,
   CheckCircle2,
   CloudRain,
   FlaskConical,
   Leaf,
   ClipboardCheck,
-  Lock,
   Mail,
   MapPin,
   MessageCircle,
@@ -109,31 +107,6 @@ const ICONOS_CAMPO: { icono: LucideIcon; posicion: string }[] = [
   { icono: FlaskConical, posicion: "left-[6%] top-[22%] sm:left-[16%]" },
   { icono: CloudRain, posicion: "right-[6%] top-[22%] sm:right-[16%]" },
   { icono: ClipboardCheck, posicion: "right-0 top-[62%] sm:right-[4%]" },
-];
-
-const PILARES_CONFIANZA: {
-  icono: LucideIcon;
-  titulo: string;
-  descripcion: string;
-}[] = [
-  {
-    icono: ShieldCheck,
-    titulo: "Trazabilidad inmutable",
-    descripcion:
-      "Cada labor agrícola forma parte de una cadena SHA-256 que detecta al instante cualquier modificación posterior.",
-  },
-  {
-    icono: BarChart3,
-    titulo: "Modelo predictivo transparente",
-    descripcion:
-      "Proyecciones en t/ha basadas únicamente en variables previas a la siembra y validadas frente a la línea base histórica.",
-  },
-  {
-    icono: Lock,
-    titulo: "Seguridad e integridad de datos",
-    descripcion:
-      "Control estricto por roles operativos y publicación selectiva de lotes y fotografías autorizadas para preventa.",
-  },
 ];
 
 /** Icono en un circulo, dentro de una frase (decorativo: el texto ya dice lo mismo). */
@@ -374,44 +347,9 @@ export default async function LandingPage() {
         </section>
 
         {/* F. SECCIÓN "PARCELAS DISPONIBLES PARA PREVENTA" + MAPA OSCURO */}
-        <LandingPreventaSeccion parcelasReales={parcelas} />
-
-        {/* G. SECCIÓN "POR QUÉ CONFIAR" */}
-        <section className="bg-superficie py-16 sm:py-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="max-w-2xl">
-              <span className="inline-flex rounded-full bg-marca-vivo/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-                Garantía operativa
-              </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
-                Por qué confiar en AgriTrack
-              </h2>
-              <p className="mt-2 text-base text-tinta-suave">
-                Diseñado junto al equipo de campo para evitar información
-                fragmentada y ofrecer evidencia concreta en cada campaña.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {PILARES_CONFIANZA.map(({ icono: Icono, titulo, descripcion }) => (
-                <article
-                  key={titulo}
-                  className="rounded-tarjeta border border-borde bg-fondo-suave p-7"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
-                    <Icono className="h-6 w-6" aria-hidden />
-                  </div>
-                  <h3 className="mt-5 text-lg font-bold text-tinta">
-                    {titulo}
-                  </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-tinta-suave">
-                    {descripcion}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <div className="bg-hueso">
+          <LandingPreventaSeccion parcelasReales={parcelas} />
+        </div>
 
         {/* H. CTA INFERIOR */}
         <section className="bg-superficie pb-16 sm:pb-20">
