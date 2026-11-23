@@ -351,141 +351,106 @@ export default async function LandingPage() {
           <LandingPreventaSeccion parcelasReales={parcelas} />
         </div>
 
-        {/* H. CTA INFERIOR */}
-        <section className="bg-superficie pb-16 sm:pb-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="flex flex-col items-start justify-between gap-6 rounded-tarjeta bg-marca-oscuro p-7 text-white shadow-xl sm:p-10 lg:flex-row lg:items-center">
-              <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-tarjeta bg-marca-vivo text-white shadow-md">
-                  <MessageCircle className="h-7 w-7" aria-hidden />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                    ¿Te interesa una parcela? Hablemos
-                  </h2>
-                  <p className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-marca-suave/90 sm:text-base">
-                    <span className="inline-flex items-center gap-1.5 font-semibold text-white">
-                      <Phone className="h-4 w-4 text-marca-vivo" aria-hidden />
-                      {TELEFONO_CONTACTO}
-                    </span>
-                    <span className="hidden text-marca-suave/50 sm:inline">
-                      ·
-                    </span>
-                    <span>
-                      Atención directa con AgroAn en Santa Cruz, Bolivia
-                    </span>
-                  </p>
-                </div>
-              </div>
+      </main>
 
+      {/* H. CIERRE: marca grande, contacto y enlaces (solo los que existen) */}
+      <footer className="overflow-hidden bg-superficie">
+        <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 sm:pt-24">
+          <p
+            aria-hidden
+            className="select-none whitespace-nowrap pb-[0.18em] font-titulo text-[25vw] leading-[0.85] text-marca-oscuro xl:text-[23rem]"
+          >
+            AgriTrack
+          </p>
+
+          <div className="mt-10 grid gap-10 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <h2 className="font-titulo text-4xl leading-tight text-tinta sm:text-5xl">
+                ¿Te interesa una parcela?
+              </h2>
+              <p className="mt-3 max-w-sm text-base text-tinta-suave">
+                Habla directamente con el equipo de AgroAn en Santa Cruz, Bolivia.
+              </p>
               <a
                 href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-superficie px-7 text-sm font-bold text-marca-oscuro shadow-md transition-transform hover:-translate-y-0.5 hover:bg-marca-suave sm:w-auto sm:text-base"
+                className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro"
               >
-                <MessageCircle className="h-5 w-5 text-marca-vivo" aria-hidden />
-                Contactar por WhatsApp
+                <MessageCircle className="h-5 w-5" aria-hidden />
+                Escribir por WhatsApp
               </a>
             </div>
-          </div>
-        </section>
-      </main>
 
-      {/* FOOTER MINIMALISTA */}
-      <footer className="border-t border-borde bg-superficie">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <div className="grid gap-8 md:grid-cols-3 md:items-start">
-            {/* Izquierda: Logo */}
-            <div>
-              <Link href="#inicio" className="inline-flex min-h-11 items-center gap-2.5">
-                <span className="flex h-10 w-10 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
-                  <Sprout className="h-5 w-5" aria-hidden />
-                </span>
-                <span className="text-lg font-bold text-tinta">
-                  AgriTrack
-                </span>
-              </Link>
-              <p className="mt-3 max-w-xs text-sm text-tinta-suave">
-                Gestión agrícola inteligente, trazabilidad verificable y preventa
-                transparente para AgroAn.
-              </p>
-            </div>
-
-            {/* Centro: Enlaces útiles */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
-                Enlaces útiles
-              </p>
-              <ul className="mt-3 space-y-2 text-sm font-medium text-tinta">
-                <li>
-                  <a href="#inicio" className="inline-flex min-h-11 items-center hover:text-marca">
-                    Inicio
-                  </a>
-                </li>
-                <li>
-                  <a href="#parcelas-preventa" className="inline-flex min-h-11 items-center hover:text-marca">
-                    Parcelas de preventa
-                  </a>
-                </li>
-                <li>
-                  <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-marca">
-                    Catálogo público completo
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="inline-flex min-h-11 items-center hover:text-marca">
-                    Acceder al panel
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Derecha: Contacto */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
-                Contacto directo
-              </p>
-              <ul className="mt-3 space-y-2.5 text-sm text-tinta">
-                <li className="flex items-center gap-2">
-                  <MapPin
-                    className="h-4 w-4 shrink-0 text-marca-vivo"
-                    aria-hidden
-                  />
-                  Pailón Sur, Santa Cruz, Bolivia
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone
-                    className="h-4 w-4 shrink-0 text-marca-vivo"
-                    aria-hidden
-                  />
-                  <a
-                    href={`tel:${TELEFONO_CONTACTO.replace(/\s+/g, "")}`}
-                    className="inline-flex min-h-11 items-center hover:text-marca"
-                  >
-                    {TELEFONO_CONTACTO}
-                  </a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Mail
-                    className="h-4 w-4 shrink-0 text-marca-vivo"
-                    aria-hidden
-                  />
-                  <a
-                    href={`mailto:${EMAIL_CONTACTO}`}
-                    className="inline-flex min-h-11 items-center hover:text-marca"
-                  >
-                    {EMAIL_CONTACTO}
-                  </a>
-                </li>
-              </ul>
-            </div>
+            <nav aria-label="Enlaces del pie" className="grid gap-8 sm:grid-cols-3 lg:col-span-7">
+              <div>
+                <p className="text-sm font-semibold text-tinta">Explora</p>
+                <ul className="mt-2 text-sm text-tinta-suave">
+                  <li>
+                    <a href="#inicio" className="inline-flex min-h-11 items-center hover:text-tinta">
+                      Inicio
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#parcelas-preventa" className="inline-flex min-h-11 items-center hover:text-tinta">
+                      Parcelas en preventa
+                    </a>
+                  </li>
+                  <li>
+                    <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-tinta">
+                      Catálogo completo
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-tinta">Equipo AgroAn</p>
+                <ul className="mt-2 text-sm text-tinta-suave">
+                  <li>
+                    <Link href="/login" className="inline-flex min-h-11 items-center hover:text-tinta">
+                      Acceder al panel
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/solicitar-acceso" className="inline-flex min-h-11 items-center hover:text-tinta">
+                      Solicitar acceso
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-tinta">Contacto</p>
+                <ul className="mt-2 text-sm text-tinta-suave">
+                  <li className="flex min-h-11 items-center gap-2">
+                    <MapPin className="h-4 w-4 shrink-0 text-marca" aria-hidden />
+                    Pailón Sur, Santa Cruz
+                  </li>
+                  <li>
+                    <a
+                      href={`tel:${TELEFONO_CONTACTO.replace(/\s+/g, "")}`}
+                      className="inline-flex min-h-11 items-center gap-2 hover:text-tinta"
+                    >
+                      <Phone className="h-4 w-4 shrink-0 text-marca" aria-hidden />
+                      {TELEFONO_CONTACTO}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={`mailto:${EMAIL_CONTACTO}`}
+                      className="inline-flex min-h-11 items-center gap-2 break-all hover:text-tinta"
+                    >
+                      <Mail className="h-4 w-4 shrink-0 text-marca" aria-hidden />
+                      {EMAIL_CONTACTO}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
           </div>
 
-          <div className="mt-8 border-t border-fondo pt-6 text-center text-xs text-tinta-suave">
-            AgroAn © {new Date().getFullYear()} · AgriTrack. Todos los derechos
-            reservados.
-          </div>
+          <p className="mt-12 border-t border-borde py-6 text-center text-sm text-tinta-suave">
+            AgroAn © {new Date().getFullYear()} · AgriTrack
+          </p>
         </div>
       </footer>
     </div>
