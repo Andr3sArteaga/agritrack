@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Advertencia } from "@/components/estado/advertencia";
-import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { PantallaCuenta, TarjetaCuenta } from "@/components/publico/pantalla-cuenta";
 import { useAuth } from "@/lib/auth-context";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { CLASE_CAMPO } from "@/components/ui/field";
 
 export default function LoginPage() {
@@ -40,20 +40,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
-      <LandingNavbar />
-
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
-        <div className="w-full max-w-md rounded-tarjeta border border-borde bg-superficie p-7 shadow-tarjeta sm:p-8">
-          <div className="text-center">
-            <span className="inline-block rounded-full bg-marca/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-              Portal AgroAn
-            </span>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight text-tinta">
-              Ingresar a AgriTrack
-            </h1>
-            <p className="mt-1.5 text-sm text-tinta-suave">Entra con tu cuenta de AgroAn.</p>
-          </div>
+    <PantallaCuenta>
+        <TarjetaCuenta
+          icono={LogIn}
+          titulo="Ingresar a AgriTrack"
+          descripcion="Entra con tu cuenta de AgroAn."
+        >
 
           <form onSubmit={onSubmit} className="mt-7 space-y-5">
             <div>
@@ -113,7 +105,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={cargando}
-              className="min-h-12 w-full rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-12 w-full rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro disabled:cursor-not-allowed disabled:opacity-60"
             >
               {cargando ? "Ingresando..." : "Ingresar"}
             </button>
@@ -131,7 +123,7 @@ export default function LoginPage() {
           <div className="mt-6 border-t border-borde pt-6">
             <Link
               href="/parcelas"
-              className="flex min-h-11 w-full items-center justify-center rounded-full border border-borde bg-fondo-suave px-5 text-sm font-semibold text-marca-oscuro transition-colors hover:border-marca hover:bg-superficie"
+              className="flex min-h-11 w-full items-center justify-center rounded-full border border-borde bg-superficie/80 px-5 text-sm font-semibold text-tinta transition-colors hover:border-tinta hover:bg-superficie"
             >
               Ver parcelas disponibles
             </Link>
@@ -139,8 +131,7 @@ export default function LoginPage() {
               No necesitas cuenta para verlas.
             </p>
           </div>
-        </div>
-      </main>
-    </div>
+        </TarjetaCuenta>
+    </PantallaCuenta>
   );
 }

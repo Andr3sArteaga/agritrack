@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { MailCheck } from "lucide-react";
+import { KeyRound, MailCheck } from "lucide-react";
 import { Advertencia } from "@/components/estado/advertencia";
-import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { PantallaCuenta, TarjetaCuenta } from "@/components/publico/pantalla-cuenta";
 import { api, apiErrorMessage } from "@/lib/api";
 import { CLASE_CAMPO } from "@/components/ui/field";
 
@@ -37,22 +37,12 @@ export default function RecuperarPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
-      <LandingNavbar />
-
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
-        <div className="w-full max-w-md rounded-tarjeta border border-borde bg-superficie p-7 shadow-tarjeta sm:p-8">
-          <div className="text-center">
-            <span className="inline-block rounded-full bg-marca/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-              Recuperación segura
-            </span>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight text-tinta">
-              ¿Olvidaste tu contraseña?
-            </h1>
-            <p className="mt-1.5 text-sm text-tinta-suave">
-              Ingresa tu correo electrónico y te enviaremos un enlace para restablecerla.
-            </p>
-          </div>
+    <PantallaCuenta>
+        <TarjetaCuenta
+          icono={KeyRound}
+          titulo="¿Olvidaste tu contraseña?"
+          descripcion="Ingresa tu correo electrónico y te enviaremos un enlace para restablecerla."
+        >
 
           {resultado ? (
             <div className="mt-7 space-y-5 text-center">
@@ -76,7 +66,7 @@ export default function RecuperarPasswordPage() {
               )}
               <Link
                 href="/login"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro"
               >
                 Volver a iniciar sesión
               </Link>
@@ -108,7 +98,7 @@ export default function RecuperarPasswordPage() {
               <button
                 type="submit"
                 disabled={enviando}
-                className="min-h-12 w-full rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-12 w-full rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {enviando ? "Enviando enlace..." : "Enviar enlace de recuperación"}
               </button>
@@ -120,8 +110,7 @@ export default function RecuperarPasswordPage() {
               </p>
             </form>
           )}
-        </div>
-      </main>
-    </div>
+        </TarjetaCuenta>
+    </PantallaCuenta>
   );
 }

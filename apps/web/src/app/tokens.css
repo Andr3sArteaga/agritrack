@@ -15,6 +15,7 @@
   --color-noche: #071712;
   /* Portada clara: cielo del hero, fondo hueso y un unico acento lima (solo botones, texto tinta encima). */
   --color-cielo: #cfe6f2;
+  --color-cielo-intenso: #a7d3ee; /* arriba del fondo de las pantallas de cuenta */
   --color-hueso: #f2f3ec;
   --color-lima: #e6f35a; /* 15:1 con texto tinta; nunca para estados */
 

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 import { Advertencia } from "@/components/estado/advertencia";
-import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { PantallaCuenta, TarjetaCuenta } from "@/components/publico/pantalla-cuenta";
 import { api, apiErrorMessage } from "@/lib/api";
 import { CLASE_CAMPO } from "@/components/ui/field";
 
@@ -40,22 +40,12 @@ export default function SolicitarAccesoPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
-      <LandingNavbar />
-
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
-        <div className="w-full max-w-lg rounded-tarjeta border border-borde bg-superficie p-7 shadow-tarjeta sm:p-8">
-          <div className="text-center">
-            <span className="inline-block rounded-full bg-marca/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-              Equipo AgroAn
-            </span>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight text-tinta">
-              Solicitar acceso a AgriTrack
-            </h1>
-            <p className="mt-1.5 text-sm text-tinta-suave">
-              Completa tus datos. El Jefe revisará tu solicitud y asignará tu rol.
-            </p>
-          </div>
+    <PantallaCuenta>
+        <TarjetaCuenta
+          icono={UserPlus}
+          titulo="Solicitar acceso a AgriTrack"
+          descripcion="Completa tus datos. El Jefe revisará tu solicitud y asignará tu rol." ancho="lg"
+        >
 
           {enviado ? (
             <div className="mt-7 space-y-5 text-center">
@@ -73,7 +63,7 @@ export default function SolicitarAccesoPage() {
               </div>
               <Link
                 href="/login"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro"
               >
                 Volver a iniciar sesión
               </Link>
@@ -181,7 +171,7 @@ export default function SolicitarAccesoPage() {
               <button
                 type="submit"
                 disabled={enviando}
-                className="min-h-12 w-full rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-12 w-full rounded-full bg-tinta px-6 text-base font-semibold text-white transition-colors hover:bg-marca-oscuro disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {enviando ? "Enviando solicitud..." : "Enviar solicitud"}
               </button>
@@ -194,8 +184,7 @@ export default function SolicitarAccesoPage() {
               </p>
             </form>
           )}
-        </div>
-      </main>
-    </div>
+        </TarjetaCuenta>
+    </PantallaCuenta>
   );
 }
