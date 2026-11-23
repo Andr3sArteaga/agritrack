@@ -3,15 +3,15 @@ import {
   ArrowRight,
   BarChart3,
   CheckCircle2,
+  CloudRain,
+  FlaskConical,
   Leaf,
   ClipboardCheck,
-  Handshake,
   Lock,
   Mail,
   MapPin,
   MessageCircle,
   Phone,
-  Search,
   ShieldCheck,
   Sprout,
   TrendingUp,
@@ -85,34 +85,30 @@ const MODULOS_PUBLICOS: {
 /** Escalon de cada tarjeta en pantalla grande, como en la referencia. */
 const ESCALON_TARJETA = ["lg:mt-0", "lg:mt-28", "lg:mt-10", "lg:mt-40"];
 
-const PASOS_TIMELINE: {
-  numero: string;
-  paso: string;
-  titulo: string;
-  descripcion: string;
-  icono: LucideIcon;
-}[] = [
+const PASOS_COMPRA: { numero: string; titulo: string; descripcion: string }[] = [
   {
     numero: "01",
-    paso: "PASO 1",
     titulo: "Ve las parcelas disponibles",
-    descripcion: "Compara ubicación, hectáreas y cultivo.",
-    icono: Search,
+    descripcion: "Compara su ubicación, hectáreas y cultivo en el catálogo.",
   },
   {
     numero: "02",
-    paso: "PASO 2",
     titulo: "Revisa sus detalles",
-    descripcion: "Consulta el historial y la producción estimada.",
-    icono: TrendingUp,
+    descripcion: "Mira su mapa, sus labores y el promedio histórico de su cultivo.",
   },
   {
     numero: "03",
-    paso: "PASO 3",
     titulo: "Contáctate con AgroAn",
-    descripcion: "Resuelve tus dudas y acuerda la compra directamente.",
-    icono: Handshake,
+    descripcion: "Resuelve tus dudas y acuerda la compra directamente con el equipo.",
   },
+];
+
+/** Iconos alrededor de la foto: lo que el equipo registra en el campo (decorativos). */
+const ICONOS_CAMPO: { icono: LucideIcon; posicion: string }[] = [
+  { icono: Sprout, posicion: "left-0 top-[62%] sm:left-[4%]" },
+  { icono: FlaskConical, posicion: "left-[6%] top-[22%] sm:left-[16%]" },
+  { icono: CloudRain, posicion: "right-[6%] top-[22%] sm:right-[16%]" },
+  { icono: ClipboardCheck, posicion: "right-0 top-[62%] sm:right-[4%]" },
 ];
 
 const PILARES_CONFIANZA: {
@@ -313,95 +309,67 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* D. SECCIÓN "QUIÉNES SOMOS" */}
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
-          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
-            <div className="lg:col-span-6">
-              <div className="relative overflow-hidden rounded-tarjeta border border-borde bg-superficie shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/assets/team.jpg"
-                  alt="Equipo técnico y productores agrícolas de AgroAn en campo"
-                  className="h-72 w-full object-cover sm:h-[410px]"
-                />
+        {/* D. QUIENES SOMOS + COMO COMPRAR: foto organica sobre un arco, y los 3 pasos */}
+        <section id="como-funciona" aria-labelledby="titulo-quienes" className="overflow-hidden bg-superficie pt-16 sm:pt-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+              <div className="lg:col-span-7">
+                <span className="inline-flex rounded-full border border-marca/30 px-3.5 py-1 text-sm font-medium text-marca">
+                  Quiénes somos
+                </span>
+                <h2
+                  id="titulo-quienes"
+                  className="mt-4 font-titulo text-4xl leading-[1.05] text-tinta sm:text-6xl"
+                >
+                  Producción agrícola en Pailón Sur, con cada paso registrado
+                </h2>
               </div>
-            </div>
-
-            <div className="lg:col-span-6">
-              <span className="inline-flex items-center gap-2 rounded-full bg-marca-vivo/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-                Sobre AgroAn
-              </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
-                Quiénes somos
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-tinta/90">
-                Somos una empresa agrícola ubicada en{" "}
-                <strong>Pailón Sur, Santa Cruz</strong>, dedicada a la producción
-                extensiva de granos estratégicos con enfoque en eficiencia
-                operativa y trazabilidad digital.
-              </p>
-              <p className="mt-3 text-base leading-relaxed text-tinta-suave">
-                A través de <strong>AgriTrack</strong> ordenamos cada labor de
-                campo, protegemos la autenticidad de nuestros registros y
-                brindamos información confiable a compradores e inversionistas
-                desde la siembra hasta la cosecha.
+              <p className="max-w-md text-base leading-relaxed text-tinta-suave lg:col-span-4 lg:col-start-9">
+                AgroAn produce granos en <strong className="text-tinta">Pailón Sur, Santa Cruz</strong>.
+                Con AgriTrack ordena cada labor de campo y comparte información confiable con
+                compradores e inversionistas, desde la siembra hasta la cosecha.
               </p>
             </div>
           </div>
-        </section>
 
-        {/* E. SECCIÓN "CÓMO FUNCIONA AGRITRACK" */}
-        <section id="como-funciona" className="bg-superficie py-16 sm:py-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex rounded-full bg-marca-vivo/12 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
-                Metodología verificable
-              </span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
-                Cómo funciona AgriTrack
-              </h2>
-              <p className="mt-3 text-base text-tinta-suave">
-                Del monitoreo diario en campo a una preventa transparente con
-                respaldo técnico en tres pasos simples.
-              </p>
-            </div>
-
-            {/* Fila 2: Línea de Tiempo Horizontal con puntos circulares (estilo referencia) */}
-            <div className="mt-12 rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8">
-              <div className="relative grid gap-6 md:grid-cols-3">
-                <div
+          {/* Foto con forma organica, sobre un arco verde a lima */}
+          <div className="relative mx-auto mt-14 max-w-6xl px-4 pb-16 sm:mt-20 sm:px-6 sm:pb-24">
+            <div
+              aria-hidden
+              className="absolute inset-x-[-30%] top-[38%] bottom-0 rounded-t-[50%] bg-linear-to-b from-marca-vivo/35 via-lima/30 to-superficie sm:inset-x-[-10%]"
+            />
+            {/* Foto e iconos en su propia caja: los iconos se ubican respecto a la foto, no a los pasos */}
+            <div className="relative mx-auto max-w-3xl">
+              {ICONOS_CAMPO.map(({ icono: Icono, posicion }) => (
+                <span
+                  key={posicion}
                   aria-hidden
-                  className="pointer-events-none absolute left-[16.66%] right-[16.66%] top-16 z-10 hidden border-t-2 border-dashed border-marca/25 md:block"
-                />
-
-                {PASOS_TIMELINE.map(
-                  ({ numero, paso, titulo, descripcion, icono: Icono }) => (
-                    <div
-                      key={numero}
-                      className="relative z-0 flex flex-col items-center rounded-tarjeta bg-fondo-suave px-6 py-8 text-center"
-                    >
-                      <div className="relative z-20 flex h-16 w-16 items-center justify-center rounded-full bg-marca text-xl font-bold text-white ring-4 ring-white shadow-tarjeta">
-                        <span>{numero}</span>
-                        <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-marca-suave text-marca ring-2 ring-white">
-                          <Icono className="h-3.5 w-3.5" aria-hidden />
-                        </span>
-                      </div>
-
-                      <span className="mt-4 inline-flex rounded-full bg-marca-suave px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-marca">
-                        {paso}
-                      </span>
-
-                      <h3 className="mt-3 text-base font-bold text-tinta">
-                        {titulo}
-                      </h3>
-                      <p className="mt-1.5 max-w-xs text-sm text-tinta-suave">
-                        {descripcion}
-                      </p>
-                    </div>
-                  ),
-                )}
-              </div>
+                  className={`absolute z-10 grid size-11 place-items-center rounded-control bg-superficie text-marca shadow-tarjeta sm:size-14 ${posicion}`}
+                >
+                  <Icono className="h-5 w-5 sm:h-6 sm:w-6" />
+                </span>
+              ))}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/team.jpg"
+                alt="Equipo de AgroAn en el campo"
+                className="relative mx-auto h-72 w-60 rounded-[32px_96px] object-cover shadow-flotante sm:h-[400px] sm:w-[360px] sm:rounded-[40px_140px]"
+              />
             </div>
+
+            {/* Como comprar */}
+            <ol className="relative mt-14 grid gap-4 sm:mt-20 md:grid-cols-3">
+              {PASOS_COMPRA.map(({ numero, titulo, descripcion }) => (
+                <li
+                  key={numero}
+                  className="rounded-tarjeta border border-borde bg-superficie/90 p-6 backdrop-blur-sm"
+                >
+                  <span className="font-titulo text-5xl leading-none text-marca">{numero}</span>
+                  <h3 className="mt-4 text-lg font-semibold text-tinta">{titulo}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-tinta-suave">{descripcion}</p>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
