@@ -7,6 +7,7 @@ import { Advertencia } from "@/components/estado/advertencia";
 import { LandingNavbar } from "@/components/publico/landing-navbar";
 import { useAuth } from "@/lib/auth-context";
 import { Eye, EyeOff } from "lucide-react";
+import { CLASE_CAMPO } from "@/components/ui/field";
 
 export default function LoginPage() {
   const { login, usuario } = useAuth();
@@ -39,24 +40,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8faf9] text-[#17211D]">
+    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
       <LandingNavbar />
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
-        <div className="w-full max-w-md rounded-3xl border border-[#E4EAE6] bg-white p-7 shadow-xs sm:p-8">
+        <div className="w-full max-w-md rounded-tarjeta border border-borde bg-superficie p-7 shadow-tarjeta sm:p-8">
           <div className="text-center">
-            <span className="inline-block rounded-full bg-[#006B4F]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#006B4F]">
+            <span className="inline-block rounded-full bg-marca/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca">
               Portal AgroAn
             </span>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight text-[#17211D]">
+            <h1 className="mt-3 text-2xl font-bold tracking-tight text-tinta">
               Ingresar a AgriTrack
             </h1>
-            <p className="mt-1.5 text-sm text-[#68736D]">Entra con tu cuenta de AgroAn.</p>
+            <p className="mt-1.5 text-sm text-tinta-suave">Entra con tu cuenta de AgroAn.</p>
           </div>
 
           <form onSubmit={onSubmit} className="mt-7 space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-[#17211D]">
+              <label htmlFor="email" className="block text-sm font-semibold text-tinta">
                 Correo electrónico
               </label>
               <input
@@ -66,18 +67,18 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+                className={`${CLASE_CAMPO} mt-1.5`}
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between gap-2">
-                <label htmlFor="password" className="block text-sm font-semibold text-[#17211D]">
+                <label htmlFor="password" className="block text-sm font-semibold text-tinta">
                   Contraseña
                 </label>
                 <Link
                   href="/recuperar-password"
-                  className="text-xs font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold text-marca hover:text-marca-hover hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
@@ -90,13 +91,13 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="min-h-11 w-full rounded-2xl border border-[#E4EAE6] bg-[#f8faf9] px-4 pr-12 text-base text-[#17211D] transition-colors focus:border-[#006B4F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006B4F]/20"
+                  className={`${CLASE_CAMPO} pr-12`}
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarPassword(!mostrarPassword)}
                   aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-[#68736D] transition-colors hover:text-[#17211D]"
+                  className="absolute right-0.5 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full text-tinta-suave transition-colors hover:text-tinta"
                 >
                   {mostrarPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -112,29 +113,29 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={cargando}
-              className="min-h-12 w-full rounded-full bg-[#004b36] px-6 text-base font-semibold text-white transition-colors hover:bg-[#00a859] disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-12 w-full rounded-full bg-marca-oscuro px-6 text-base font-semibold text-white transition-colors hover:bg-marca-noche disabled:cursor-not-allowed disabled:opacity-60"
             >
               {cargando ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
 
           <div className="mt-5 text-center">
-            <p className="text-sm text-[#68736D]">
+            <p className="text-sm text-tinta-suave">
               ¿Eres parte del equipo? Si no tienes cuenta,
             </p>
-            <Link href="/solicitar-acceso" className="text-sm font-semibold text-[#006B4F] hover:text-[#00a859] hover:underline">
+            <Link href="/solicitar-acceso" className="inline-flex min-h-11 items-center text-sm font-semibold text-marca hover:text-marca-hover hover:underline">
               haz clic aquí
             </Link>
           </div>
 
-          <div className="mt-6 border-t border-[#E4EAE6] pt-6">
+          <div className="mt-6 border-t border-borde pt-6">
             <Link
               href="/parcelas"
-              className="flex min-h-11 w-full items-center justify-center rounded-full border border-[#E4EAE6] bg-[#f8faf9] px-5 text-sm font-semibold text-[#004b36] transition-colors hover:border-[#006B4F] hover:bg-white"
+              className="flex min-h-11 w-full items-center justify-center rounded-full border border-borde bg-fondo-suave px-5 text-sm font-semibold text-marca-oscuro transition-colors hover:border-marca hover:bg-superficie"
             >
               Ver parcelas disponibles
             </Link>
-            <p className="mt-2.5 text-center text-xs text-[#68736D]">
+            <p className="mt-2.5 text-center text-xs text-tinta-suave">
               No necesitas cuenta para verlas.
             </p>
           </div>
