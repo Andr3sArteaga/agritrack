@@ -17,18 +17,18 @@ export function GaleriaFotosCliente({
 
   return (
     <>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
         {fotos.map((foto, idx) => (
           <figure
             key={foto.id}
-            className="group overflow-hidden rounded-tarjeta border border-borde bg-fondo-suave"
+            className="group overflow-hidden rounded-tarjeta bg-superficie p-2 shadow-tarjeta"
           >
             <button
               type="button"
               onClick={() => setIndiceAmpliado(idx)}
               aria-label={`Expandir ${foto.descripcion || `foto ${idx + 1} de ${nombreParcela}`}`}
               title="Expandir imagen"
-              className="relative block w-full overflow-hidden text-left"
+              className="relative block w-full overflow-hidden rounded-[16px_44px] text-left"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -44,7 +44,7 @@ export function GaleriaFotosCliente({
               </span>
             </button>
             {foto.descripcion && (
-              <figcaption className="border-t border-borde px-3.5 py-2.5 text-xs font-medium text-tinta-suave">
+              <figcaption className="px-2 pb-1 pt-2.5 text-sm text-tinta-suave">
                 {foto.descripcion}
               </figcaption>
             )}
