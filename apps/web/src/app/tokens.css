@@ -13,6 +13,10 @@
   --color-marca-oscuro: #004b36; /* 9,6:1 con texto blanco */
   --color-marca-noche: #003b2a;
   --color-noche: #071712;
+  /* Portada clara: cielo del hero, fondo hueso y un unico acento lima (solo botones, texto tinta encima). */
+  --color-cielo: #cfe6f2;
+  --color-hueso: #f2f3ec;
+  --color-lima: #e6f35a; /* 15:1 con texto tinta; nunca para estados */
 
   /* Texto, bordes y superficies */
   --color-tinta: #17211d;
@@ -70,5 +74,7 @@
 /* La fuente la carga next/font (layout.tsx) en la variable --font-inter. */
 @theme inline {
   --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
+  /* Titulos de la portada publica (clase font-titulo). */
+  --font-titulo: var(--font-instrument), Georgia, "Times New Roman", serif;
   --font-mono: Consolas, Menlo, monospace;
 }

@@ -8,19 +8,20 @@ import {
   ListChecks,
   Mail,
   MapPin,
-  MapPinned,
   MessageCircle,
   Phone,
   Ruler,
   ShieldCheck,
   Sprout,
   TrendingUp,
+  type LucideIcon,
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Advertencia } from "@/components/estado/advertencia";
 import { EstadoBadge } from "@/components/estado/estado-badge";
 import { EstadoVacio } from "@/components/estado/estado-vacio";
 import { LandingNavbar } from "@/components/publico/landing-navbar";
+import { PiePublico } from "@/components/publico/pie-publico";
 import { ActivityItem } from "@/components/ui/activity-item";
 import { CropChip } from "@/components/ui/crop-chip";
 import { puedePublicarse, TEXTOS } from "@/lib/textos";
@@ -43,6 +44,39 @@ async function obtenerDetalle(
   return res.json();
 }
 
+/** Titulo de cada bloque: icono en un circulo y texto con serifa. */
+function TituloSeccion({ icono: Icono, children }: { icono: LucideIcon; children: React.ReactNode }) {
+  return (
+    <h2 className="flex items-center gap-3 font-titulo text-3xl leading-tight text-tinta">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-marca-suave text-marca">
+        <Icono className="h-5 w-5" aria-hidden />
+      </span>
+      {children}
+    </h2>
+  );
+}
+
+/** Dato clave de la parcela (superficie, cultivo, promedio). El valor va en Inter, nunca en serifa. */
+function DatoClave({
+  icono: Icono,
+  etiqueta,
+  children,
+}: {
+  icono: LucideIcon;
+  etiqueta: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-tarjeta bg-superficie p-5 shadow-tarjeta">
+      <p className="flex items-center gap-2 text-sm font-medium text-tinta-suave">
+        <Icono className="h-4 w-4 text-marca" aria-hidden />
+        {etiqueta}
+      </p>
+      <div className="mt-2">{children}</div>
+    </div>
+  );
+}
+
 export default async function ParcelaDetallePage(
   props: PageProps<"/parcelas/[id]">,
 ) {
@@ -61,334 +95,237 @@ export default async function ParcelaDetallePage(
       )}`
     : null;
   const publicarAdvertencia = puedePublicarse(TEXTOS.MENOS_DE_TRES_CAMPANAS);
+  const estadoRegistros =
+    parcela.registrosRevisados === 0
+      ? "SIN_DATOS"
+      : parcela.registrosVerificados
+        ? "BIEN"
+        : "CRITICO";
 
   return (
-    <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
-      <LandingNavbar />
+    <div className="flex min-h-screen flex-col bg-hueso text-tinta">
+      <LandingNavbar sobreHero />
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
-        {/* Barra de navegacion superior */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      {/* pt-20: deja libre el espacio de la barra superpuesta */}
+      <main className="flex-1 bg-linear-to-b from-cielo via-hueso to-hueso to-30% pt-20">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
           <Link
             href="/parcelas"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-borde bg-superficie px-4 text-sm font-semibold text-tinta shadow-tarjeta transition-colors hover:border-marca-vivo hover:text-marca"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-borde bg-superficie px-4 text-sm font-semibold text-tinta transition-colors hover:border-tinta"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Volver al catálogo de parcelas
+            Volver al catálogo
           </Link>
 
-          <Link
-            href="/#parcelas-preventa"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-tinta-suave transition-colors hover:text-marca"
-          >
-            Inicio
-          </Link>
-        </div>
-
-        {/* Encabezado principal unificado */}
-        <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          {/* Encabezado: nombre grande con serifa, sin tarjeta */}
+          <header className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-vivo/12 px-3 py-1 text-xs font-bold text-marca-oscuro">
-                  <Sprout className="h-3.5 w-3.5 text-marca-vivo" aria-hidden />
-                  {parcela.temporadaActual ?? "Campaña actual"}
-                </span>
+                {parcela.temporadaActual && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-superficie px-3 py-1 text-sm font-medium text-tinta">
+                    <Sprout className="h-4 w-4 text-marca" aria-hidden />
+                    {parcela.temporadaActual}
+                  </span>
+                )}
                 <CropChip cultivo={parcela.cultivoActual} />
-                <span className="inline-flex items-center gap-1 rounded-full bg-marca-suave px-3 py-1 text-xs font-semibold text-marca">
-                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-marca-suave px-3 py-1 text-sm font-medium text-marca">
+                  <CheckCircle2 className="h-4 w-4" aria-hidden />
                   Disponible para preventa
                 </span>
               </div>
-
-              <h1 className="mt-4 text-2xl font-bold tracking-tight text-tinta sm:text-3xl">
+              <h1 className="mt-4 font-titulo text-5xl leading-[1.05] text-marca-oscuro sm:text-7xl">
                 {parcela.nombre}
               </h1>
-              <p className="mt-2 flex items-center gap-2 text-base text-tinta-suave">
-                <MapPin className="h-4 w-4 shrink-0 text-marca-vivo" aria-hidden />
+              <p className="mt-3 flex items-center gap-2 text-base text-tinta-suave">
+                <MapPin className="h-4 w-4 shrink-0 text-marca" aria-hidden />
                 {parcela.ubicacionTexto}
               </p>
             </div>
 
-            <div className="shrink-0 rounded-tarjeta border border-borde bg-fondo-suave px-4 py-3.5">
+            <div className="shrink-0 rounded-tarjeta bg-superficie px-4 py-3.5 shadow-tarjeta">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-sm font-semibold text-tinta">
-                  Registros protegidos contra cambios:
-                </span>
-                <EstadoBadge
-                  estado={
-                    parcela.registrosRevisados === 0
-                      ? "SIN_DATOS"
-                      : parcela.registrosVerificados
-                        ? "BIEN"
-                        : "CRITICO"
-                  }
-                />
+                <span className="text-sm font-semibold text-tinta">Registros protegidos</span>
+                <EstadoBadge estado={estadoRegistros} />
               </div>
-              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-tinta-suave">
-                <ShieldCheck className="h-4 w-4 shrink-0 text-marca-vivo" aria-hidden />
+              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-tinta-suave">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-marca" aria-hidden />
                 Verificados con cadena SHA-256
               </p>
             </div>
-          </div>
+          </header>
 
-          {/* 3 tarjetas resumen fáciles de leer */}
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tinta-suave">
-                <Ruler className="h-4 w-4 text-marca-vivo" aria-hidden />
-                Superficie total
-              </p>
-              <p className="mt-2 text-2xl font-bold text-tinta">
-                {parcela.hectareas} ha
-              </p>
-              <p className="mt-1 text-xs text-tinta-suave">
-                Área medida sobre polígono georreferenciado
-              </p>
-            </div>
-
-            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tinta-suave">
-                <Sprout className="h-4 w-4 text-marca-vivo" aria-hidden />
-                Cultivo actual
-              </p>
-              <p className="mt-2 text-2xl font-bold text-tinta">
-                {parcela.cultivoActual ?? "Sin campaña activa"}
-              </p>
-              <p className="mt-1 text-xs text-tinta-suave">
-                {parcela.temporadaActual ?? "Sin temporada asignada"}
-              </p>
-            </div>
-
-            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tinta-suave">
-                <TrendingUp className="h-4 w-4 text-marca-vivo" aria-hidden />
-                {TEXTOS.LINEA_BASE_ETIQUETA.texto}
-              </p>
-              {parcela.rendimientoEstimadoTnHa === null ? (
-                <div className="mt-2">
-                  <EstadoBadge estado="SIN_DATOS" />
-                  <p className="mt-1.5 text-xs text-tinta-suave">
-                    Sin cosechas previas para promediar
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <p className="mt-2 text-2xl font-bold text-marca">
-                    {parcela.rendimientoEstimadoTnHa}{" "}
-                    <span className="text-base font-semibold text-tinta">
-                      t/ha
-                    </span>
-                  </p>
-                  <p className="mt-1 text-xs text-tinta-suave">
-                    {parcela.produccionEstimadaTotalTn !== null
-                      ? `≈ ${parcela.produccionEstimadaTotalTn} t en total · promedio histórico`
-                      : TEXTOS.PRODUCCION_SIN_ESTIMACION.texto}
-                  </p>
-                  {publicarAdvertencia && (
-                    <div className="mt-3">
-                      <Advertencia
-                        tipo="ATENCION"
-                        titulo="No se puede validar"
-                        texto={TEXTOS.MENOS_DE_TRES_CAMPANAS}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Contenido principal en 2 columnas */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-12">
-          {/* Columna izquierda */}
-          <div className="space-y-6 lg:col-span-7">
-            {/* Mapa */}
-            <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
-              <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
-                <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
-                  <MapPinned className="h-5 w-5" aria-hidden />
-                </span>
-                Dónde está la parcela (polígono georreferenciado)
-              </h2>
-
+          {/* Mapa grande + datos clave */}
+          <div className="mt-8 grid gap-5 lg:grid-cols-12">
+            <section aria-label="Ubicación de la parcela" className="lg:col-span-8">
               {parcela.poligono ? (
-                <div className="mt-4 overflow-hidden rounded-tarjeta border border-borde">
-                  <MiniMapaCliente poligono={parcela.poligono} />
+                <div className="overflow-hidden rounded-tarjeta bg-superficie p-2 shadow-flotante">
+                  <div className="overflow-hidden rounded-control">
+                    <MiniMapaCliente poligono={parcela.poligono} />
+                  </div>
                 </div>
               ) : (
-                <div className="mt-4">
+                <div className="rounded-tarjeta bg-superficie p-5 shadow-tarjeta">
                   <EstadoVacio mini titulo="Sin polígono dibujado">
-                    <p>
-                      Esta parcela aún no tiene su contorno dibujado en el mapa.
-                    </p>
+                    <p>Esta parcela aún no tiene su contorno dibujado en el mapa.</p>
                   </EstadoVacio>
                 </div>
               )}
             </section>
 
-            {/* Fotos */}
-            {parcela.fotos.length > 0 && (
-              <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
-                <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
-                    <Camera className="h-5 w-5" aria-hidden />
-                  </span>
-                  Fotos de campo ({parcela.fotos.length})
-                </h2>
+            <div className="grid gap-5 sm:grid-cols-3 lg:col-span-4 lg:grid-cols-1 lg:content-start">
+              <DatoClave icono={Ruler} etiqueta="Superficie total">
+                <p className="text-3xl font-semibold text-tinta">{parcela.hectareas} ha</p>
+                <p className="mt-1 text-sm text-tinta-suave">Medida sobre el polígono del mapa</p>
+              </DatoClave>
 
-                <GaleriaFotosCliente
-                  fotos={parcela.fotos}
-                  nombreParcela={parcela.nombre}
-                />
-              </section>
-            )}
+              <DatoClave icono={Sprout} etiqueta="Cultivo actual">
+                {parcela.cultivoActual ? (
+                  <>
+                    <p className="text-3xl font-semibold text-tinta">{parcela.cultivoActual}</p>
+                    {parcela.temporadaActual && (
+                      <p className="mt-1 text-sm text-tinta-suave">{parcela.temporadaActual}</p>
+                    )}
+                  </>
+                ) : (
+                  <EstadoBadge estado="SIN_DATOS" />
+                )}
+              </DatoClave>
 
-            {/* Historico de rendimiento */}
-            <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
-              <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
-                <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
-                  <LineChart className="h-5 w-5" aria-hidden />
-                </span>
-                Histórico de rendimiento (campañas anteriores)
-              </h2>
-
-              <div className="mt-4">
-                <RendimientoChart datos={parcela.historicoRendimiento} />
-              </div>
-            </section>
+              <DatoClave icono={TrendingUp} etiqueta={TEXTOS.LINEA_BASE_ETIQUETA.texto}>
+                {parcela.rendimientoEstimadoTnHa === null ? (
+                  <>
+                    <EstadoBadge estado="SIN_DATOS" />
+                    <p className="mt-1.5 text-sm text-tinta-suave">Sin cosechas previas para promediar</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-semibold text-tinta">
+                      {parcela.rendimientoEstimadoTnHa}{" "}
+                      <span className="text-base font-medium text-tinta-suave">t/ha</span>
+                    </p>
+                    <p className="mt-1 text-sm text-tinta-suave">
+                      {parcela.produccionEstimadaTotalTn !== null
+                        ? `≈ ${parcela.produccionEstimadaTotalTn} t en total · promedio histórico`
+                        : TEXTOS.PRODUCCION_SIN_ESTIMACION.texto}
+                    </p>
+                    {publicarAdvertencia && (
+                      <div className="mt-3">
+                        <Advertencia
+                          tipo="ATENCION"
+                          titulo="No se puede validar"
+                          texto={TEXTOS.MENOS_DE_TRES_CAMPANAS}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </DatoClave>
+            </div>
           </div>
 
-          {/* Columna derecha */}
-          <div className="space-y-6 lg:col-span-5">
-            {/* Historial de cuidado */}
-            <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta">
-              <h2 className="flex items-center gap-2.5 text-lg font-bold text-tinta">
-                <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-vivo/12 text-marca">
-                  <ListChecks className="h-5 w-5" aria-hidden />
-                </span>
-                Historial de cuidado (campaña actual)
-              </h2>
-
-              <div className="mt-4">
-                {parcela.historialCuidado.length === 0 ? (
-                  <EstadoVacio mini titulo="Todavía no hay labores registradas">
-                    <p>Las labores de la campaña actual aparecerán aquí.</p>
-                  </EstadoVacio>
-                ) : (
-                  <ol className="divide-y divide-borde">
-                    {parcela.historialCuidado.map((item, index) => (
-                      <li key={index}>
-                        <ActivityItem tipo={item.tipo} fecha={item.fecha} descripcion={item.descripcion} />
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-            </section>
-
-            {/* Tarjeta de contacto directo */}
-            <section className="rounded-tarjeta bg-marca-oscuro p-6 text-white shadow-xl sm:p-7">
-              <span className="inline-flex rounded-full bg-marca-vivo/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-marca-suave">
-                CONTACTO DIRECTO
-              </span>
-              <h2 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">
-                ¿Te interesa esta parcela? Contáctate con AgroAn
-              </h2>
-              <p className="mt-2 text-sm text-marca-suave/85">
-                Comunícate directamente con nuestro equipo para recibir más
-                información técnica o coordinar una visita en campo.
-              </p>
-
-              {tieneContacto ? (
-                <div className="mt-5 space-y-3">
-                  {contacto.nombre && (
-                    <div className="flex items-center gap-3 rounded-tarjeta bg-white/10 px-4 py-3 text-sm">
-                      <Building2
-                        className="h-4 w-4 shrink-0 text-marca-vivo"
-                        aria-hidden
-                      />
-                      <span>
-                        Empresa: <strong>{contacto.nombre}</strong>
-                      </span>
-                    </div>
-                  )}
-
-                  {contacto.telefono && (
-                    <a
-                      href={`tel:${contacto.telefono.replace(/\s+/g, "")}`}
-                      className="flex min-h-11 items-center gap-3 rounded-tarjeta bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
-                    >
-                      <Phone
-                        className="h-4 w-4 shrink-0 text-marca-vivo"
-                        aria-hidden
-                      />
-                      {contacto.telefono}
-                    </a>
-                  )}
-
-                  {contacto.email && (
-                    <a
-                      href={`mailto:${contacto.email}`}
-                      className="flex min-h-11 items-center gap-3 rounded-tarjeta bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
-                    >
-                      <Mail
-                        className="h-4 w-4 shrink-0 text-marca-vivo"
-                        aria-hidden
-                      />
-                      {contacto.email}
-                    </a>
-                  )}
-
-                  {whatsappHref && (
-                    <a
-                      href={whatsappHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-superficie px-6 text-sm font-bold text-marca-oscuro shadow-md transition-transform hover:-translate-y-0.5 hover:bg-marca-suave"
-                    >
-                      <MessageCircle
-                        className="h-5 w-5 text-marca-vivo"
-                        aria-hidden
-                      />
-                      Consultar por WhatsApp
-                    </a>
-                  )}
-                </div>
-              ) : (
-                <div className="mt-4 rounded-tarjeta border border-white/15 bg-white/10 p-4 text-sm text-marca-suave">
-                  Todavía no hay datos de contacto configurados para esta parcela.
-                </div>
+          {/* Contenido en 2 columnas */}
+          <div className="mt-14 grid gap-10 lg:grid-cols-12 lg:gap-8">
+            <div className="space-y-12 lg:col-span-7">
+              {parcela.fotos.length > 0 && (
+                <section>
+                  <TituloSeccion icono={Camera}>Fotos de campo ({parcela.fotos.length})</TituloSeccion>
+                  <GaleriaFotosCliente fotos={parcela.fotos} nombreParcela={parcela.nombre} />
+                </section>
               )}
-            </section>
+
+              <section>
+                <TituloSeccion icono={LineChart}>Histórico de rendimiento</TituloSeccion>
+                <p className="mt-1 text-sm text-tinta-suave">Toneladas por hectárea de las campañas anteriores.</p>
+                <div className="mt-5 rounded-tarjeta bg-superficie p-5 shadow-tarjeta">
+                  <RendimientoChart datos={parcela.historicoRendimiento} />
+                </div>
+              </section>
+
+              <section>
+                <TituloSeccion icono={ListChecks}>Historial de cuidado</TituloSeccion>
+                <p className="mt-1 text-sm text-tinta-suave">Labores de la campaña actual.</p>
+                <div className="mt-5 rounded-tarjeta bg-superficie p-3 shadow-tarjeta sm:p-4">
+                  {parcela.historialCuidado.length === 0 ? (
+                    <EstadoVacio mini titulo="Todavía no hay labores registradas">
+                      <p>Las labores de la campaña actual aparecerán aquí.</p>
+                    </EstadoVacio>
+                  ) : (
+                    <ol className="divide-y divide-borde">
+                      {parcela.historialCuidado.map((item, index) => (
+                        <li key={index}>
+                          <ActivityItem tipo={item.tipo} fecha={item.fecha} descripcion={item.descripcion} />
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            {/* Contacto: fijo al bajar en pantalla grande (top-24 = debajo de la barra) */}
+            <aside className="lg:col-span-5">
+              <section className="rounded-tarjeta bg-marca-oscuro p-6 text-white shadow-flotante sm:p-8 lg:sticky lg:top-24">
+                <span className="inline-flex rounded-full border border-white/25 px-3 py-1 text-sm font-medium text-white/90">
+                  Contacto directo
+                </span>
+                <h2 className="mt-4 font-titulo text-4xl leading-tight">¿Te interesa esta parcela?</h2>
+                <p className="mt-2 text-base text-white/85">
+                  Habla con el equipo de AgroAn para recibir más información o coordinar una visita
+                  al campo.
+                </p>
+
+                {tieneContacto ? (
+                  <div className="mt-6 space-y-3">
+                    {contacto.nombre && (
+                      <div className="flex items-center gap-3 rounded-control bg-white/10 px-4 py-3 text-sm">
+                        <Building2 className="h-4 w-4 shrink-0" aria-hidden />
+                        <span>
+                          Empresa: <strong>{contacto.nombre}</strong>
+                        </span>
+                      </div>
+                    )}
+                    {contacto.telefono && (
+                      <a
+                        href={`tel:${contacto.telefono.replace(/\s+/g, "")}`}
+                        className="flex min-h-11 items-center gap-3 rounded-control bg-white/10 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-white/15"
+                      >
+                        <Phone className="h-4 w-4 shrink-0" aria-hidden />
+                        {contacto.telefono}
+                      </a>
+                    )}
+                    {contacto.email && (
+                      <a
+                        href={`mailto:${contacto.email}`}
+                        className="flex min-h-11 items-center gap-3 break-all rounded-control bg-white/10 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-white/15"
+                      >
+                        <Mail className="h-4 w-4 shrink-0" aria-hidden />
+                        {contacto.email}
+                      </a>
+                    )}
+                    {whatsappHref && (
+                      <a
+                        href={whatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-superficie px-6 text-base font-semibold text-tinta transition-colors hover:bg-marca-suave"
+                      >
+                        <MessageCircle className="h-5 w-5 text-marca" aria-hidden />
+                        Consultar por WhatsApp
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-control border border-dashed border-white/30 bg-white/10 p-4 text-sm text-white/90">
+                    Todavía no hay datos de contacto configurados para esta parcela.
+                  </div>
+                )}
+              </section>
+            </aside>
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-borde bg-superficie">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-tinta-suave sm:flex-row sm:px-6">
-          <Link href="/#inicio" className="inline-flex min-h-11 items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-tarjeta bg-marca-oscuro text-marca-vivo">
-              <Sprout className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="font-bold text-tinta">AgriTrack</span>
-            <span>· AgroAn</span>
-          </Link>
-
-          <div className="flex flex-wrap items-center gap-5 font-medium">
-            <Link href="/#inicio" className="inline-flex min-h-11 items-center hover:text-marca">
-              Inicio
-            </Link>
-            <Link href="/parcelas" className="inline-flex min-h-11 items-center hover:text-marca">
-              Catálogo completo
-            </Link>
-            <Link href="/login" className="inline-flex min-h-11 items-center hover:text-marca">
-              Acceder al panel
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <PiePublico />
     </div>
   );
 }

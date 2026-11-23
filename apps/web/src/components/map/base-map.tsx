@@ -79,7 +79,7 @@ export function BaseMap({
       <div
         role="group"
         aria-label="Tipo de mapa"
-        className="absolute right-3 top-3 z-[1000] flex overflow-hidden rounded-md border border-stone-300 bg-white text-xs font-medium shadow"
+        className="absolute right-3 top-3 z-[1000] flex overflow-hidden rounded-full border border-borde bg-superficie text-sm font-medium shadow-tarjeta"
       >
         {OPCIONES_TIPO.map(({ tipo, etiqueta, ayuda, Icono }) => (
           <button
@@ -88,13 +88,11 @@ export function BaseMap({
             title={ayuda}
             aria-pressed={tipoMapa === tipo}
             onClick={() => setTipoMapa(tipo)}
-            className={`inline-flex items-center gap-1 px-2.5 py-1.5 ${
-              tipoMapa === tipo
-                ? "bg-emerald-700 text-white"
-                : "text-stone-700 hover:bg-stone-100"
+            className={`inline-flex min-h-11 items-center gap-1.5 px-3.5 ${
+              tipoMapa === tipo ? "bg-tinta text-white" : "text-tinta hover:bg-fondo"
             }`}
           >
-            <Icono className="h-3.5 w-3.5" aria-hidden />
+            <Icono className="h-4 w-4" aria-hidden />
             {etiqueta}
           </button>
         ))}
