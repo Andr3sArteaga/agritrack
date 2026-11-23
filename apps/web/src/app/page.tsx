@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { LandingNavbar } from "@/components/publico/landing-navbar";
 import { LandingPreventaSeccion } from "@/components/publico/landing-preventa-seccion";
+import { MapaPreventaCliente } from "@/components/publico/mapa-preventa-cliente";
 import type { CatalogoParcela } from "@/lib/types";
 
 const TELEFONO_CONTACTO =
@@ -47,8 +48,8 @@ async function obtenerParcelasPublicas(): Promise<CatalogoParcela[]> {
 }
 
 const HERO_BENEFICIOS = [
-  "Registros auditables con huella SHA-256",
-  "Estimación de rendimiento con IA",
+  "Registros auditables con huella",
+  "Promedio histórico por cultivo",
   "Ubicación geográfica exacta por polígono",
 ];
 
@@ -140,6 +141,13 @@ const PILARES_CONFIANZA: {
 
 export default async function LandingPage() {
   const parcelas = await obtenerParcelasPublicas();
+  const parcelasConPoligono = parcelas.flatMap((p) =>
+    p.poligono
+      ? [{ id: p.id, nombre: p.nombre, cultivo: p.cultivoActual, hectareas: p.hectareas, poligono: p.poligono }]
+      : [],
+  );
+  const hectareasPublicadas =
+    Math.round(parcelas.reduce((total, p) => total + p.hectareas, 0) * 100) / 100;
   const whatsappNumero = TELEFONO_CONTACTO.replace(/[^0-9]/g, "");
   const whatsappHref = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(
     "Hola AgroAn, me interesa recibir información sobre las parcelas disponibles en AgriTrack.",
@@ -151,96 +159,87 @@ export default async function LandingPage() {
       <LandingNavbar sobreHero />
 
       <main className="flex-1">
-        {/* B. HERO SECTION (pt incluye los 80 px de la barra superpuesta) */}
+        {/* B. HERO: cielo claro, titulo con serifa y el mapa real de las parcelas en preventa.
+            El pt incluye los 80 px de la barra superpuesta. */}
         <section
           id="inicio"
-          className="relative overflow-hidden bg-marca-oscuro pb-28 pt-32 text-white sm:pb-36 sm:pt-36 lg:pt-40"
+          className="relative overflow-hidden bg-linear-to-b from-cielo via-hueso to-superficie pt-32 sm:pt-36 lg:pt-40"
         >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-marca-vivo/20 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-marca-vivo/15 blur-3xl"
-          />
-
-          <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-12">
-            {/* Hero Izquierda */}
-            <div className="lg:col-span-6">
-              <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
-                Encuentra tu próxima{" "}
-                <span className="text-marca-vivo">producción</span> de forma
-                rápida y sencilla
-              </h1>
-
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-marca-suave/90 sm:text-lg">
-                Supervisa campañas reales en Santa Cruz con trazabilidad de
-                labores, monitoreo en campo y estimación de rendimiento
-                basada en datos antes de cerrar acuerdos.
-              </p>
-
-              <div className="mt-8 flex flex-wrap items-center gap-3.5">
-                <a
-                  href="#parcelas-preventa"
-                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-marca-vivo px-6 text-sm font-semibold text-noche shadow-lg shadow-black/20 transition-all hover:bg-marca-vivo/90 sm:text-base"
+          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+            <h1 className="font-titulo text-5xl leading-[1.05] text-marca-oscuro sm:text-6xl lg:text-7xl">
+              Encuentra tu próxima <span className="italic text-marca">producción</span> de
+              forma rápida y sencilla
+            </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-tinta-suave sm:text-lg">
+              Conoce parcelas reales de Pailón Sur, Santa Cruz, con cada labor registrada, su
+              ubicación exacta y el promedio histórico de su cultivo.
+            </p>
+            <ul className="mt-6 flex flex-wrap justify-center gap-2">
+              {HERO_BENEFICIOS.map((beneficio) => (
+                <li
+                  key={beneficio}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-borde bg-superficie/80 px-3 py-1.5 text-sm font-medium text-tinta"
                 >
-                  Ver parcelas disponibles
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </a>
-                <a
-                  href="#como-funciona"
-                  className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/35 px-6 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white/10 sm:text-base"
-                >
-                  Conocer más
-                </a>
-              </div>
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-marca" aria-hidden />
+                  {beneficio}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-              <ul className="mt-8 grid gap-2.5 sm:grid-cols-3">
-                {HERO_BENEFICIOS.map((beneficio) => (
-                  <li
-                    key={beneficio}
-                    className="flex items-start gap-2 text-xs font-medium text-marca-suave/90 sm:text-sm"
+          {/* Tarjeta del mapa, apoyada sobre el paisaje */}
+          <div className="relative z-10 mx-auto mt-10 max-w-5xl px-4 sm:mt-12 sm:px-6">
+            <div className="rounded-tarjeta border border-borde bg-superficie p-3 shadow-flotante sm:p-4">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-1 pb-3">
+                <div>
+                  <p className="text-sm text-tinta-suave">Parcelas en preventa</p>
+                  <p className="text-lg font-semibold text-tinta">Pailón Sur, Santa Cruz</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {parcelas.length > 0 ? (
+                    <>
+                      <span className="rounded-full bg-fondo px-3 py-1 text-sm font-medium text-tinta">
+                        {parcelas.length} {parcelas.length === 1 ? "parcela" : "parcelas"}
+                      </span>
+                      <span className="rounded-full bg-fondo px-3 py-1 text-sm font-medium text-tinta">
+                        {hectareasPublicadas} ha
+                      </span>
+                    </>
+                  ) : (
+                    <span className="rounded-full border border-dashed border-sindatos-borde bg-sindatos-fondo px-3 py-1 text-sm font-medium text-sindatos-texto">
+                      Sin parcelas publicadas
+                    </span>
+                  )}
+                  <Link
+                    href="/parcelas"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-tinta px-4 text-sm font-semibold text-white transition-colors hover:bg-marca-oscuro"
                   >
-                    <CheckCircle2
-                      className="mt-0.5 h-4 w-4 shrink-0 text-marca-vivo"
-                      aria-hidden
-                    />
-                    <span>{beneficio}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Hero Derecha: Dos semicírculos opuestos alineados en la base */}
-            <div className="lg:col-span-6">
-              <div className="mx-auto flex max-w-lg items-end justify-center gap-3 sm:gap-4">
-                <div className="h-72 w-36 overflow-hidden rounded-l-full rounded-r-none bg-marca-noche shadow-2xl sm:h-[420px] sm:w-[210px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/assets/hero-1.jpg"
-                    alt="Vista aérea de cultivos agrícolas en desarrollo"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-
-                <div className="h-64 w-36 overflow-hidden rounded-l-none rounded-r-full border border-white/15 bg-marca-noche shadow-2xl sm:h-[375px] sm:w-[205px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/assets/hero-2.jpg"
-                    alt="Detalle de cultivos saludables bajo luz natural"
-                    className="h-full w-full object-cover"
-                  />
+                    Ver catálogo
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </Link>
                 </div>
               </div>
+              <div className="h-64 overflow-hidden rounded-control sm:h-80 lg:h-[380px]">
+                <MapaPreventaCliente parcelas={parcelasConPoligono} />
+              </div>
             </div>
+          </div>
+
+          {/* Paisaje recortado en "V" */}
+          <div className="relative -mt-36 sm:-mt-52">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/banner-field.jpg"
+              alt=""
+              className="h-[380px] w-full object-cover [clip-path:polygon(0_0,100%_0,100%_60%,55%_95%,50%_100%,45%_95%,0_60%)] sm:h-[520px]"
+            />
           </div>
         </section>
 
         {/* C. BANNER "TRANSPARENCIA TOTAL" SUPERPUESTO */}
         <section
           aria-label="Transparencia total"
-          className="relative z-10 -mt-16 mx-auto max-w-7xl px-4 sm:-mt-20 sm:px-6"
+          className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6"
         >
           <div className="grid items-center gap-6 overflow-hidden rounded-tarjeta border border-marca-vivo/30 bg-marca-noche p-5 text-white shadow-2xl sm:p-8 lg:grid-cols-12">
             <div className="overflow-hidden rounded-tarjeta border border-white/10 lg:col-span-5">
