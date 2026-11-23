@@ -148,13 +148,13 @@ export default async function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-fondo-suave text-tinta">
       {/* A. NAVBAR STICKY */}
-      <LandingNavbar />
+      <LandingNavbar sobreHero />
 
       <main className="flex-1">
-        {/* B. HERO SECTION */}
+        {/* B. HERO SECTION (pt incluye los 80 px de la barra superpuesta) */}
         <section
           id="inicio"
-          className="relative overflow-hidden bg-marca-oscuro pb-28 pt-12 text-white sm:pb-36 sm:pt-16 lg:pt-20"
+          className="relative overflow-hidden bg-marca-oscuro pb-28 pt-32 text-white sm:pb-36 sm:pt-36 lg:pt-40"
         >
           <div
             aria-hidden
