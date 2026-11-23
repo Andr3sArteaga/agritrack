@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { api, apiErrorMessage } from "@/lib/api";
 import { AccionesModal, Modal } from "@/components/modal";
+import { CLASE_CAMPO, Field } from "@/components/ui/field";
 import { TIPO_CONTACTO_LABEL, type Contacto, type TipoContacto } from "@/lib/types";
 
 const TIPOS: TipoContacto[] = [
@@ -61,67 +62,79 @@ export function ContactoForm({
   return (
     <Modal titulo={contacto ? "Editar contacto" : "Nuevo contacto"} onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-stone-700">Tipo</label>
-          <select
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value as TipoContacto)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          >
-            {TIPOS.map((t) => (
-              <option key={t} value={t}>
-                {TIPO_CONTACTO_LABEL[t]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-700">Nombre</label>
-          <input
-            required
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-700">Empresa</label>
-          <input
-            value={empresa}
-            onChange={(e) => setEmpresa(e.target.value)}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-stone-700">Teléfono</label>
+        <Field etiqueta="Tipo">
+          {(props) => (
+            <select
+              {...props}
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as TipoContacto)}
+              className={CLASE_CAMPO}
+            >
+              {TIPOS.map((t) => (
+                <option key={t} value={t}>
+                  {TIPO_CONTACTO_LABEL[t]}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
+        <Field etiqueta="Nombre">
+          {(props) => (
             <input
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              {...props}
+              required
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className={CLASE_CAMPO}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          )}
+        </Field>
+        <Field etiqueta="Empresa" opcional>
+          {(props) => (
+            <input {...props} value={empresa} onChange={(e) => setEmpresa(e.target.value)} className={CLASE_CAMPO} />
+          )}
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field etiqueta="Teléfono" opcional>
+            {(props) => (
+              <input
+                {...props}
+                type="tel"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                className={CLASE_CAMPO}
+              />
+            )}
+          </Field>
+          <Field etiqueta="Email" opcional>
+            {(props) => (
+              <input
+                {...props}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={CLASE_CAMPO}
+              />
+            )}
+          </Field>
+        </div>
+        <Field etiqueta="Notas" opcional>
+          {(props) => (
+            <textarea
+              {...props}
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+              rows={2}
+              className={`${CLASE_CAMPO} py-2`}
             />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-700">Notas</label>
-          <textarea
-            value={notas}
-            onChange={(e) => setNotas(e.target.value)}
-            rows={2}
-            className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-          />
-        </div>
+          )}
+        </Field>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm font-medium text-critico-borde">
+            {error}
+          </p>
+        )}
 
         <AccionesModal onCancelar={onClose} etiqueta="Guardar" guardando={guardando} />
       </form>

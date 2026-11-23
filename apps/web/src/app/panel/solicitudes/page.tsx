@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, Mail, Phone, UserCheck, XCircle } from "lucide-react";
 import { EncabezadoPagina } from "@/components/encabezado-pagina";
 import { Advertencia } from "@/components/estado/advertencia";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CLASE_CAMPO } from "@/components/ui/field";
 import { api, apiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { ROL_LABEL, type Rol, type Usuario } from "@/lib/types";
@@ -129,13 +132,9 @@ export default function SolicitudesAccesoPage() {
       />
 
       {avisoAccion && (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-2xl border border-[#00a859]/30 bg-[#E8F5EF] p-4 text-sm text-[#004b36]"
-        >
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#00a859]" aria-hidden />
-          <p className="font-medium">{avisoAccion}</p>
-        </div>
+        <Advertencia tipo="BIEN" titulo="Listo" rol="status">
+          {avisoAccion}
+        </Advertencia>
       )}
 
       {error && (
@@ -145,19 +144,17 @@ export default function SolicitudesAccesoPage() {
       )}
 
       {cargando ? (
-        <div className="rounded-2xl border border-[#E4EAE6] bg-white p-8 text-center text-sm text-[#68736D]">
-          Cargando solicitudes pendientes...
-        </div>
+        <p className="text-tinta-suave">Cargando solicitudes pendientes...</p>
       ) : solicitudes.length === 0 ? (
-        <div className="rounded-2xl border border-[#E4EAE6] bg-white p-8 text-center">
-          <UserCheck className="mx-auto h-9 w-9 text-[#00a859]" aria-hidden />
-          <h2 className="mt-3 text-base font-bold text-[#17211D]">
+        <Card className="p-8 text-center">
+          <UserCheck className="mx-auto h-9 w-9 text-marca" aria-hidden />
+          <h2 className="mt-3 text-base font-bold text-tinta">
             No hay solicitudes pendientes
           </h2>
-          <p className="mt-1 text-sm text-[#68736D]">
+          <p className="mt-1 text-sm text-tinta-suave">
             Cuando alguien del equipo envíe una solicitud desde la pantalla de ingreso, aparecerá aquí.
           </p>
-        </div>
+        </Card>
       ) : (
         <div className="space-y-4">
           {solicitudes.map((solicitante) => {
@@ -170,29 +167,29 @@ export default function SolicitudesAccesoPage() {
             });
 
             return (
-              <div
+              <Card
                 key={solicitante.id}
-                className="flex flex-col gap-4 rounded-2xl border border-[#E4EAE6] bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between"
+                className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="text-base font-bold text-[#17211D]">
+                    <h2 className="text-base font-bold text-tinta">
                       {solicitante.nombre} {solicitante.apellido ?? ""}
                     </h2>
-                    <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                    <span className="rounded-full border border-dotted border-pend-borde bg-pend-fondo px-2.5 py-0.5 text-xs font-semibold text-pend-texto">
                       Pendiente
                     </span>
-                    <span className="text-xs text-[#68736D]">Solicitado el {fecha}</span>
+                    <span className="text-xs text-tinta-suave">Solicitado el {fecha}</span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-[#68736D]">
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-tinta-suave">
                     <span className="inline-flex items-center gap-1.5">
-                      <Mail className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                      <Mail className="h-4 w-4 text-marca" aria-hidden />
                       {solicitante.email}
                     </span>
                     {solicitante.telefono && (
                       <span className="inline-flex items-center gap-1.5">
-                        <Phone className="h-4 w-4 text-[#006B4F]" aria-hidden />
+                        <Phone className="h-4 w-4 text-marca" aria-hidden />
                         {solicitante.telefono}
                       </span>
                     )}
@@ -200,10 +197,10 @@ export default function SolicitudesAccesoPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full items-center gap-2 sm:w-auto">
                     <label
                       htmlFor={`rol-${solicitante.id}`}
-                      className="text-xs font-semibold uppercase tracking-wide text-[#68736D]"
+                      className="text-xs font-semibold uppercase tracking-wide text-tinta-suave"
                     >
                       Rol asignado
                     </label>
@@ -217,7 +214,7 @@ export default function SolicitudesAccesoPage() {
                           [solicitante.id]: e.target.value as Rol,
                         }))
                       }
-                      className="min-h-10 rounded-xl border border-[#E4EAE6] bg-[#f8faf9] px-3 text-sm font-semibold text-[#17211D] focus:border-[#006B4F] focus:bg-white focus:outline-none"
+                      className={`${CLASE_CAMPO} flex-1 font-semibold sm:w-auto`}
                     >
                       {ROLES_DISPONIBLES.map((rol) => (
                         <option key={rol} value={rol}>
@@ -231,23 +228,17 @@ export default function SolicitudesAccesoPage() {
                     type="button"
                     disabled={enProceso}
                     onClick={() => rechazar(solicitante)}
-                    className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-critico-borde/40 bg-superficie px-4 text-base font-semibold text-critico-borde transition-colors hover:bg-critico-fondo disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <XCircle className="h-4 w-4" aria-hidden />
                     {enProceso && accionActiva === "rechazar" ? "Rechazando..." : "Rechazar"}
                   </button>
 
-                  <button
-                    type="button"
-                    disabled={enProceso}
-                    onClick={() => aprobar(solicitante)}
-                    className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#004b36] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#00a859] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <CheckCircle2 className="h-4 w-4" aria-hidden />
+                  <Button disabled={enProceso} onClick={() => aprobar(solicitante)} icono={CheckCircle2}>
                     {enProceso && accionActiva === "aprobar" ? "Aprobando..." : "Aprobar"}
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
