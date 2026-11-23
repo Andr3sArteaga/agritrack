@@ -25,7 +25,20 @@ Tailwind 4 genera las clases a partir del nombre: `--color-marca` → `bg-marca`
 | `salvia` | `#D6D5C9` | Fondo de secciones de la portada (tarjetas de módulos) | 12:1 con `tinta` |
 | `lima` | `#E6F35A` | Único acento de la portada: botón redondo principal, siempre con texto `tinta`. **Nunca para estados** (se confunde con Atención) | 15:1 con `tinta` |
 
-Títulos de la portada pública: clase `font-titulo` (Instrument Serif, cargada con `next/font/google`). El panel sigue solo con Inter.
+### Tipografías
+
+Dos fuentes, ambas cargadas con `next/font/google` (se sirven desde nuestro servidor):
+
+| Fuente | Clase | Dónde |
+|---|---|---|
+| **Instrument Serif** (fina, un solo grosor) | `font-titulo` | Títulos grandes de la parte pública (hero, secciones, cierre, números de pasos) y el nombre **AgriTrack** del logo (barra pública y barra lateral del panel) |
+| **Inter** | `font-sans` (por defecto) | Todo lo demás: botones, menús, formularios, tarjetas, textos, datos y el panel completo |
+
+Reglas:
+- Instrument Serif solo en tamaño grande (24 px o más), salvo el logo. Es muy fina y en tamaño chico se lee mal.
+- Nunca en botones, formularios ni datos: ahí va siempre Inter.
+- En el panel, la serifa aparece solo en el logo. El resto del panel es una herramienta de trabajo y va en Inter.
+- No agregar una tercera fuente.
 | `tinta` | `#17211D` | Texto principal | 16:1 |
 | `tinta-suave` | `#68736D` | Texto secundario | 4,9:1 sobre blanco, 4,5:1 sobre `fondo` |
 | `borde` | `#E4EAE6` | Bordes y divisores | — |
