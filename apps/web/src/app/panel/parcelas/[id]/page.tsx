@@ -26,6 +26,7 @@ import {
   EstimacionComponente,
   type PuntoHistoricoRendimiento,
 } from "@/components/estado/estimacion-componente";
+import { ActionMenu, type AccionMenu } from "@/components/ui/action-menu";
 import { ActivityItem } from "@/components/ui/activity-item";
 import { Button } from "@/components/ui/button";
 import { CropChip } from "@/components/ui/crop-chip";
@@ -77,10 +78,9 @@ const ESTADOS_CAMPANA: EstadoCampana[] = ["PLANIFICADA", "EN_CURSO", "COSECHADA"
 type PestanaParcela = "registro" | "estimacion";
 type ModalCategoria = "suelo" | "clima" | "manejo" | "observaciones" | null;
 
-function TarjetaCategoriaAmbiente({
+function BloqueAmbiente({
   titulo,
-  descripcion,
-  contador,
+  resumen,
   estado,
   icono: Icono,
   puedeEditar,
@@ -90,11 +90,8 @@ function TarjetaCategoriaAmbiente({
   onRegistrar,
   children,
 }: {
-  /** Contenido extra entre la descripcion y los botones (ej. barras de valores). */
-  children?: React.ReactNode;
   titulo: string;
-  descripcion: string;
-  contador: string;
+  resumen: string;
   estado: EstadoRegistroItem;
   icono: typeof TestTubes;
   puedeEditar: boolean;
@@ -102,44 +99,43 @@ function TarjetaCategoriaAmbiente({
   etiquetaRegistrar?: string;
   onConsultar: () => void;
   onRegistrar?: () => void;
+  children?: React.ReactNode;
 }) {
   const sinDatos = estado === "SIN_DATOS";
   return (
-    <article
-      className={`flex flex-col justify-between gap-4 rounded-tarjeta bg-white p-5 transition-colors ${
+    <div
+      className={`rounded-tarjeta p-3.5 transition-colors ${
         sinDatos
-          ? "border-2 border-dashed border-sindatos-borde"
-          : "border border-borde"
+          ? "border-2 border-dashed border-sindatos-borde bg-fondo-suave/50"
+          : "border border-borde bg-fondo-suave/60"
       }`}
     >
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-marca-suave text-marca">
-              <Icono className="h-5 w-5" aria-hidden />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-tinta">{titulo}</h3>
-              <p className="text-xs font-medium text-marca">{contador}</p>
-            </div>
+      <div className="flex items-start justify-between gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-marca-suave text-marca">
+            <Icono className="h-4 w-4" aria-hidden />
           </div>
-          <BadgeEstadoRegistro estado={estado} tamano="sm" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-bold text-tinta">{titulo}</h3>
+              <BadgeEstadoRegistro estado={estado} tamano="sm" />
+            </div>
+            <p className="mt-0.5 text-xs text-tinta-suave">{resumen}</p>
+          </div>
         </div>
-
-        <p className="text-sm leading-relaxed text-tinta-suave">{descripcion}</p>
-        {children}
       </div>
 
-      <div className="flex flex-wrap gap-2 border-t border-borde pt-3">
+      {children && <div className="mt-3 border-t border-borde/70 pt-3">{children}</div>}
+
+      <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={onConsultar}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-control border border-borde bg-fondo-suave px-3 text-sm font-semibold text-tinta hover:bg-marca-suave hover:text-marca"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-control border border-borde bg-white px-3 text-sm font-semibold text-tinta hover:bg-marca-suave hover:text-marca"
         >
           <Eye className="h-4 w-4 shrink-0" aria-hidden />
           {etiquetaConsultar}
         </button>
-
         {puedeEditar && onRegistrar && etiquetaRegistrar && (
           <button
             type="button"
@@ -151,7 +147,7 @@ function TarjetaCategoriaAmbiente({
           </button>
         )}
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -494,12 +490,33 @@ function ParcelaPrivadaDetalleContenido() {
   );
   const actividadesVigentesCount = actividades.filter((a) => a.vigente).length;
   const estadoProgresoPct = Math.round((evaluacion.completadas / 5) * 100);
+  const mostrarBarraMovilRegistro =
+    pestanaActiva === "registro" && puedeRegistrarActividad && Boolean(campanaSeleccionada);
+
+  const accionesJefe: AccionMenu[] = esJefe
+    ? [
+        ...(campanaSeleccionada
+          ? [{ etiqueta: "Nueva campaña", icono: Plus, onClick: () => setMostrarFormCampana(true) }]
+          : []),
+        { etiqueta: "Editar parcela", icono: Pencil, onClick: () => setModalEditarParcela(true) },
+        ...(campanaSeleccionada
+          ? [
+              {
+                etiqueta: "Eliminar campaña",
+                icono: Trash2,
+                peligro: true,
+                onClick: () => eliminarCampana(campanaSeleccionada),
+              },
+            ]
+          : []),
+      ]
+    : [];
 
   return (
-    <div className="text-tinta">
-      <div className="mx-auto max-w-6xl space-y-6">
-        {/* A. ENCABEZADO ÚNICO DE LA PARCELA (Toda la identidad va solo aquí) */}
-        <header className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6">
+    <div className={`text-tinta ${mostrarBarraMovilRegistro ? "pb-24 md:pb-0" : ""}`}>
+      <div className="mx-auto max-w-6xl space-y-5">
+        {/* A. ENCABEZADO COMPACTO ORIENTADO A LA ACCIÓN */}
+        <header className="rounded-tarjeta border border-borde bg-white p-4 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/panel/parcelas"
@@ -510,6 +527,29 @@ function ParcelaPrivadaDetalleContenido() {
             </Link>
 
             <div className="flex flex-wrap items-center gap-2">
+              {puedeRegistrarActividad && campanaSeleccionada ? (
+                <button
+                  type="button"
+                  onClick={() => setModalActividad({ corrigiendo: null })}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  Registrar actividad
+                </button>
+              ) : (
+                esJefe &&
+                !campanaSeleccionada && (
+                  <button
+                    type="button"
+                    onClick={() => setMostrarFormCampana(true)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden />
+                    Nueva campaña
+                  </button>
+                )
+              )}
+
               {parcela.poligono && (
                 <button
                   type="button"
@@ -520,32 +560,16 @@ function ParcelaPrivadaDetalleContenido() {
                   Ver mapa
                 </button>
               )}
-              {esJefe && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setModalEditarParcela(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-borde bg-white px-3.5 text-sm font-semibold text-tinta hover:bg-fondo-suave"
-                  >
-                    <Pencil className="h-4 w-4 text-marca" aria-hidden />
-                    Editar parcela
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMostrarFormCampana(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-3.5 text-sm font-semibold text-white hover:bg-marca-hover"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                    Nueva campaña
-                  </button>
-                </>
+
+              {esJefe && accionesJefe.length > 0 && (
+                <ActionMenu acciones={accionesJefe} etiqueta="Más acciones de la parcela" />
               )}
             </div>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <ParcelThumb poligono={parcela.poligono} tamano={48} />
-            <h1 className="text-[28px] font-semibold leading-tight text-tinta">
+            <h1 className="text-2xl font-semibold leading-tight text-tinta sm:text-[28px]">
               {parcela.nombre}
             </h1>
             {parcela.disponibleParaPreventa && (
@@ -573,107 +597,93 @@ function ParcelaPrivadaDetalleContenido() {
             )}
           </div>
 
-          {/* Grilla única de metadatos: nunca repetida en bloques inferiores */}
-          <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-borde pt-4 sm:grid-cols-3 lg:grid-cols-6">
-            <div>
-              <dt className="text-xs font-medium text-tinta-suave">Ubicación</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-tinta">
-                {parcela.ubicacionTexto || "Sin registrar"}
-              </dd>
+          {/* Franja compacta de metadatos y selector de campaña / etapa */}
+          <div className="mt-4 flex flex-col gap-3 border-t border-borde pt-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <span className="inline-flex items-center gap-1.5 text-tinta-suave">
+                <MapPin className="h-4 w-4 shrink-0 text-marca" aria-hidden />
+                <span className="font-semibold text-tinta">
+                  {parcela.ubicacionTexto || "Sin ubicación"}
+                </span>
+              </span>
+              <span className="font-semibold text-tinta">{parcela.hectareas} ha</span>
+              <CropChip
+                cultivo={campanaSeleccionada ? cultivoNombre(campanaSeleccionada.cultivoId) : null}
+              />
+              {registroActivo?.variedad?.trim() && (
+                <span className="text-tinta-suave">
+                  Variedad:{" "}
+                  <strong className="font-semibold text-tinta">
+                    {registroActivo.variedad.trim()}
+                  </strong>
+                </span>
+              )}
+              {registroActivo?.fechaSiembra && (
+                <span className="text-tinta-suave">
+                  Siembra:{" "}
+                  <strong className="font-semibold text-tinta">
+                    {formatearFecha(registroActivo.fechaSiembra)}
+                  </strong>
+                </span>
+              )}
             </div>
-            <div>
-              <dt className="text-xs font-medium text-tinta-suave">Superficie total</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-tinta">
-                {parcela.hectareas} ha
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-tinta-suave">Campaña activa</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-tinta">
-                {campanaSeleccionada ? (
-                  <div className="flex flex-col gap-1">
-                    {campanas.length > 1 ? (
+
+            <div className="flex flex-wrap items-center gap-2">
+              {campanaSeleccionada ? (
+                <>
+                  {campanas.length > 1 ? (
+                    <select
+                      aria-label="Seleccionar campaña de la parcela"
+                      value={campanaSeleccionada.id}
+                      onChange={(e) => setCampanaManualId(e.target.value)}
+                      className="min-h-11 rounded-control border border-borde bg-fondo-suave px-3 text-sm font-semibold text-tinta"
+                    >
+                      {campanas.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.temporada} ({ESTADO_CAMPANA_LABEL[c.estado]})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="inline-flex min-h-11 items-center rounded-control border border-borde bg-fondo-suave px-3 text-sm font-semibold text-tinta">
+                      {campanaSeleccionada.temporada}
+                    </span>
+                  )}
+
+                  {esJefe ? (
+                    <div className="flex items-center gap-2">
+                      <BadgeEstadoCampana estado={campanaSeleccionada.estado} />
                       <select
-                        aria-label="Seleccionar campaña de la parcela"
-                        value={campanaSeleccionada.id}
-                        onChange={(e) => setCampanaManualId(e.target.value)}
-                        className="min-h-11 rounded-control border border-borde bg-fondo-suave px-2 py-1 text-sm font-semibold text-tinta"
+                        aria-label="Cambiar etapa de la campaña"
+                        value={campanaSeleccionada.estado}
+                        onChange={(e) =>
+                          cambiarEstadoCampana(campanaSeleccionada, e.target.value as EstadoCampana)
+                        }
+                        className="min-h-11 rounded-control border border-borde bg-white px-2.5 text-sm font-medium text-tinta"
                       >
-                        {campanas.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.temporada} ({ESTADO_CAMPANA_LABEL[c.estado]})
+                        {ESTADOS_CAMPANA.map((estado) => (
+                          <option key={estado} value={estado}>
+                            Etapa: {ESTADO_CAMPANA_LABEL[estado]}
                           </option>
                         ))}
                       </select>
-                    ) : (
-                      <span>{campanaSeleccionada.temporada}</span>
-                    )}
-                  </div>
-                ) : (
-                  "Sin campaña"
-                )}
-              </dd>
+                    </div>
+                  ) : (
+                    <BadgeEstadoCampana estado={campanaSeleccionada.estado} />
+                  )}
+                </>
+              ) : (
+                <span className="text-sm font-medium text-tinta-suave">Sin campaña activa</span>
+              )}
             </div>
-            <div>
-              <dt className="text-xs font-medium text-tinta-suave">Cultivo actual</dt>
-              <dd className="mt-1">
-                <CropChip
-                  cultivo={campanaSeleccionada ? cultivoNombre(campanaSeleccionada.cultivoId) : null}
-                />
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-tinta-suave">Variedad / semilla</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-tinta">
-                {registroActivo?.variedad?.trim() || "Sin registrar"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-tinta-suave">Fecha de siembra</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-tinta">
-                {registroActivo?.fechaSiembra
-                  ? formatearFecha(registroActivo.fechaSiembra)
-                  : "Sin registrar"}
-              </dd>
-            </div>
-          </dl>
-
-          {/* Barra compacta de gestión de estado de campaña (solo JEFE) */}
-          {esJefe && campanaSeleccionada && (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-borde pt-3 text-xs">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium text-tinta-suave">Etapa de la campaña:</span>
-                <BadgeEstadoCampana estado={campanaSeleccionada.estado} />
-                <span className="text-tinta-suave">· Cambiar a:</span>
-                {ESTADOS_CAMPANA.map((estado) => (
-                  <button
-                    key={estado}
-                    type="button"
-                    disabled={estado === campanaSeleccionada.estado}
-                    onClick={() => cambiarEstadoCampana(campanaSeleccionada, estado)}
-                    className="min-h-11 rounded-control border border-borde bg-fondo-suave px-2.5 text-sm font-medium text-tinta hover:bg-marca-suave disabled:opacity-40"
-                  >
-                    {ESTADO_CAMPANA_LABEL[estado]}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => eliminarCampana(campanaSeleccionada)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-control px-2 text-sm font-medium text-critico-borde hover:bg-critico-fondo"
-              >
-                <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                Eliminar campaña
-              </button>
-            </div>
-          )}
+          </div>
         </header>
 
         {/* NAVEGACIÓN PRINCIPAL EN 2 PESTAÑAS */}
         <div
           role="tablist"
           aria-label="Vistas principales de la parcela"
-          className="grid grid-cols-1 gap-2 rounded-tarjeta border border-borde bg-white p-1.5 sm:grid-cols-2"
+          className="grid grid-cols-1 gap-2 rounded-tarjeta border border-borde bg-white p-1.5 shadow-tarjeta sm:grid-cols-2"
         >
           <button
             id="tab-registro"
@@ -689,7 +699,18 @@ function ParcelaPrivadaDetalleContenido() {
             }`}
           >
             <ClipboardList className="h-5 w-5 shrink-0" aria-hidden />
-            Registro
+            <span>Registro</span>
+            {campanaSeleccionada && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  pestanaActiva === "registro"
+                    ? "bg-white/20 text-white"
+                    : "bg-fondo-suave text-tinta-suave"
+                }`}
+              >
+                {actividadesVigentesCount}
+              </span>
+            )}
           </button>
 
           <button
@@ -718,295 +739,284 @@ function ParcelaPrivadaDetalleContenido() {
             aria-labelledby="tab-registro"
             className="space-y-6"
           >
-            {/* D. ESTADO DEL REGISTRO (Resumen superior de completitud) */}
+            {/* Barra compacta de avance del registro (detalle completo en modal) */}
             <section
               aria-labelledby="heading-estado-registro"
-              className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
+              className="flex flex-col gap-3 rounded-tarjeta border border-borde bg-white px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 id="heading-estado-registro" className="text-lg font-bold text-tinta">
-                    Estado del registro
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 id="heading-estado-registro" className="text-sm font-bold text-tinta">
+                    Registro de la parcela · {evaluacion.completadas} de 5 completas
                   </h2>
-                  <p className="mt-0.5 text-sm text-tinta-suave">
-                    {evaluacion.completadas} de 5 dimensiones completas para respaldo técnico y
-                    estimación de rendimiento.
-                  </p>
+                  <span className="text-xs font-semibold text-tinta-suave">
+                    {estadoProgresoPct}%
+                  </span>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setModalCompletitud(true)}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-marca/40 bg-marca-suave px-4 text-sm font-bold text-marca hover:bg-marca hover:text-white"
-                >
-                  <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
-                  Ver qué información falta registrar
-                  {evaluacion.totalFaltantes > 0 ? ` (${evaluacion.totalFaltantes})` : ""}
-                </button>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-fondo-suave ring-1 ring-borde">
+                  <div
+                    className="h-full rounded-full bg-marca transition-all duration-300"
+                    style={{ width: `${Math.max(6, estadoProgresoPct)}%` }}
+                  />
+                </div>
               </div>
 
-              <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-fondo-suave ring-1 ring-borde">
-                <div
-                  className="h-full rounded-full bg-marca transition-all duration-300"
-                  style={{ width: `${Math.max(6, estadoProgresoPct)}%` }}
-                />
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
-                {evaluacion.dimensiones.map((dim) => (
-                  <button
-                    key={dim.id}
-                    type="button"
-                    onClick={() => setModalCompletitud(true)}
-                    className={`flex flex-col justify-between rounded-tarjeta p-3 text-left transition-colors hover:border-marca/50 ${
-                      dim.estado === "SIN_DATOS"
-                        ? "border-2 border-dashed border-sindatos-borde bg-fondo-suave"
-                        : "border border-borde bg-white"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-xs font-bold text-tinta">{dim.nombre}</span>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <BadgeEstadoRegistro estado={dim.estado} tamano="sm" />
-                    </div>
-                    <p className="mt-1.5 text-xs text-tinta-suave">{dim.resumen}</p>
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => setModalCompletitud(true)}
+                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-control border border-marca/40 bg-marca-suave px-4 text-sm font-bold text-marca hover:bg-marca hover:text-white"
+              >
+                <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
+                {evaluacion.totalFaltantes > 0
+                  ? `Ver faltantes (${evaluacion.totalFaltantes})`
+                  : "Ver resumen"}
+              </button>
             </section>
 
-            {/* C. VARIABLES DEL CULTIVO Y AMBIENTE (4 Tarjetas de Categorías + Modales) */}
-            <section aria-labelledby="heading-variables-ambiente" className="space-y-3">
-              <div className="flex flex-wrap items-end justify-between gap-2">
-                <div>
-                  <h2 id="heading-variables-ambiente" className="text-lg font-bold text-tinta">
-                    Variables del cultivo y ambiente
-                  </h2>
-                  <p className="text-sm text-tinta-suave">
-                    Consulta el historial o carga nuevos registros por categoría.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <TarjetaCategoriaAmbiente
-                  titulo="Suelo"
-                  descripcion="Análisis de laboratorio y mediciones de campo: acidez (pH), materia orgánica, humedad y nutrientes N-P-K."
-                  contador={`${evaluacion.sueloConDato}/6 indicadores · ${suelo.length} análisis`}
-                  estado={evaluacion.estadoSuelo}
-                  icono={TestTubes}
-                  puedeEditar={puedeRegistrarActividad}
-                  etiquetaConsultar="Consultar historial"
-                  etiquetaRegistrar="Registrar suelo"
-                  onConsultar={() => setModalCategoria("suelo")}
-                  onRegistrar={() => setFormMonitoreo("suelo")}
-                >
-                  {/* Escala neutra: muestra el ultimo valor real, sin decir si es bueno o malo. */}
-                  <div className="space-y-4 pt-1">
-                    {(["ph", "humedad"] as const).map((campo) => {
-                      const ind = evaluacion.indicadoresSuelo.find((i) => i.campo === campo);
-                      return (
-                        <RangeBar
-                          key={campo}
-                          etiqueta={ind?.etiqueta ?? campo}
-                          valor={ind?.valor ?? null}
-                          min={0}
-                          max={campo === "ph" ? 14 : 100}
-                          unidad={campo === "ph" ? "" : "%"}
-                          fecha={ind?.fecha}
-                        />
-                      );
-                    })}
+            {/* Layout 2 columnas: Actividades primero (campo/móvil) + Ambiente y manejo lateral */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              {/* Columna principal: ACTIVIDADES AGRÍCOLAS */}
+              <section
+                aria-labelledby="heading-actividades"
+                className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6 lg:col-span-7"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2
+                      id="heading-actividades"
+                      className="flex items-center gap-2 text-lg font-bold text-tinta"
+                    >
+                      <CalendarRange className="h-5 w-5 text-marca" aria-hidden />
+                      Actividades agrícolas
+                    </h2>
+                    <p className="mt-0.5 text-sm text-tinta-suave">
+                      {campanaSeleccionada
+                        ? `${actividadesVigentesCount} ${
+                            actividadesVigentesCount === 1
+                              ? "labor vigente registrada"
+                              : "labores vigentes registradas"
+                          } en la campaña seleccionada.`
+                        : "Selecciona o crea una campaña para registrar labores de campo."}
+                    </p>
                   </div>
-                </TarjetaCategoriaAmbiente>
 
-                <TarjetaCategoriaAmbiente
-                  titulo="Clima"
-                  descripcion="Condición climática diaria, lluvias registradas en milímetros y alertas por helada, granizo o viento."
-                  contador={`${clima.length} ${
-                    clima.length === 1 ? "medición" : "mediciones"
-                  } · ${evaluacion.clima30d.length} en últimos 30 días`}
-                  estado={evaluacion.estadoClima}
-                  icono={CloudRain}
-                  puedeEditar={puedeRegistrarActividad}
-                  etiquetaConsultar="Consultar historial"
-                  etiquetaRegistrar="Registrar clima"
-                  onConsultar={() => setModalCategoria("clima")}
-                  onRegistrar={() => setFormMonitoreo("clima")}
-                />
+                  {puedeRegistrarActividad && campanaSeleccionada && (
+                    <button
+                      type="button"
+                      onClick={() => setModalActividad({ corrigiendo: null })}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Registrar actividad
+                    </button>
+                  )}
+                </div>
 
-                <TarjetaCategoriaAmbiente
-                  titulo="Manejo del cultivo"
-                  descripcion="Superficie sembrada, fecha de siembra y variedad (predictores del modelo IA), además de los datos de cosecha."
-                  contador={
-                    campanaSeleccionada
-                      ? `${evaluacion.manejoConDato}/3 variables pre-siembra listas`
-                      : "Sin campaña activa"
-                  }
-                  estado={evaluacion.estadoManejo}
-                  icono={Sprout}
-                  puedeEditar={puedeRegistrarActividad && !!campanaSeleccionada}
-                  etiquetaConsultar="Ver detalle"
-                  etiquetaRegistrar="Editar siembra"
-                  onConsultar={() => setModalCategoria("manejo")}
-                  onRegistrar={() =>
-                    campanaSeleccionada &&
-                    setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "siembra" })
-                  }
-                />
+                {!campanaSeleccionada ? (
+                  <div className="mt-5 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center">
+                    <p className="text-sm font-semibold text-tinta">
+                      No hay una campaña seleccionada todavía.
+                    </p>
+                    <p className="mt-1 text-xs text-tinta-suave">
+                      Crea una campaña agrícola para comenzar la bitácora de siembra, aplicaciones y
+                      cosecha.
+                    </p>
+                    {esJefe && (
+                      <button
+                        type="button"
+                        onClick={() => setMostrarFormCampana(true)}
+                        className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
+                      >
+                        <Plus className="h-4 w-4" aria-hidden />
+                        Crear primera campaña
+                      </button>
+                    )}
+                  </div>
+                ) : cargandoActividades ? (
+                  <p className="mt-4 text-sm text-tinta-suave">Cargando línea de tiempo...</p>
+                ) : actividadesOrdenadas.length === 0 ? (
+                  <div className="mt-5 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center">
+                    <p className="text-sm font-semibold text-tinta">
+                      Todavía no hay actividades agrícolas registradas en esta campaña.
+                    </p>
+                    <p className="mt-1 text-xs text-tinta-suave">
+                      Registra siembra, fertilización, fumigación, mediciones de humedad o cosecha
+                      para construir la trazabilidad.
+                    </p>
+                    {puedeRegistrarActividad && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setModalActividad({ corrigiendo: null, tipoInicial: "SIEMBRA" })
+                        }
+                        className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
+                      >
+                        <Plus className="h-4 w-4" aria-hidden />
+                        Registrar primera actividad
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-4 divide-y divide-borde">
+                    {actividadesOrdenadas.map((act) => (
+                      <ActivityItem
+                        key={act.id}
+                        tipo={act.tipo}
+                        fecha={act.fecha}
+                        descripcion={act.descripcion}
+                        secuencia={act.secuencia}
+                        reemplazada={!act.vigente}
+                        acciones={
+                          act.vigente && puedeRegistrarActividad ? (
+                            <Button
+                              variante="secundario"
+                              icono={Pencil}
+                              onClick={() => setModalActividad({ corrigiendo: act })}
+                              title="Registrar corrección sin borrar el historial"
+                            >
+                              Corregir
+                            </Button>
+                          ) : undefined
+                        }
+                        etiquetas={
+                          (act.tipo === "COSECHA" && act.rendimientoTnHa !== null) ||
+                          act.insumo ||
+                          act.cantidad !== null ||
+                          act.maquinariaUtilizada ||
+                          act.tercerizado ? (
+                            <>
+                              {act.tipo === "COSECHA" && act.rendimientoTnHa !== null && (
+                                <Tag tono="marca">{act.rendimientoTnHa} t/ha</Tag>
+                              )}
+                              {act.insumo && <Tag>Insumo: {act.insumo}</Tag>}
+                              {act.cantidad !== null && (
+                                <Tag>
+                                  Cantidad: {act.cantidad} {act.unidad ?? ""}
+                                </Tag>
+                              )}
+                              {act.maquinariaUtilizada && <Tag>Equipo: {act.maquinariaUtilizada}</Tag>}
+                              {act.tercerizado && <Tag>Servicio tercerizado</Tag>}
+                            </>
+                          ) : undefined
+                        }
+                        nota={
+                          act.correccionDeId
+                            ? `Corrige a #${
+                                actividades.find((x) => x.id === act.correccionDeId)?.secuencia ?? "?"
+                              }${act.motivoCorreccion ? `: ${act.motivoCorreccion}` : ""}`
+                            : undefined
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
 
-                <TarjetaCategoriaAmbiente
-                  titulo="Observaciones"
-                  descripcion="Notas técnicas consolidadas provenientes de análisis de suelo, registros de clima y bitácora de actividades."
-                  contador={`${evaluacion.observaciones.length} ${
-                    evaluacion.observaciones.length === 1
-                      ? "observación registrada"
-                      : "observaciones registradas"
-                  }`}
-                  estado={evaluacion.estadoObservaciones}
-                  icono={ClipboardList}
-                  puedeEditar={puedeRegistrarActividad}
-                  etiquetaConsultar="Ver observaciones"
-                  onConsultar={() => setModalCategoria("observaciones")}
-                />
-              </div>
-            </section>
-
-            {/* B. ACTIVIDADES AGRÍCOLAS (Línea de Tiempo Cronológica) */}
-            <section
-              aria-labelledby="heading-actividades"
-              className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2
-                    id="heading-actividades"
-                    className="flex items-center gap-2 text-lg font-bold text-tinta"
-                  >
-                    <CalendarRange className="h-5 w-5 text-marca" aria-hidden />
-                    Actividades agrícolas
+              {/* Columna lateral: AMBIENTE Y MANEJO */}
+              <section
+                aria-labelledby="heading-variables-ambiente"
+                className="rounded-tarjeta border border-borde bg-white p-5 lg:col-span-5"
+              >
+                <div className="mb-4">
+                  <h2 id="heading-variables-ambiente" className="text-lg font-bold text-tinta">
+                    Ambiente y manejo
                   </h2>
                   <p className="mt-0.5 text-sm text-tinta-suave">
-                    {campanaSeleccionada
-                      ? `${actividadesVigentesCount} ${
-                          actividadesVigentesCount === 1
-                            ? "labor vigente registrada"
-                            : "labores vigentes registradas"
-                        } en la campaña seleccionada.`
-                      : "Selecciona o crea una campaña para registrar labores de campo."}
+                    Estado resumido y acceso rápido por categoría.
                   </p>
                 </div>
 
-                {puedeRegistrarActividad && campanaSeleccionada && (
-                  <button
-                    type="button"
-                    onClick={() => setModalActividad({ corrigiendo: null })}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
+                <div className="space-y-3">
+                  <BloqueAmbiente
+                    titulo="Suelo"
+                    resumen={`${evaluacion.sueloConDato}/6 indicadores · ${suelo.length} análisis`}
+                    estado={evaluacion.estadoSuelo}
+                    icono={TestTubes}
+                    puedeEditar={puedeRegistrarActividad}
+                    etiquetaConsultar="Historial"
+                    etiquetaRegistrar="Registrar"
+                    onConsultar={() => setModalCategoria("suelo")}
+                    onRegistrar={() => setFormMonitoreo("suelo")}
                   >
-                    <Plus className="h-4 w-4" aria-hidden />
-                    Registrar actividad
-                  </button>
-                )}
-              </div>
+                    <div className="space-y-3">
+                      {(["ph", "humedad"] as const).map((campo) => {
+                        const ind = evaluacion.indicadoresSuelo.find((i) => i.campo === campo);
+                        return (
+                          <RangeBar
+                            key={campo}
+                            etiqueta={ind?.etiqueta ?? campo}
+                            valor={ind?.valor ?? null}
+                            min={0}
+                            max={campo === "ph" ? 14 : 100}
+                            unidad={campo === "ph" ? "" : "%"}
+                            fecha={ind?.fecha}
+                          />
+                        );
+                      })}
+                    </div>
+                  </BloqueAmbiente>
 
-              {!campanaSeleccionada ? (
-                <div className="mt-5 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center">
-                  <p className="text-sm font-semibold text-tinta">
-                    No hay una campaña seleccionada todavía.
-                  </p>
-                  <p className="mt-1 text-xs text-tinta-suave">
-                    Crea una campaña agrícola para comenzar la bitácora de siembra, aplicaciones y
-                    cosecha.
-                  </p>
-                  {esJefe && (
-                    <button
-                      type="button"
-                      onClick={() => setMostrarFormCampana(true)}
-                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
-                    >
-                      <Plus className="h-4 w-4" aria-hidden />
-                      Crear primera campaña
-                    </button>
-                  )}
+                  <BloqueAmbiente
+                    titulo="Clima"
+                    resumen={
+                      evaluacion.clima30d.length > 0
+                        ? `${evaluacion.clima30d.length} en últimos 30d · ${evaluacion.lluvia30dMm} mm lluvia`
+                        : `${clima.length} ${
+                            clima.length === 1 ? "registro histórico" : "registros históricos"
+                          }`
+                    }
+                    estado={evaluacion.estadoClima}
+                    icono={CloudRain}
+                    puedeEditar={puedeRegistrarActividad}
+                    etiquetaConsultar="Historial"
+                    etiquetaRegistrar="Registrar"
+                    onConsultar={() => setModalCategoria("clima")}
+                    onRegistrar={() => setFormMonitoreo("clima")}
+                  />
+
+                  <BloqueAmbiente
+                    titulo="Manejo del cultivo"
+                    resumen={
+                      campanaSeleccionada
+                        ? `${evaluacion.manejoConDato}/3 variables de siembra${
+                            registroActivo?.variedad?.trim()
+                              ? ` · ${registroActivo.variedad.trim()}`
+                              : ""
+                          }${
+                            registroActivo?.fechaSiembra
+                              ? ` · ${formatearFecha(registroActivo.fechaSiembra)}`
+                              : ""
+                          }`
+                        : "Sin campaña activa"
+                    }
+                    estado={evaluacion.estadoManejo}
+                    icono={Sprout}
+                    puedeEditar={puedeRegistrarActividad && !!campanaSeleccionada}
+                    etiquetaConsultar="Ver detalle"
+                    etiquetaRegistrar="Editar siembra"
+                    onConsultar={() => setModalCategoria("manejo")}
+                    onRegistrar={() =>
+                      campanaSeleccionada &&
+                      setModalRegistroCosecha({ campana: campanaSeleccionada, modo: "siembra" })
+                    }
+                  />
+
+                  <BloqueAmbiente
+                    titulo="Observaciones"
+                    resumen={`${evaluacion.observaciones.length} ${
+                      evaluacion.observaciones.length === 1
+                        ? "nota registrada"
+                        : "notas registradas"
+                    }`}
+                    estado={evaluacion.estadoObservaciones}
+                    icono={ClipboardList}
+                    puedeEditar={puedeRegistrarActividad}
+                    etiquetaConsultar="Ver notas"
+                    onConsultar={() => setModalCategoria("observaciones")}
+                  />
                 </div>
-              ) : cargandoActividades ? (
-                <p className="mt-4 text-sm text-tinta-suave">Cargando línea de tiempo...</p>
-              ) : actividadesOrdenadas.length === 0 ? (
-                <div className="mt-5 rounded-tarjeta border-2 border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center">
-                  <p className="text-sm font-semibold text-tinta">
-                    Todavía no hay actividades agrícolas registradas en esta campaña.
-                  </p>
-                  <p className="mt-1 text-xs text-tinta-suave">
-                    Registra siembra, fertilización, fumigación, mediciones de humedad o cosecha
-                    para construir la trazabilidad.
-                  </p>
-                  {puedeRegistrarActividad && (
-                    <button
-                      type="button"
-                      onClick={() => setModalActividad({ corrigiendo: null, tipoInicial: "SIEMBRA" })}
-                      className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-4 text-sm font-semibold text-white hover:bg-marca-hover"
-                    >
-                      <Plus className="h-4 w-4" aria-hidden />
-                      Registrar primera actividad
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="mt-4 divide-y divide-borde">
-                  {actividadesOrdenadas.map((act) => (
-                    <ActivityItem
-                      key={act.id}
-                      tipo={act.tipo}
-                      fecha={act.fecha}
-                      descripcion={act.descripcion}
-                      secuencia={act.secuencia}
-                      reemplazada={!act.vigente}
-                      acciones={
-                        act.vigente && puedeRegistrarActividad ? (
-                          <Button
-                            variante="secundario"
-                            icono={Pencil}
-                            onClick={() => setModalActividad({ corrigiendo: act })}
-                            title="Registrar corrección sin borrar el historial"
-                          >
-                            Corregir
-                          </Button>
-                        ) : undefined
-                      }
-                      etiquetas={
-                        (act.tipo === "COSECHA" && act.rendimientoTnHa !== null) ||
-                        act.insumo ||
-                        act.cantidad !== null ||
-                        act.maquinariaUtilizada ||
-                        act.tercerizado ? (
-                          <>
-                            {act.tipo === "COSECHA" && act.rendimientoTnHa !== null && (
-                              <Tag tono="marca">{act.rendimientoTnHa} t/ha</Tag>
-                            )}
-                            {act.insumo && <Tag>Insumo: {act.insumo}</Tag>}
-                            {act.cantidad !== null && (
-                              <Tag>
-                                Cantidad: {act.cantidad} {act.unidad ?? ""}
-                              </Tag>
-                            )}
-                            {act.maquinariaUtilizada && <Tag>Equipo: {act.maquinariaUtilizada}</Tag>}
-                            {act.tercerizado && <Tag>Servicio tercerizado</Tag>}
-                          </>
-                        ) : undefined
-                      }
-                      nota={
-                        act.correccionDeId
-                          ? `Corrige a #${
-                              actividades.find((x) => x.id === act.correccionDeId)?.secuencia ?? "?"
-                            }${act.motivoCorreccion ? `: ${act.motivoCorreccion}` : ""}`
-                          : undefined
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
+              </section>
+            </div>
 
             {/* E. FOTOS DE LA PARCELA (Gestión y visibilidad en preventa) */}
             <FotosParcelaSeccion
@@ -1014,6 +1024,20 @@ function ParcelaPrivadaDetalleContenido() {
               disponibleParaPreventa={parcela.disponibleParaPreventa}
               puedeEditar={puedeRegistrarActividad}
             />
+          </div>
+        )}
+
+        {/* Barra fija en celular para registrar labor con 1 toque */}
+        {mostrarBarraMovilRegistro && (
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-borde bg-white/95 px-4 py-3 backdrop-blur-xs md:hidden">
+            <button
+              type="button"
+              onClick={() => setModalActividad({ corrigiendo: null })}
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-control bg-marca px-4 text-base font-semibold text-white shadow-tarjeta hover:bg-marca-hover"
+            >
+              <Plus className="h-5 w-5" aria-hidden />
+              Registrar actividad
+            </button>
           </div>
         )}
 

@@ -5,14 +5,13 @@ import {
   BarChart3,
   CalendarClock,
   CheckCircle2,
-  ClipboardCheck,
+  ChevronDown,
   Equal,
   FlaskConical,
   History,
   Info,
   RefreshCw,
   SlidersHorizontal,
-  Sparkles,
   Sprout,
   TrendingDown,
   TrendingUp,
@@ -70,8 +69,8 @@ const ESTILO_ESCENARIO: Record<EfectoImpacto, EstiloEscenario> = {
     caja: "border-marca/40 bg-marca-suave text-tinta",
     pildora: "border-marca/40 bg-white text-marca",
     claseIcono: "text-marca",
-    etiquetaBadge: "+ Producción estimada mayor que la referencia (Escenario positivo)",
-    tituloCorto: "Aumenta respecto a la referencia",
+    etiquetaBadge: "Sobre la referencia",
+    tituloCorto: "Sobre la referencia",
     punteado: false,
   },
   NEUTRO: {
@@ -79,8 +78,8 @@ const ESTILO_ESCENARIO: Record<EfectoImpacto, EstiloEscenario> = {
     caja: "border-tinta-suave bg-fondo text-tinta",
     pildora: "border-tinta-suave bg-white text-tinta-suave",
     claseIcono: "text-tinta-suave",
-    etiquetaBadge: "= Producción estimada similar a la referencia (Escenario neutro)",
-    tituloCorto: "Se mantiene igual que la referencia",
+    etiquetaBadge: "Similar a la referencia",
+    tituloCorto: "Similar a la referencia",
     punteado: true,
   },
   NEGATIVO: {
@@ -88,8 +87,8 @@ const ESTILO_ESCENARIO: Record<EfectoImpacto, EstiloEscenario> = {
     caja: "border-atencion-borde/50 bg-atencion-fondo text-tinta",
     pildora: "border-atencion-borde/50 bg-white text-atencion-texto",
     claseIcono: "text-atencion-icono",
-    etiquetaBadge: "− Producción estimada menor que la referencia (Escenario negativo)",
-    tituloCorto: "Disminuye respecto a la referencia",
+    etiquetaBadge: "Bajo la referencia",
+    tituloCorto: "Bajo la referencia",
     punteado: false,
   },
 };
@@ -189,6 +188,7 @@ export function EstimacionComponente({
   const [error, setError] = useState<string | null>(null);
   const [recargaLocal, setRecargaLocal] = useState(0);
   const [entrenandoModelo, setEntrenandoModelo] = useState(false);
+  const [mostrarValidacionTecnica, setMostrarValidacionTecnica] = useState(false);
   const [avisoEntrenamiento, setAvisoEntrenamiento] = useState<{
     tipo: "ok" | "error";
     texto: string;
@@ -357,9 +357,6 @@ export function EstimacionComponente({
     0.1,
     ...factores.map((f) => Math.abs(f.delta_t_ha)),
   );
-
-  const factoresPositivos = factores.filter((f) => f.efecto === "POSITIVO");
-  const factoresNegativos = factores.filter((f) => f.efecto === "NEGATIVO");
   const porcentajeVsRef = formatoPorcentaje(estimadoPrincipal, referenciaPrincipal);
 
   // Recomendaciones accionables basadas en estado real del registro y modelo
@@ -416,122 +413,99 @@ export function EstimacionComponente({
         </div>
       )}
 
-      {/* A. RESULTADO PRINCIPAL */}
-      <section
-        aria-labelledby="res-principal-heading"
-        className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
-      >
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-marca">
-              Resultado del modelo predictivo
-            </p>
-            <h2 id="res-principal-heading" className="mt-0.5 text-xl font-bold text-tinta">
-              Estimación de rendimiento · Campaña {temporada}
-              {cultivoNombre ? ` (${cultivoNombre})` : ""}
-            </h2>
+      {avisoEntrenamiento &&
+        (avisoEntrenamiento.tipo === "error" ? (
+          <Advertencia tipo="ATENCION" titulo="No se pudo actualizar el modelo">
+            {avisoEntrenamiento.texto}
+          </Advertencia>
+        ) : (
+          <div className="flex items-start gap-2.5 rounded-tarjeta border border-marca/40 bg-marca-suave px-4 py-3 text-sm text-tinta">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-marca" aria-hidden />
+            <span>{avisoEntrenamiento.texto}</span>
           </div>
+        ))}
 
-          <div className="flex flex-wrap items-center gap-2">
-            {datos.etiqueta_datos && <EtiquetaDemo texto={datos.etiqueta_datos} />}
-            {esModeloOficial ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-marca/40 bg-marca-suave px-3 py-1 text-xs font-bold text-marca">
-                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                Modelo Oficial {bloqueModelo?.version_modelo ?? ""}
-              </span>
-            ) : esModeloExperimental ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300 bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-900">
-                <FlaskConical className="h-3.5 w-3.5" aria-hidden />
-                Modelo Experimental {bloqueModelo?.version_modelo ?? ""}
-              </span>
-            ) : (
-              <span className="rounded-full border border-borde bg-fondo-suave px-3 py-1 text-xs font-bold text-tinta-suave">
-                Línea base histórica
-              </span>
-            )}
-            {puedeEntrenar && cultivoId && (
-              <button
-                type="button"
-                disabled={entrenandoModelo}
-                onClick={actualizarModeloIa}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-borde bg-fondo-suave px-3 text-sm font-semibold text-tinta hover:bg-marca-suave disabled:opacity-60"
-              >
-                <RefreshCw
-                  className={`h-3.5 w-3.5 text-marca ${entrenandoModelo ? "animate-spin" : ""}`}
-                  aria-hidden
-                />
-                {entrenandoModelo ? "Actualizando..." : "Actualizar modelo IA"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {avisoEntrenamiento && (
-          <div className="mt-4">
-            {avisoEntrenamiento.tipo === "error" ? (
-              <Advertencia tipo="ATENCION" titulo="No se pudo actualizar el modelo">
-                {avisoEntrenamiento.texto}
-              </Advertencia>
-            ) : (
-              <div className="flex items-start gap-2.5 rounded-control border border-marca/40 bg-marca-suave px-3.5 py-2.5 text-sm text-tinta">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-marca" aria-hidden />
-                <span>{avisoEntrenamiento.texto}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {/* Métrica hero t/ha y t totales */}
-          <div className="rounded-tarjeta border border-borde bg-fondo-suave p-5">
-            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-tinta-suave">
-              <Sprout className="h-4 w-4 text-marca" aria-hidden />
-              Rendimiento estimado
-            </p>
-            <div className="mt-2">
-              {estimadoPrincipal !== null ? (
-                <p className="text-4xl font-extrabold tracking-tight text-tinta">
-                  {estimadoPrincipal.toFixed(2)}{" "}
-                  <span className="text-lg font-bold text-tinta-suave">t/ha</span>
+      {/* BLOQUE 1: HERO ESTIMACIÓN + EVOLUCIÓN HISTÓRICA */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Hero (5 cols) */}
+        <section
+          aria-labelledby="res-principal-heading"
+          className="flex flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 sm:p-6 lg:col-span-5"
+        >
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-marca">
+                  Estimación · {temporada}
+                  {cultivoNombre ? ` (${cultivoNombre})` : ""}
                 </p>
+                <h2 id="res-principal-heading" className="sr-only">
+                  Estimación de rendimiento · Campaña {temporada}
+                </h2>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5">
+                {datos.etiqueta_datos && <EtiquetaDemo texto={datos.etiqueta_datos} />}
+                {esModeloOficial ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-marca/40 bg-marca-suave px-2.5 py-0.5 text-xs font-bold text-marca">
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                    Modelo Oficial {bloqueModelo?.version_modelo ?? ""}
+                  </span>
+                ) : esModeloExperimental ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300 bg-indigo-50 px-2.5 py-0.5 text-xs font-bold text-indigo-900">
+                    <FlaskConical className="h-3.5 w-3.5" aria-hidden />
+                    Experimental {bloqueModelo?.version_modelo ?? ""}
+                  </span>
+                ) : (
+                  <span className="rounded-full border border-borde bg-fondo-suave px-2.5 py-0.5 text-xs font-bold text-tinta-suave">
+                    Línea base histórica
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-tinta-suave">
+                <Sprout className="h-4 w-4 text-marca" aria-hidden />
+                Rendimiento esperado
+              </p>
+              {estimadoPrincipal !== null ? (
+                <div className="mt-1">
+                  <p className="text-4xl font-extrabold tracking-tight text-tinta">
+                    {estimadoPrincipal.toFixed(2)}{" "}
+                    <span className="text-lg font-bold text-tinta-suave">t/ha</span>
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-marca">
+                    {produccionTotalTn !== null
+                      ? `${produccionTotalTn.toFixed(1)} toneladas totales`
+                      : "Pendiente superficie sembrada"}
+                  </p>
+                </div>
               ) : (
-                <div className="py-1">
+                <div className="mt-2">
                   <EstadoBadge estado="SIN_DATOS" tamano="lg" />
                 </div>
               )}
             </div>
-            <div className="mt-4 border-t border-borde pt-3">
-              <p className="text-xs font-semibold text-tinta-suave">Producción total estimada</p>
-              <p className="mt-0.5 text-lg font-bold text-marca">
-                {produccionTotalTn !== null
-                  ? `${produccionTotalTn.toFixed(2)} toneladas`
-                  : "Pendiente superficie sembrada"}
-              </p>
-            </div>
-          </div>
 
-          {/* Escenario de impacto */}
-          <div
-            className={`flex flex-col justify-between rounded-tarjeta border p-5 ${estilo.caja} ${
-              estilo.punteado ? "border-dashed" : ""
-            }`}
-          >
-            <div>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${estilo.pildora}`}
-              >
-                <Zap className={`h-3.5 w-3.5 shrink-0 ${estilo.claseIcono}`} aria-hidden />
-                {estilo.etiquetaBadge}
-              </span>
-              <div className="mt-3 flex items-center gap-2.5">
-                <IconoEscenario className={`h-7 w-7 shrink-0 ${estilo.claseIcono}`} aria-hidden />
-                <div>
-                  <p className="text-2xl font-extrabold text-tinta">
-                    {diferenciaPrincipal !== null
-                      ? `${formatoDelta(diferenciaPrincipal)} (${porcentajeVsRef})`
-                      : estilo.tituloCorto}
-                  </p>
-                </div>
+            <div
+              className={`rounded-tarjeta border p-3.5 ${estilo.caja} ${
+                estilo.punteado ? "border-dashed" : ""
+              }`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ${estilo.pildora}`}
+                >
+                  <Zap className={`h-3.5 w-3.5 shrink-0 ${estilo.claseIcono}`} aria-hidden />
+                  {estilo.etiquetaBadge}
+                </span>
+                <span className="inline-flex items-center gap-1 text-sm font-extrabold text-tinta">
+                  <IconoEscenario className={`h-4 w-4 ${estilo.claseIcono}`} aria-hidden />
+                  {diferenciaPrincipal !== null
+                    ? `${formatoDelta(diferenciaPrincipal)} (${porcentajeVsRef})`
+                    : estilo.tituloCorto}
+                </span>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-tinta/85">
                 {impacto?.resumen ??
@@ -539,642 +513,557 @@ export function EstimacionComponente({
               </p>
             </div>
 
-            {onEditarVariablesSiembra && (
-              <div className="mt-4">
+            <dl className="grid grid-cols-2 gap-3 border-t border-borde pt-3 text-sm">
+              <div>
+                <dt className="text-xs text-tinta-suave">Referencia</dt>
+                <dd className="mt-0.5 font-semibold text-tinta">
+                  {referenciaPrincipal !== null ? `${referenciaPrincipal.toFixed(2)} t/ha` : "Sin datos"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-tinta-suave">Entrenamiento</dt>
+                <dd className="mt-0.5 font-semibold text-tinta">
+                  {bloqueModelo
+                    ? `${bloqueModelo.campañas_usadas} campañas`
+                    : `${oficial.campañas_usadas} campañas`}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          {(onEditarVariablesSiembra || (puedeEntrenar && cultivoId)) && (
+            <div className="mt-5 flex flex-wrap gap-2 border-t border-borde pt-4">
+              {onEditarVariablesSiembra && (
                 <button
                   type="button"
                   onClick={onEditarVariablesSiembra}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-marca px-3.5 text-sm font-semibold text-white hover:bg-marca-hover"
+                  className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-control bg-marca px-3.5 text-sm font-semibold text-white hover:bg-marca-hover"
                 >
-                  <SlidersHorizontal className="h-4 w-4" aria-hidden />
-                  Simular o ajustar variables de siembra
+                  <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
+                  Ajustar variables de siembra
                 </button>
+              )}
+              {puedeEntrenar && cultivoId && (
+                <button
+                  type="button"
+                  disabled={entrenandoModelo}
+                  onClick={actualizarModeloIa}
+                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-control border border-borde bg-fondo-suave px-3 text-sm font-semibold text-tinta hover:bg-marca-suave disabled:opacity-60"
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 text-marca ${entrenandoModelo ? "animate-spin" : ""}`}
+                    aria-hidden
+                  />
+                  {entrenandoModelo ? "Actualizando..." : "Actualizar modelo IA"}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Evolución histórica (7 cols) */}
+        <section
+          aria-labelledby="evolucion-heading"
+          className="flex flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 sm:p-6 lg:col-span-7"
+        >
+          <div>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h3
+                  id="evolucion-heading"
+                  className="flex items-center gap-2 text-lg font-bold text-tinta"
+                >
+                  <History className="h-5 w-5 text-marca" aria-hidden />
+                  Evolución histórica del rendimiento
+                </h3>
+                <p className="mt-0.5 text-xs text-tinta-suave">
+                  Comparación de cosechas reales frente a la estimación actual de la campaña.
+                </p>
+              </div>
+            </div>
+
+            {puntosGrafico.length > 0 ? (
+              <>
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-tinta-suave">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className="h-3 w-3 rounded-sm"
+                      style={{ backgroundColor: "#78a88a" }}
+                      aria-hidden
+                    />
+                    Cosecha real registrada
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className="h-3 w-3 rounded-sm border border-dashed border-atencion-icono bg-atencion-icono"
+                      aria-hidden
+                    />
+                    Estimación actual
+                  </span>
+                  {referenciaPrincipal !== null && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span
+                        className="h-0.5 w-4 border-t-2 border-dashed border-tinta-suave"
+                        aria-hidden
+                      />
+                      Referencia ({referenciaPrincipal.toFixed(2)} t/ha)
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-3 h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%" minHeight={240}>
+                    <BarChart
+                      data={puntosGrafico}
+                      margin={{ top: 12, right: 16, left: 0, bottom: 16 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-borde)" vertical={false} />
+                      <XAxis
+                        dataKey="etiqueta"
+                        tick={{ fontSize: 12, fill: "var(--color-tinta)" }}
+                        interval={0}
+                        angle={puntosGrafico.length > 4 ? -15 : 0}
+                        textAnchor={puntosGrafico.length > 4 ? "end" : "middle"}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: "var(--color-tinta-suave)" }}
+                        unit=" t/ha"
+                        width={68}
+                      />
+                      <Tooltip
+                        formatter={(value) => [`${Number(value).toFixed(2)} t/ha`, "Rendimiento"]}
+                        contentStyle={{
+                          borderRadius: "10px",
+                          border: "1px solid var(--color-borde)",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Legend wrapperStyle={{ display: "none" }} />
+                      {referenciaPrincipal !== null && (
+                        <ReferenceLine
+                          y={referenciaPrincipal}
+                          stroke="var(--color-tinta-suave)"
+                          strokeDasharray="4 4"
+                        />
+                      )}
+                      <Bar dataKey="valor" radius={[6, 6, 0, 0]} maxBarSize={52}>
+                        {puntosGrafico.map((entry) => (
+                          <Cell
+                            key={entry.etiqueta}
+                            fill={
+                              entry.tipo === "estimacion"
+                                ? "var(--color-atencion-icono)"
+                                : "#78a88a"
+                            }
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            ) : (
+              <div className="mt-4 rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center text-sm text-tinta-suave">
+                Todavía no hay cosechas reales previas ni estimación disponible para graficar la serie
+                histórica.
               </div>
             )}
           </div>
 
-          {/* Metadatos del cálculo */}
-          <div className="flex flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 text-sm">
-            <div className="space-y-3">
-              <div className="flex items-start justify-between gap-2 border-b border-borde pb-2">
-                <span className="text-tinta-suave">Campaña evaluada</span>
-                <span className="text-right font-semibold text-tinta">
-                  {temporada}
-                  {cultivoNombre ? ` · ${cultivoNombre}` : ""}
-                </span>
-              </div>
-              <div className="flex items-start justify-between gap-2 border-b border-borde pb-2">
-                <span className="text-tinta-suave">Fecha de estimación</span>
-                <span className="inline-flex items-center gap-1 text-right font-semibold text-tinta">
-                  <CalendarClock className="h-3.5 w-3.5 text-marca" aria-hidden />
-                  {fechaConsultaIso ? formatearFechaHora(fechaConsultaIso) : "Actual"}
-                </span>
-              </div>
-              <div className="flex items-start justify-between gap-2 border-b border-borde pb-2">
-                <span className="text-tinta-suave">Base de entrenamiento</span>
-                <span className="text-right font-semibold text-tinta">
-                  {bloqueModelo
-                    ? `${bloqueModelo.campañas_usadas} campañas históricas`
-                    : `${oficial.campañas_usadas} campañas`}
-                </span>
-              </div>
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-tinta-suave">Referencia comparativa</span>
-                <span className="text-right font-semibold text-tinta">
-                  {referenciaPrincipal !== null ? `${referenciaPrincipal.toFixed(2)} t/ha` : "Sin datos"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* METRICAS DE DESEMPENO RANDOM FOREST (MAE, RMSE Y R2) */}
-      {bloqueModelo && (
-        <section
-          aria-labelledby="metricas-rf-heading"
-          className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h3
-                id="metricas-rf-heading"
-                className="flex items-center gap-2 text-lg font-bold text-tinta"
-              >
-                <BarChart3 className="h-5 w-5 text-marca" aria-hidden />
-                Métricas de desempeño del modelo Random Forest (MAE, RMSE y R²)
-              </h3>
-              <p className="mt-0.5 text-sm text-tinta-suave">
-                Evaluación estadística fuera de muestra frente al promedio histórico por cultivo
-                (línea base) mediante validación temporal <em>walk-forward</em>.
+          <div className="mt-4 grid grid-cols-1 gap-3 border-t border-borde pt-4 sm:grid-cols-2">
+            <div className="rounded-control bg-fondo-suave px-3.5 py-2.5">
+              <p className="text-xs text-tinta-suave">
+                {ultimaCampanaReal
+                  ? `Última cosecha (${ultimaCampanaReal.temporada})`
+                  : "Última cosecha"}
               </p>
+              <div className="mt-0.5 flex flex-wrap items-baseline justify-between gap-2">
+                <span className="text-base font-bold text-tinta">
+                  {ultimaCampanaReal
+                    ? `${ultimaCampanaReal.rendimientoTnHa.toFixed(2)} t/ha`
+                    : "Sin cosecha previa"}
+                </span>
+                {ultimaCampanaReal && estimadoPrincipal !== null && (
+                  <span className="text-xs font-semibold text-tinta-suave">
+                    {formatoDelta(
+                      Math.round((estimadoPrincipal - ultimaCampanaReal.rendimientoTnHa) * 100) /
+                        100,
+                    )}{" "}
+                    ({formatoPorcentaje(estimadoPrincipal, ultimaCampanaReal.rendimientoTnHa)})
+                  </span>
+                )}
+              </div>
             </div>
 
-            {metricasEval ? (
-              metricasEval.superaLineaBase ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-marca/40 bg-marca-suave px-3 py-1 text-xs font-bold text-marca">
-                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                  Supera en MAE al promedio histórico
+            <div className="rounded-control bg-fondo-suave px-3.5 py-2.5">
+              <p className="text-xs text-tinta-suave">
+                {impacto?.fuenteReferencia === "mediana_modelo"
+                  ? "Referencia histórica (mediana)"
+                  : "Referencia histórica (línea base)"}
+              </p>
+              <div className="mt-0.5 flex flex-wrap items-baseline justify-between gap-2">
+                <span className="text-base font-bold text-tinta">
+                  {referenciaPrincipal !== null
+                    ? `${referenciaPrincipal.toFixed(2)} t/ha`
+                    : "Sin referencia"}
                 </span>
-              ) : metricasEval.maeModelo < metricasEval.maeLineaBase ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-sindatos-borde bg-fondo px-3 py-1 text-xs font-bold text-tinta">
-                  <Equal className="h-3.5 w-3.5 text-tinta-suave" aria-hidden />
-                  Menor MAE puntual (IC no concluyente)
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-atencion-borde/50 bg-atencion-fondo px-3 py-1 text-xs font-bold text-atencion-texto">
-                  <Info className="h-3.5 w-3.5 text-atencion-icono" aria-hidden />
-                  No supera aún al promedio histórico en MAE
-                </span>
-              )
-            ) : null}
+                {referenciaPrincipal !== null && estimadoPrincipal !== null && (
+                  <span className="text-xs font-semibold text-tinta-suave">
+                    {formatoDelta(diferenciaPrincipal)} ({porcentajeVsRef})
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-
-          {metricasEval ? (
-            <>
-              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-                {/* Tarjeta 1: MAE */}
-                <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
-                      MAE · Error Absoluto Medio
-                    </span>
-                    <span className="rounded-control border border-borde bg-white px-2 py-0.5 text-xs font-bold text-marca">
-                      Criterio principal
-                    </span>
-                  </div>
-                  <p className="mt-2 text-2xl font-extrabold text-tinta">
-                    {metricasEval.maeModelo.toFixed(3)}{" "}
-                    <span className="text-sm font-semibold text-tinta-suave">t/ha</span>
-                  </p>
-                  <div className="mt-2 space-y-1 border-t border-borde pt-2 text-xs text-tinta-suave">
-                    <p className="flex items-center justify-between gap-2">
-                      <span>Promedio histórico (Línea base):</span>
-                      <strong className="text-tinta">
-                        {metricasEval.maeLineaBase.toFixed(3)} t/ha
-                      </strong>
-                    </p>
-                    <p className="flex items-center justify-between gap-2">
-                      <span>Diferencia (Modelo − Base):</span>
-                      <strong
-                        className={
-                          metricasEval.diferenciaMae < 0 ? "text-marca" : "text-atencion-texto"
-                        }
-                      >
-                        {metricasEval.diferenciaMae > 0 ? "+" : ""}
-                        {metricasEval.diferenciaMae.toFixed(3)} t/ha
-                        {reduccionMaePct !== null && reduccionMaePct > 0
-                          ? ` (−${reduccionMaePct}%)`
-                          : ""}
-                      </strong>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tarjeta 2: RMSE */}
-                <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
-                      RMSE · Raíz Error Cuadrático
-                    </span>
-                  </div>
-                  <p className="mt-2 text-2xl font-extrabold text-tinta">
-                    {metricasEval.rmseModelo.toFixed(3)}{" "}
-                    <span className="text-sm font-semibold text-tinta-suave">t/ha</span>
-                  </p>
-                  <div className="mt-2 space-y-1 border-t border-borde pt-2 text-xs text-tinta-suave">
-                    <p className="flex items-center justify-between gap-2">
-                      <span>Promedio histórico (Línea base):</span>
-                      <strong className="text-tinta">
-                        {metricasEval.rmseLineaBase.toFixed(3)} t/ha
-                      </strong>
-                    </p>
-                    <p className="text-xs leading-snug text-tinta-suave">
-                      Penaliza con mayor peso las desviaciones grandes en t/ha.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tarjeta 3: R² */}
-                <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
-                      R² · Coeficiente de Determinación
-                    </span>
-                  </div>
-                  <p className="mt-2 text-2xl font-extrabold text-tinta">
-                    {metricasEval.r2Modelo !== null
-                      ? metricasEval.r2Modelo.toFixed(3)
-                      : "Sin varianza"}
-                  </p>
-                  <div className="mt-2 space-y-1 border-t border-borde pt-2 text-xs text-tinta-suave">
-                    {metricasEval.r2Modelo !== null ? (
-                      metricasEval.r2Modelo >= 0 ? (
-                        <p>
-                          Varianza explicada en validación:{" "}
-                          <strong className="text-marca">
-                            {(metricasEval.r2Modelo * 100).toFixed(1)} %
-                          </strong>
-                        </p>
-                      ) : (
-                        <p>
-                          Ajuste inferior a la media global en los cortes históricos evaluados.
-                        </p>
-                      )
-                    ) : (
-                      <p>Se requieren al menos 2 observaciones con variación para calcular R².</p>
-                    )}
-                    <p className="text-xs leading-snug text-tinta-suave">
-                      Valores cercanos a 1.000 indican mayor capacidad explicativa.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 rounded-tarjeta border border-borde bg-fondo-suave px-4 py-3 text-xs text-tinta-suave">
-                <strong className="text-tinta">Detalle de validación:</strong>{" "}
-                validación temporal <em>walk-forward</em> sin fuga de datos en{" "}
-                <strong className="text-tinta">{metricasEval.cortesEvaluados}</strong>{" "}
-                {metricasEval.cortesEvaluados === 1 ? "corte" : "cortes"} (
-                <strong className="text-tinta">{metricasEval.filasEvaluadas}</strong>{" "}
-                {metricasEval.filasEvaluadas === 1 ? "registro de lote" : "registros de lote"}) ·
-                Intervalo de confianza Bootstrap 95 % para ΔMAE:{" "}
-                <strong className="text-tinta">
-                  [{metricasEval.icDiferenciaMae[0].toFixed(3)},{" "}
-                  {metricasEval.icDiferenciaMae[1].toFixed(3)}] t/ha
-                </strong>{" "}
-                (el modelo supera significativamente al promedio histórico cuando el límite superior
-                es menor que 0).
-              </div>
-            </>
-          ) : (
-            <div className="mt-4 rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-4 text-sm text-tinta-suave">
-              Esta versión del modelo no tiene métricas de validación actualizadas guardadas.
-              {puedeEntrenar && cultivoId
-                ? " Usa el botón “Actualizar modelo IA” arriba para recalcular MAE, RMSE y R²."
-                : ""}
-            </div>
-          )}
         </section>
-      )}
+      </div>
 
-      {/* B. FACTORES DE INFLUENCIA CON BARRAS VISUALES */}
+      {/* BLOQUE 2: QUÉ EXPLICA ESTA ESTIMACIÓN (UNIFICADO) */}
       <section
         aria-labelledby="factores-heading"
         className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
       >
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h3 id="factores-heading" className="text-lg font-bold text-tinta">
-              ¿Qué factores influyeron en esta estimación?
-            </h3>
-            <p className="mt-0.5 text-sm text-tinta-suave">
-              Efecto individual calculado por el modelo Random Forest al variar cada predictor de
-              manejo respecto a su valor de referencia.
-            </p>
-          </div>
-        </div>
-
-        {factores.length > 0 ? (
-          <div className="mt-4 space-y-3">
-            {factores.map((factor) => {
-              const chip = CHIP_FACTOR[factor.efecto];
-              const IconoChip = chip.icono;
-              const anchoBarra =
-                factor.delta_t_ha === 0
-                  ? 8
-                  : Math.min(100, Math.max(14, (Math.abs(factor.delta_t_ha) / maxAbsDelta) * 100));
-              return (
-                <div
-                  key={factor.variable}
-                  className="rounded-tarjeta border border-borde bg-fondo-suave p-4"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-bold text-tinta">{factor.etiqueta}</span>
-                      <span className="rounded-control border border-borde bg-white px-2 py-0.5 text-xs font-semibold text-marca">
-                        {factor.valorIngresado}
-                      </span>
-                    </div>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${
-                        chip.clase
-                      } ${chip.punteado ? "border-dashed" : ""}`}
-                    >
-                      <IconoChip className={`h-3.5 w-3.5 ${chip.iconoClase}`} aria-hidden />
-                      {chip.texto} ({formatoDelta(factor.delta_t_ha)})
-                    </span>
-                  </div>
-
-                  {/* Barra proporcional del delta real */}
-                  <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-white ring-1 ring-borde">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${chip.barra}`}
-                      style={{ width: `${anchoBarra}%` }}
-                    />
-                  </div>
-
-                  <p className="mt-2 text-xs leading-relaxed text-tinta-suave">{factor.detalle}</p>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-4 rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-4 text-sm text-tinta-suave">
-            Registra superficie sembrada, fecha de siembra y variedad en la pestaña{" "}
-            <strong>Registro</strong> para cuantificar el aporte de cada variable en la estimación.
-          </div>
-        )}
-
-        {/* Contexto agronómico real complementario (sin alterar el modelo pre-siembra) */}
-        {evaluacionRegistro && (
-          <div className="mt-4 grid grid-cols-1 gap-3 border-t border-borde pt-4 sm:grid-cols-2">
-            <div className="rounded-tarjeta border border-borde bg-white p-3.5 text-xs">
-              <p className="font-bold text-tinta">
-                Contexto de suelo ({evaluacionRegistro.sueloConDato}/6 indicadores cargados)
-              </p>
-              <p className="mt-1 text-tinta-suave">
-                Registro agronómico complementario de campo; el modelo Random Forest pre-siembra
-                no incorpora aún variables químicas de suelo en el cálculo numérico.
-              </p>
-            </div>
-            <div className="rounded-tarjeta border border-borde bg-white p-3.5 text-xs">
-              <p className="font-bold text-tinta">
-                Contexto climático ({evaluacionRegistro.clima30d.length} registros en 30d ·{" "}
-                {evaluacionRegistro.lluvia30dMm} mm lluvia)
-              </p>
-              <p className="mt-1 text-tinta-suave">
-                Monitoreo ambiental de seguimiento en campo; sirve para contrastar riesgos climáticos
-                (helada/granizo/déficit hídrico) frente a la estimación estadística.
-              </p>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* C y D: EVOLUCIÓN HISTÓRICA + COMPARACIÓN DE CAMPAÑAS */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* C. EVOLUCIÓN HISTÓRICA */}
-        <section
-          aria-labelledby="evolucion-heading"
-          className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6 lg:col-span-7"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <h3
-                id="evolucion-heading"
-                className="flex items-center gap-2 text-lg font-bold text-tinta"
-              >
-                <History className="h-5 w-5 text-marca" aria-hidden />
-                Evolución histórica del rendimiento
-              </h3>
-              <p className="mt-0.5 text-xs text-tinta-suave">
-                Se distinguen las cosechas reales registradas (verde sólido) frente a la estimación
-                actual de la campaña (ámbar).
-              </p>
-            </div>
-          </div>
-
-          {puntosGrafico.length > 0 ? (
-            <>
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-tinta-suave">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-3 w-3 rounded-sm bg-marca" aria-hidden />
-                  Cosecha real registrada
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-3 w-3 rounded-sm border border-dashed border-atencion-icono bg-atencion-icono" aria-hidden />
-                  Estimación predictiva actual
-                </span>
-                {referenciaPrincipal !== null && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="h-0.5 w-4 border-t-2 border-dashed border-tinta-suave" aria-hidden />
-                    Ref. histórica ({referenciaPrincipal.toFixed(2)} t/ha)
-                  </span>
-                )}
-              </div>
-
-              <div className="mt-3 h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%" minHeight={240}>
-                  <BarChart
-                    data={puntosGrafico}
-                    margin={{ top: 12, right: 16, left: 0, bottom: 16 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-borde)" vertical={false} />
-                    <XAxis
-                      dataKey="etiqueta"
-                      tick={{ fontSize: 12, fill: "var(--color-tinta)" }}
-                      interval={0}
-                      angle={puntosGrafico.length > 4 ? -15 : 0}
-                      textAnchor={puntosGrafico.length > 4 ? "end" : "middle"}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12, fill: "var(--color-tinta-suave)" }}
-                      unit=" t/ha"
-                      width={68}
-                    />
-                    <Tooltip
-                      formatter={(value) => [`${Number(value).toFixed(2)} t/ha`, "Rendimiento"]}
-                      contentStyle={{
-                        borderRadius: "10px",
-                        border: "1px solid var(--color-borde)",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Legend wrapperStyle={{ display: "none" }} />
-                    {referenciaPrincipal !== null && (
-                      <ReferenceLine
-                        y={referenciaPrincipal}
-                        stroke="var(--color-tinta-suave)"
-                        strokeDasharray="4 4"
-                      />
-                    )}
-                    <Bar dataKey="valor" radius={[6, 6, 0, 0]} maxBarSize={52}>
-                      {puntosGrafico.map((entry) => (
-                        <Cell
-                          key={entry.etiqueta}
-                          fill={entry.tipo === "estimacion" ? "var(--color-atencion-icono)" : "var(--color-marca)"}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </>
-          ) : (
-            <div className="mt-4 rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-6 text-center text-sm text-tinta-suave">
-              Todavía no hay cosechas reales previas ni estimación disponible para graficar la serie
-              histórica.
-            </div>
-          )}
-        </section>
-
-        {/* D. COMPARACIÓN DE CAMPAÑAS */}
-        <section
-          aria-labelledby="comparacion-heading"
-          className="flex flex-col justify-between rounded-tarjeta border border-borde bg-white p-5 sm:p-6 lg:col-span-5"
-        >
-          <div>
-            <h3 id="comparacion-heading" className="text-lg font-bold text-tinta">
-              Comparación de campañas
-            </h3>
-            <p className="mt-0.5 text-xs text-tinta-suave">
-              Contraste en t/ha y variación porcentual respecto a la estimación actual.
-            </p>
-
-            <div className="mt-4 space-y-2.5">
-              {/* Fila 1: Campaña actual estimada */}
-              <div className="rounded-tarjeta border border-marca/40 bg-marca-suave p-3.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-marca">
-                    Campaña actual ({temporada})
-                  </span>
-                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-marca">
-                    Estimación
-                  </span>
-                </div>
-                <p className="mt-1 text-xl font-extrabold text-tinta">
-                  {estimadoPrincipal !== null ? `${estimadoPrincipal.toFixed(2)} t/ha` : "Sin datos"}
-                  {produccionTotalTn !== null ? (
-                    <span className="ml-2 text-xs font-semibold text-tinta-suave">
-                      ({produccionTotalTn.toFixed(1)} t)
-                    </span>
-                  ) : null}
-                </p>
-              </div>
-
-              {/* Fila 2: Última campaña cosechada */}
-              <div className="rounded-tarjeta border border-borde bg-fondo-suave p-3.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-tinta-suave">
-                    {ultimaCampanaReal
-                      ? `Última cosecha (${ultimaCampanaReal.temporada})`
-                      : "Última campaña cosechada"}
-                  </span>
-                  {ultimaCampanaReal && estimadoPrincipal !== null && (
-                    <span className="text-xs font-bold text-tinta">
-                      {formatoDelta(
-                        Math.round((estimadoPrincipal - ultimaCampanaReal.rendimientoTnHa) * 100) /
-                          100,
-                      )}{" "}
-                      ({formatoPorcentaje(estimadoPrincipal, ultimaCampanaReal.rendimientoTnHa)})
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-base font-bold text-tinta">
-                  {ultimaCampanaReal
-                    ? `${ultimaCampanaReal.rendimientoTnHa.toFixed(2)} t/ha`
-                    : "Sin cosecha previa en esta parcela"}
-                </p>
-              </div>
-
-              {/* Fila 3: Promedio / referencia histórica */}
-              <div className="rounded-tarjeta border border-borde bg-fondo-suave p-3.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-tinta-suave">
-                    {impacto?.fuenteReferencia === "mediana_modelo"
-                      ? "Mediana histórica del modelo"
-                      : "Promedio / línea base histórica"}
-                  </span>
-                  {referenciaPrincipal !== null && estimadoPrincipal !== null && (
-                    <span className="text-xs font-bold text-tinta">
-                      {formatoDelta(diferenciaPrincipal)} ({porcentajeVsRef})
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-base font-bold text-tinta">
-                  {referenciaPrincipal !== null
-                    ? `${referenciaPrincipal.toFixed(2)} t/ha`
-                    : "Sin referencia disponible"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {historicoPrevio.length > 0 && (
-            <div className="mt-4 border-t border-borde pt-3">
-              <p className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
-                Historial reciente de la parcela
-              </p>
-              <ul className="mt-2 space-y-1.5 text-xs">
-                {historicoPrevio
-                  .slice(-3)
-                  .reverse()
-                  .map((h) => (
-                    <li
-                      key={h.campanaId}
-                      className="flex items-center justify-between gap-2 text-tinta"
-                    >
-                      <span className="text-tinta-suave">
-                        {h.temporada} · {h.cultivoNombre}
-                      </span>
-                      <span className="font-bold">
-                        {h.rendimientoTnHa.toFixed(2)} t/ha
-                        {estimadoPrincipal !== null && (
-                          <span className="ml-1.5 font-normal text-tinta-suave">
-                            (vs actual: {formatoPorcentaje(estimadoPrincipal, h.rendimientoTnHa)})
-                          </span>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* E. EXPLICACIÓN ESTRUCTURADA DEL RESULTADO */}
-      <section
-        aria-labelledby="explicacion-heading"
-        className="rounded-tarjeta border border-borde bg-white p-5 sm:p-6"
-      >
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-marca" aria-hidden />
-          <h3 id="explicacion-heading" className="text-lg font-bold text-tinta">
-            Explicación del resultado
+        <div className="mb-4">
+          <h3 id="factores-heading" className="text-lg font-bold text-tinta">
+            Qué explica esta estimación
           </h3>
+          <p className="mt-0.5 text-sm text-tinta-suave">
+            Aporte individual de las variables de manejo y recomendaciones según el estado actual de
+            la parcela.
+          </p>
         </div>
-        <p className="mt-1 text-sm text-tinta-suave">
-          Lectura interpretativa basada únicamente en las asociaciones estadísticas del modelo y en
-          los registros reales cargados en la parcela.
-        </p>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-            <h4 className="flex items-center gap-1.5 text-sm font-bold text-tinta">
-              <ClipboardCheck className="h-4 w-4 text-marca" aria-hidden />
-              Variables asociadas al cálculo
-            </h4>
-            <ul className="mt-2 space-y-1.5 text-xs text-tinta-suave">
-              {factores.length > 0 ? (
-                factores.map((f) => (
-                  <li key={f.variable}>
-                    <strong className="text-tinta">{f.etiqueta}:</strong> {f.valorIngresado}
-                  </li>
-                ))
-              ) : (
-                <li>
-                  No se evaluaron predictores específicos porque faltan variables de siembra en la
-                  campaña o historial suficiente del cultivo.
-                </li>
-              )}
-              <li>
-                <strong className="text-tinta">Referencia histórica del lote/cultivo:</strong>{" "}
-                {bloqueModelo
-                  ? `${bloqueModelo.campañas_usadas} campañas usadas en el entrenamiento`
-                  : `${oficial.campañas_usadas} campañas históricas cerradas`}
-              </li>
-            </ul>
-          </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Izquierda: Factores que influyeron */}
+          <div className="lg:col-span-7">
+            <h4 className="mb-3 text-sm font-bold text-tinta">Factores que influyeron</h4>
+            {factores.length > 0 ? (
+              <div className="space-y-3">
+                {factores.map((factor) => {
+                  const chip = CHIP_FACTOR[factor.efecto];
+                  const IconoChip = chip.icono;
+                  const anchoBarra =
+                    factor.delta_t_ha === 0
+                      ? 8
+                      : Math.min(
+                          100,
+                          Math.max(14, (Math.abs(factor.delta_t_ha) / maxAbsDelta) * 100),
+                        );
+                  return (
+                    <div
+                      key={factor.variable}
+                      className="rounded-tarjeta border border-borde bg-fondo-suave p-3.5"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-bold text-tinta">{factor.etiqueta}</span>
+                          <span className="rounded-control border border-borde bg-white px-2 py-0.5 text-xs font-semibold text-marca">
+                            {factor.valorIngresado}
+                          </span>
+                        </div>
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${
+                            chip.clase
+                          } ${chip.punteado ? "border-dashed" : ""}`}
+                        >
+                          <IconoChip className={`h-3.5 w-3.5 ${chip.iconoClase}`} aria-hidden />
+                          {chip.texto} ({formatoDelta(factor.delta_t_ha)})
+                        </span>
+                      </div>
 
-          <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-            <h4 className="flex items-center gap-1.5 text-sm font-bold text-marca">
-              <TrendingUp className="h-4 w-4" aria-hidden />
-              Condiciones asociadas a mayor rendimiento
-            </h4>
-            {factoresPositivos.length > 0 ? (
-              <ul className="mt-2 space-y-1.5 text-xs text-tinta">
-                {factoresPositivos.map((f) => (
-                  <li key={f.variable}>
-                    <strong>{f.etiqueta}</strong> ({formatoDelta(f.delta_t_ha)}): {f.detalle}
-                  </li>
-                ))}
-              </ul>
+                      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white ring-1 ring-borde">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${chip.barra}`}
+                          style={{ width: `${anchoBarra}%` }}
+                        />
+                      </div>
+
+                      <p className="mt-2 text-xs leading-relaxed text-tinta-suave">
+                        {factor.detalle}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <p className="mt-2 text-xs text-tinta-suave">
-                Con los datos ingresados actualmente no se identificaron variables con aporte
-                positivo adicional sobre la referencia.
-              </p>
+              <div className="rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-4 text-sm text-tinta-suave">
+                Registra superficie sembrada, fecha de siembra y variedad en la pestaña{" "}
+                <strong>Registro</strong> para cuantificar el aporte de cada variable en la
+                estimación.
+              </div>
             )}
           </div>
 
-          <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-            <h4 className="flex items-center gap-1.5 text-sm font-bold text-atencion-texto">
-              <TrendingDown className="h-4 w-4 text-atencion-icono" aria-hidden />
-              Condiciones asociadas a menor rendimiento
-            </h4>
-            {factoresNegativos.length > 0 ? (
-              <ul className="mt-2 space-y-1.5 text-xs text-tinta">
-                {factoresNegativos.map((f) => (
-                  <li key={f.variable}>
-                    <strong>{f.etiqueta}</strong> ({formatoDelta(f.delta_t_ha)}): {f.detalle}
-                  </li>
+          {/* Derecha: Qué mejorar + Contexto de campo */}
+          <div className="space-y-4 lg:col-span-5">
+            <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
+              <h4 className="text-sm font-bold text-tinta">Cómo mejorar futuras estimaciones</h4>
+              <ul className="mt-2.5 list-disc space-y-2 pl-4 text-xs leading-relaxed text-tinta-suave">
+                {mejorasFuturas.map((m) => (
+                  <li key={m}>{m}</li>
                 ))}
               </ul>
-            ) : (
-              <p className="mt-2 text-xs text-tinta-suave">
-                No se detectaron factores de siembra que reduzcan la estimación respecto al escenario
-                base.
-              </p>
+            </div>
+
+            {evaluacionRegistro && (
+              <div className="rounded-tarjeta border border-borde bg-white p-4">
+                <h4 className="text-sm font-bold text-tinta">Contexto de campo (informativo)</h4>
+                <dl className="mt-2.5 space-y-2 text-xs">
+                  <div className="flex items-center justify-between gap-2 border-b border-borde pb-2">
+                    <dt className="text-tinta-suave">Suelo</dt>
+                    <dd className="font-semibold text-tinta">
+                      {evaluacionRegistro.sueloConDato}/6 indicadores
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-tinta-suave">Clima (últimos 30 días)</dt>
+                    <dd className="font-semibold text-tinta">
+                      {evaluacionRegistro.clima30d.length} registros ·{" "}
+                      {evaluacionRegistro.lluvia30dMm} mm lluvia
+                    </dd>
+                  </div>
+                </dl>
+                <p className="mt-2.5 text-xs text-tinta-suave">
+                  Registros agronómicos complementarios de seguimiento; no forman parte de la fórmula
+                  pre-siembra del modelo Random Forest.
+                </p>
+              </div>
             )}
           </div>
-
-          <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
-            <h4 className="text-sm font-bold text-tinta">
-              Cómo mejorar futuras estimaciones
-            </h4>
-            <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs text-tinta-suave">
-              {mejorasFuturas.map((m) => (
-                <li key={m}>{m}</li>
-              ))}
-            </ul>
-          </div>
         </div>
-
-        {advertenciasUnicas.length > 0 && (
-          <div className="mt-4 rounded-tarjeta border border-borde bg-white p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
-              Notas técnicas del modelo
-            </p>
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-tinta-suave">
-              {advertenciasUnicas.map((texto) => (
-                <li key={texto}>{texto}</li>
-              ))}
-            </ul>
-          </div>
-        )}
       </section>
+
+      {/* BLOQUE 3: REVELACIÓN PROGRESIVA — VALIDACIÓN TÉCNICA DEL MODELO */}
+      {(bloqueModelo || advertenciasUnicas.length > 0) && (
+        <section
+          aria-labelledby="metricas-rf-heading"
+          className="rounded-tarjeta border border-borde bg-white"
+        >
+          <button
+            id="metricas-rf-heading"
+            type="button"
+            aria-expanded={mostrarValidacionTecnica}
+            onClick={() => setMostrarValidacionTecnica((prev) => !prev)}
+            className="flex min-h-11 w-full flex-wrap items-center justify-between gap-3 rounded-tarjeta px-5 py-4 text-left transition-colors hover:bg-fondo-suave/60 sm:px-6"
+          >
+            <div className="flex flex-wrap items-center gap-2.5">
+              <BarChart3 className="h-5 w-5 shrink-0 text-marca" aria-hidden />
+              <div>
+                <span className="text-base font-bold text-tinta">
+                  Validación técnica del modelo
+                </span>
+                <p className="text-xs text-tinta-suave">
+                  Métricas estadísticas (MAE, RMSE, R²), validación temporal y notas técnicas.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {metricasEval && (
+                <>
+                  {metricasEval.superaLineaBase ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-marca/40 bg-marca-suave px-2.5 py-0.5 text-xs font-bold text-marca">
+                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                      Supera línea base
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-atencion-borde/50 bg-atencion-fondo px-2.5 py-0.5 text-xs font-bold text-atencion-texto">
+                      <Info className="h-3.5 w-3.5 text-atencion-icono" aria-hidden />
+                      No supera aún
+                    </span>
+                  )}
+                  <span className="rounded-full border border-borde bg-fondo-suave px-2.5 py-0.5 text-xs font-semibold text-tinta">
+                    MAE {metricasEval.maeModelo.toFixed(3)} t/ha
+                  </span>
+                </>
+              )}
+              <ChevronDown
+                className={`h-5 w-5 text-tinta-suave transition-transform duration-200 ${
+                  mostrarValidacionTecnica ? "rotate-180" : ""
+                }`}
+                aria-hidden
+              />
+            </div>
+          </button>
+
+          {mostrarValidacionTecnica && (
+            <div className="space-y-4 border-t border-borde p-5 sm:p-6">
+              {bloqueModelo &&
+                (metricasEval ? (
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm text-tinta-suave">
+                        Evaluación estadística fuera de muestra frente al promedio histórico por
+                        cultivo (línea base) mediante validación temporal <em>walk-forward</em>.
+                      </p>
+                      {metricasEval.superaLineaBase ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-marca/40 bg-marca-suave px-3 py-1 text-xs font-bold text-marca">
+                          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                          Supera en MAE al promedio histórico
+                        </span>
+                      ) : metricasEval.maeModelo < metricasEval.maeLineaBase ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-sindatos-borde bg-fondo px-3 py-1 text-xs font-bold text-tinta">
+                          <Equal className="h-3.5 w-3.5 text-tinta-suave" aria-hidden />
+                          Menor MAE puntual (IC no concluyente)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-atencion-borde/50 bg-atencion-fondo px-3 py-1 text-xs font-bold text-atencion-texto">
+                          <Info className="h-3.5 w-3.5 text-atencion-icono" aria-hidden />
+                          No supera aún al promedio histórico en MAE
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {/* Tarjeta 1: MAE */}
+                      <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
+                            MAE · Error Absoluto Medio
+                          </span>
+                          <span className="rounded-control border border-borde bg-white px-2 py-0.5 text-xs font-bold text-marca">
+                            Criterio principal
+                          </span>
+                        </div>
+                        <p className="mt-2 text-2xl font-extrabold text-tinta">
+                          {metricasEval.maeModelo.toFixed(3)}{" "}
+                          <span className="text-sm font-semibold text-tinta-suave">t/ha</span>
+                        </p>
+                        <div className="mt-2 space-y-1 border-t border-borde pt-2 text-xs text-tinta-suave">
+                          <p className="flex items-center justify-between gap-2">
+                            <span>Promedio histórico (Línea base):</span>
+                            <strong className="text-tinta">
+                              {metricasEval.maeLineaBase.toFixed(3)} t/ha
+                            </strong>
+                          </p>
+                          <p className="flex items-center justify-between gap-2">
+                            <span>Diferencia (Modelo − Base):</span>
+                            <strong
+                              className={
+                                metricasEval.diferenciaMae < 0 ? "text-marca" : "text-atencion-texto"
+                              }
+                            >
+                              {metricasEval.diferenciaMae > 0 ? "+" : ""}
+                              {metricasEval.diferenciaMae.toFixed(3)} t/ha
+                              {reduccionMaePct !== null && reduccionMaePct > 0
+                                ? ` (−${reduccionMaePct}%)`
+                                : ""}
+                            </strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tarjeta 2: RMSE */}
+                      <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
+                            RMSE · Raíz Error Cuadrático
+                          </span>
+                        </div>
+                        <p className="mt-2 text-2xl font-extrabold text-tinta">
+                          {metricasEval.rmseModelo.toFixed(3)}{" "}
+                          <span className="text-sm font-semibold text-tinta-suave">t/ha</span>
+                        </p>
+                        <div className="mt-2 space-y-1 border-t border-borde pt-2 text-xs text-tinta-suave">
+                          <p className="flex items-center justify-between gap-2">
+                            <span>Promedio histórico (Línea base):</span>
+                            <strong className="text-tinta">
+                              {metricasEval.rmseLineaBase.toFixed(3)} t/ha
+                            </strong>
+                          </p>
+                          <p className="text-xs leading-snug text-tinta-suave">
+                            Penaliza con mayor peso las desviaciones grandes en t/ha.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tarjeta 3: R² */}
+                      <div className="rounded-tarjeta border border-borde bg-fondo-suave p-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
+                            R² · Coeficiente de Determinación
+                          </span>
+                        </div>
+                        <p className="mt-2 text-2xl font-extrabold text-tinta">
+                          {metricasEval.r2Modelo !== null
+                            ? metricasEval.r2Modelo.toFixed(3)
+                            : "Sin varianza"}
+                        </p>
+                        <div className="mt-2 space-y-1 border-t border-borde pt-2 text-xs text-tinta-suave">
+                          {metricasEval.r2Modelo !== null ? (
+                            metricasEval.r2Modelo >= 0 ? (
+                              <p>
+                                Varianza explicada en validación:{" "}
+                                <strong className="text-marca">
+                                  {(metricasEval.r2Modelo * 100).toFixed(1)} %
+                                </strong>
+                              </p>
+                            ) : (
+                              <p>
+                                Ajuste inferior a la media global en los cortes históricos evaluados.
+                              </p>
+                            )
+                          ) : (
+                            <p>
+                              Se requieren al menos 2 observaciones con variación para calcular R².
+                            </p>
+                          )}
+                          <p className="text-xs leading-snug text-tinta-suave">
+                            Valores cercanos a 1.000 indican mayor capacidad explicativa.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-tarjeta border border-borde bg-fondo-suave px-4 py-3 text-xs text-tinta-suave">
+                      <span>
+                        <strong className="text-tinta">Detalle de validación:</strong> validación
+                        temporal <em>walk-forward</em> sin fuga de datos en{" "}
+                        <strong className="text-tinta">{metricasEval.cortesEvaluados}</strong>{" "}
+                        {metricasEval.cortesEvaluados === 1 ? "corte" : "cortes"} (
+                        <strong className="text-tinta">{metricasEval.filasEvaluadas}</strong>{" "}
+                        {metricasEval.filasEvaluadas === 1 ? "registro de lote" : "registros de lote"}
+                        ) · Intervalo de confianza Bootstrap 95 % para ΔMAE:{" "}
+                        <strong className="text-tinta">
+                          [{metricasEval.icDiferenciaMae[0].toFixed(3)},{" "}
+                          {metricasEval.icDiferenciaMae[1].toFixed(3)}] t/ha
+                        </strong>{" "}
+                        (el modelo supera significativamente al promedio histórico cuando el límite
+                        superior es menor que 0).
+                      </span>
+                      {fechaConsultaIso && (
+                        <span className="inline-flex items-center gap-1 font-medium text-tinta">
+                          <CalendarClock className="h-3.5 w-3.5 text-marca" aria-hidden />
+                          {formatearFechaHora(fechaConsultaIso)}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-tarjeta border border-dashed border-sindatos-borde bg-fondo-suave p-4 text-sm text-tinta-suave">
+                    Esta versión del modelo no tiene métricas de validación actualizadas guardadas.
+                    {puedeEntrenar && cultivoId
+                      ? " Usa el botón “Actualizar modelo IA” arriba para recalcular MAE, RMSE y R²."
+                      : ""}
+                  </div>
+                ))}
+
+              {advertenciasUnicas.length > 0 && (
+                <div className="rounded-tarjeta border border-borde bg-fondo-suave/60 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-tinta-suave">
+                    Notas técnicas del modelo
+                  </p>
+                  <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-tinta-suave">
+                    {advertenciasUnicas.map((texto) => (
+                      <li key={texto}>{texto}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
